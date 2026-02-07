@@ -3,6 +3,8 @@
 using Microsoft.EntityFrameworkCore;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Endpoints;
+using ProductManagementSystem.Api.Services;
+using ProductManagementSystem.Api.Services.Contracts;
 using Serilog;
 using System.Text.Json;
 
@@ -27,6 +29,8 @@ builder.Services.AddDbContext<RepositoryContext>(opts =>
             .EnableSensitiveDataLogging()
             .LogTo(Log.Information, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information, Microsoft.EntityFrameworkCore.Diagnostics.DbContextLoggerOptions.SingleLine);
 });
+
+builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
 
 builder.Services.AddControllers();
 
