@@ -10,7 +10,10 @@ public class ProductCategoryConfiguration : IEntityTypeConfiguration<ProductCate
     {
         builder.HasIndex(x => x.Id);
 
+        builder.HasIndex(x => x.NormalizedName).IsUnique();
+
         builder.Property(x => x.Id).IsRequired();
+
 
         builder.Property(x => x.Name)
             .IsRequired()
