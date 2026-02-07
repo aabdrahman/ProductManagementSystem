@@ -1,4 +1,6 @@
-﻿namespace ProductManagementSystem.Api.Entities.Models;
+﻿using ProductManagementSystem.Api.Entities.StaticValues;
+
+namespace ProductManagementSystem.Api.Entities.Models;
 
 public class Order
 {
@@ -6,6 +8,9 @@ public class Order
     public DateTime CreatedAt { get; set; }
     public string CreatedBy { get; set; }
     public int OrderCount { get; set; }
+    public DateTime DeliveryDate { get; set; }
+    public OrderStatus Ordertatus { get; set; }
+    public bool IsActive { get; set; }
 
     //RELATIONSHIP
     //Product

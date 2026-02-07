@@ -1,5 +1,7 @@
 
 
+using Microsoft.EntityFrameworkCore;
+using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Endpoints;
 using Serilog;
 using System.Text.Json;
@@ -18,6 +20,14 @@ Log.Logger = new LoggerConfiguration()
                     .CreateLogger();
 
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<RepositoryContext>(opts =>
+{
+    opts.UseSqlServer(builder.Configuration.GetConnectionString("SqlDbConnection"))
+            .EnableSensitiveDataLogging()
+            .LogTo(Log.Information, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information, Microsoft.EntityFrameworkCore.Diagnostics.DbContextLoggerOptions.SingleLine);
+});
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
