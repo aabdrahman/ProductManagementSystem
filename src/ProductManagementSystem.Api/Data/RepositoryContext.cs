@@ -6,7 +6,7 @@ namespace ProductManagementSystem.Api.Data;
 
 public class RepositoryContext : DbContext
 {
-    protected RepositoryContext(DbContextOptions<RepositoryContext> options) : base(options)
+    public RepositoryContext(DbContextOptions<RepositoryContext> options) : base(options)
     {
     }
 
