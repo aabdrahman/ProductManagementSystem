@@ -32,6 +32,7 @@ builder.Services.AddDbContext<RepositoryContext>(opts =>
 
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddControllers();
 

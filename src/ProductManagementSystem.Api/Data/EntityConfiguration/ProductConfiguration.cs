@@ -14,6 +14,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.HasIndex(x => x.ProductCategoryId);
 
+        builder.ToTable(table => table.HasCheckConstraint("CK_Product_Current_Count", "[CurrentCount] >= 0"));
+
         builder.Property(x => x.Name)
             .IsRequired()
             .HasMaxLength(100);

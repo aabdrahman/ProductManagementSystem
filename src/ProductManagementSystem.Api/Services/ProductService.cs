@@ -103,7 +103,7 @@ public sealed class ProductService : IProductService
             }
             else
             {
-                bool isOrderExists = await _repositoryContext.Orders.AnyAsync(x => x.ProductId == Id && (x.Ordertatus == Entities.StaticValues.OrderStatus.Pending || x.Ordertatus == Entities.StaticValues.OrderStatus.Processing));
+                bool isOrderExists = await _repositoryContext.Orders.AnyAsync(x => x.ProductId == Id && (x.OrderStatus == Entities.StaticValues.OrderStatus.Pending || x.OrderStatus == Entities.StaticValues.OrderStatus.Processing));
 
                 if (isOrderExists)
                 {
