@@ -1,0 +1,143 @@
+﻿
+
+/*-------------------------------------------------------------------------------------*/
+
+/* Overlay */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(1.5px);
+    z-index: 999;
+}
+
+/* Modal container */
+.app-modal {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 1050;
+    pointer-events: none; /* Ensure outside interaction */
+}
+
+/* Modal box */
+.app-modal-content {
+    background: #e6dfdf;
+    width: min(92vw, 650px);
+    border-radius: 24px;
+    padding: 1.25rem;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    animation: modalPop 0.25s ease-out forwards;
+    pointer-events: auto; /* Allow inside interaction */
+
+}
+
+/* Animation */
+@keyframes modalPop {
+
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.96);
+    }
+
+    25% {
+        opacity: 0.25;
+        transform: translateY(7.5px) scale(0.97);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: translateY(5px) scale(0.98);
+    }
+
+    75% {
+        opacity: 0.75;
+        transform: translateY(2.5px) scale(0.99);
+    }
+
+    100% {
+
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Header */
+.app-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #d1d5db;
+}
+
+.app-modal-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-family: var(--FONT-STYLE-HEADER);
+}
+
+/* Close button */
+.app-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.8;
+    font-weight: 200;
+}
+
+.app-modal-close:hover {
+    animation: modalClose 0.5s ease-out forwards;
+}
+
+/* Animation */
+@keyframes modalClose {
+
+    0% {
+        opacity: 0.8;
+        transform: rotate(0deg) scale(1);
+        font-weight: 200;
+    }
+
+    25% {
+        opacity: 0.85;
+        transform: rotate(45deg) scale(1.05);
+        font-weight: 300;
+    }
+
+    50% {
+        opacity: 0.9;
+        transform: rotate(90deg) scale(1.1);
+        font-weight: 400;
+    }
+
+    75% {
+        opacity: 0.95;
+        transform: rotate(135deg) scale(1.15);
+        font-weight: 500;
+    }
+
+    100% {
+        opacity: 1;
+        transform: rotate(180deg) scale(1.2);
+        font-weight: 600;
+    }
+}
+
+/* Body */
+.app-modal-body {
+    color: var(--FONT-COLOR-SECONDARY);
+    line-height: 1.5;
+}
+
+/* Footer */
+.app-modal-footer {
+    margin-top: 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}

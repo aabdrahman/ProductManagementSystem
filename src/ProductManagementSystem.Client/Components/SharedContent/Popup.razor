@@ -1,0 +1,106 @@
+﻿@* @if (_showModal)
+{
+    <div class="modal-backdrop" @onclick="CloseModal">
+
+    </div>
+
+    <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-header">
+            <h3>@_modalTitle</h3>
+            <button class="modal-close" hidden="@_showCloseButton" @onclick="CloseModal">✕</button>
+        </div>
+
+        <div class="modal-body">
+            @ChildContent
+        </div>
+
+        @if (_showFooter)
+        {
+            <div class="modal-footer">
+                <button class="btn ghost" @onclick="CloseModal">Cancel</button>
+                <button class="btn danger" @onclick="ConfirmAction">Confirm</button>
+            </div>
+        }
+
+    </div>
+} *@
+
+@if (_showModal)
+{
+    <div class="modal-overlay"></div>
+
+    <div class="app-modal" role="dialog" aria-modal="true">
+        <div class="app-modal-content" @onclick:stopPropagation>
+            <div class="app-modal-header">
+                <h3>@_modalTitle</h3>
+                @if (ShowCloseButton)
+                {
+                    <button class="app-modal-close" @onclick="CloseModal">✕</button>
+                }
+            </div>
+
+            <div class="app-modal-body">
+                @Body
+            </div>
+
+            @if (_showFooter)
+            {
+                <div class="app-modal-footer">
+                    @Footer
+                </div>
+            }
+        </div>
+    </div>
+}
+
+
+
+
+@code {
+
+    private bool _showModal;
+    private bool _showCloseButton;
+    private string _modalTitle = "";
+    private bool _showFooter;
+
+    [Parameter, EditorRequired]
+    public RenderFragment Body { get; set; }
+
+    [Parameter]
+    public bool ShowCloseButton { get; set; } = false;
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; }
+
+    [Parameter]
+    public bool ShowFooter { get; set; } = false;
+
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Console.WriteLine($"Popup On Parameter set run.......");
+        _showCloseButton = ShowCloseButton;
+        _modalTitle = Title ?? "";
+        _showFooter = Footer is not null;
+    }
+
+
+    public void OpenModal()
+    {
+        Console.WriteLine($"Open Modal Called.........");
+        _showModal = true;
+        Console.WriteLine($"Open Modal Executed: {_showModal}.........");
+    }
+
+    public void CloseModal()
+    {
+        _showModal = false;
+    }
+
+    private void ConfirmAction()
+    {
+        CloseModal();
+    }
+}
