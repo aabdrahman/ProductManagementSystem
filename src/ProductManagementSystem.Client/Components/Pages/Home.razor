@@ -20,11 +20,7 @@ Welcome to your new app.
         else
         {
             <p>Modal Content Loaded!</p>
-            <h1>Hello, world!</h1>
-
-            <p>
-                Welcome to your new app.
-            </p>
+            <Status StatusMessage="@(DateTime.Now.Second % 2 != 0 ? $"The time is: {DateTime.Now.ToString("f")}" : $"The time is: {DateTime.Now.ToString("f")}")" SuccessStatus="@(DateTime.Now.Second % 2 != 0)" />
         }
     </Body>
 </Popup>

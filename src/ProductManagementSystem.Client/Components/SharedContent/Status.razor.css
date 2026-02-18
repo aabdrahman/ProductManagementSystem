@@ -1,0 +1,26 @@
+﻿
+
+.status {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    margin: 10px 0px 10px 0px;
+    border-radius: 0.25rem;
+    font-size: 1.275rem;
+    font-weight: 800;
+    color: var(--FONT-COLOR-BASIC);
+    width: 100%;
+    font-family: var(--FONT-STYLE-BODY);
+    text-align: center;
+    font-style: italic;
+}
+
+.failure {
+    background-color: #821408;
+}
+
+.success {
+
+    background-color: #0A4D1B;
+}

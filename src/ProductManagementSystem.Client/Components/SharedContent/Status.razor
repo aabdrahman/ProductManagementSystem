@@ -1,0 +1,22 @@
+﻿
+<div class="status @(_successStatus ? "success" : "failure")">
+    @_statusMessage
+</div>
+
+@code {
+
+    private string _statusMessage;
+    private bool _successStatus;
+
+    [Parameter, EditorRequired]
+    public bool SuccessStatus { get; set; }
+
+    [Parameter, EditorRequired]
+    public string StatusMessage { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _successStatus = SuccessStatus;
+        _statusMessage = StatusMessage;
+    }
+}
