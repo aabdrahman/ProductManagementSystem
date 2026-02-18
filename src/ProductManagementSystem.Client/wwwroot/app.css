@@ -1,15 +1,45 @@
 
 /*IMPORT FONTS*/
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Bungee+Spice&family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Quicksand:wght@300..700&family=Raleway:ital,wght@0,100..900;1,100..900&family=Story+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Cantata+One&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Ysabeau+Office:ital,wght@0,1..1000;1,1..1000&display=swap');
 
 :root {
     --BG-COLOR: #addeb2;
     --BG-COLOR-SECONDARY: #71e37d;
+    --BG-COLOR-TERTIARY: #434a43;
+    --BG-COLOR-NAV: #111827;
+    --BG-COLOR-BTN-SUCCESS: #2f963a;
+    --BG-COLOR-BTN-SUCCESS-HOVER: #0b7016;
+    --BG-COLOR-BTN-SUCCESS-HOVER: #0bb31c;
     --FONT-COLOR-PRIMARY: #0f1c10;
     --FONT-COLOR-SECONDARY: #5b635c;
+    --FONT-COLOR-BASIC: #d7d9d7;
+    --FONT-COLOR-MAIN: #11b822;
+    --FONT-COLOR-LINK-HOVER: #0bb31c;
     --FONT-STYLE-HEADER: "Bungee Spice", sans-serif;
+    --FONT-STYLE-HEADER-MAIN: "Bungee Inline", sans-serif;
     --FONT-STYLE-BODY: "Quicksand", sans-serif;
     --FONT-STYLE-BODY-DESCRIPTION: "Anton", sans-serif;
+    --FONT-STYLE-BODY-TITLE: "Noto Sans", sans-serif;
+}
+
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--BG-COLOR);
+}
+
+main {
+    padding: 6rem 6%;
 }
 
 
@@ -27,6 +57,11 @@ h1:focus {
 
 .validation-message {
     color: #e50000;
+    text-align: center;
+    font-family: var(--FONT-STYLE-BODY);
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-style: italic;
 }
 
 .blazor-error-boundary {
@@ -35,38 +70,12 @@ h1:focus {
     color: white;
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
-}
-
-* {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-}
-
-html {
-
-    width: 100vw;
-    height: 100vh;
-/*    overflow-x: hidden;*/
-}
-
-body {
-
-    background-color: var(--BG-COLOR);
-}
-
-main {
-/*    min-height: 100vh;*/
-    width: 100%;
-    height: 100vh;
-    margin: 5rem;
-    border: solid 2rem blue;
 }
 
 h1 {
