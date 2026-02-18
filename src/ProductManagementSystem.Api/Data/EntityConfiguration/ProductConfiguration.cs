@@ -48,7 +48,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired();
 
         builder.HasOne(x => x.productCategory)
-            .WithMany()
+            .WithMany(x => x.Products)
             .HasForeignKey(x => x.ProductCategoryId)
             .OnDelete(DeleteBehavior.NoAction);
 

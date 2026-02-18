@@ -3,10 +3,10 @@
 using Microsoft.EntityFrameworkCore;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Endpoints;
+using ProductManagementSystem.Api.Extensions;
 using ProductManagementSystem.Api.Services;
 using ProductManagementSystem.Api.Services.Contracts;
 using Serilog;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +27,7 @@ builder.Services.AddDbContext<RepositoryContext>(opts =>
 {
     opts.UseSqlServer(builder.Configuration.GetConnectionString("SqlDbConnection"))
             .EnableSensitiveDataLogging()
-            .LogTo(Log.Information, new[] { DbLoggerCategory.Database.Command.Name }, LogLevel.Information, Microsoft.EntityFrameworkCore.Diagnostics.DbContextLoggerOptions.SingleLine);
+            .LogTo(Log.Information, new[] { DbLoggerCategory.Database.Command.Name, DbLoggerCategory.Model.Name }, LogLevel.Information, Microsoft.EntityFrameworkCore.Diagnostics.DbContextLoggerOptions.SingleLine);
 });
 
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
@@ -49,9 +49,13 @@ app.UseSwaggerUI(opts =>
 
 app.UseHttpsRedirection();
 
+await app.MigrateDatabase();
+
 app.MapWeatherEndpoints();
 
 app.MapControllers();
+
+//await app.MigrateDatabase();
 
 app.Run();
 
