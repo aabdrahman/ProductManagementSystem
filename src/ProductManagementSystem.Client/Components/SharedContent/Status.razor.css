@@ -14,6 +14,7 @@
     font-family: var(--FONT-STYLE-BODY);
     text-align: center;
     font-style: italic;
+    text-wrap: wrap;
 }
 
 .failure {

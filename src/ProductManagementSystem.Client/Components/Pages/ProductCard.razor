@@ -1,0 +1,47 @@
+﻿
+
+<div class="product-card">
+    <!-- Product Category -->
+    <span class="product-category">@_product.CategoryName</span>
+
+    <!-- Product Name -->
+    <h3>@_product.Name</h3>
+
+    <!-- Product Description -->
+    <p class="product-desc">
+        @(_product.Description ?? "No description available")
+    </p>
+
+    <!-- Stock Status -->
+    @if(_product.CurrentCount == 0)
+    {
+        <span class="out stock">Out of Stock</span>
+    }
+    else if(_product.CurrentCount < 3)
+    {
+        <span class="low stock">Only @_product.CurrentCount left.</span>
+    }
+    else
+    {
+        <span class="in-stock ">In Stock (@_product.CurrentCount)</span>
+    }
+
+
+    <!-- Footer: Price & Order Button -->
+    <div class="product-footer">
+        <span class="product-price">@(_product.CostPrice.ToString("C"))</span>
+        <button class="order-btn" disabled="@(_product.CurrentCount == 0)">Order Now</button>
+    </div>
+</div>
+
+@code {
+    private ProductDto _product;
+
+    [Parameter, EditorRequired]
+    public ProductDto Product { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _product = Product;
+    }
+}

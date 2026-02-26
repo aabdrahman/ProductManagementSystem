@@ -1,0 +1,104 @@
+﻿
+
+.product-card {
+    background: var(--BG-COLOR-TERTIARY);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+}
+
+.product-category {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: var(--FONT-COLOR-SECONDARY);
+    text-transform: uppercase;
+    letter-spacing: 0.75px;
+    display: block;
+    margin-bottom: 0.75rem;
+    font-family: var(--FONT-STYLE-BODY-TITLE) ;
+}
+
+.product-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.product-desc {
+    font-size: 1.1rem;
+    color: var(--FONT-COLOR-BODY);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 500;
+}
+
+.stock {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.in {
+    display: block;
+    color: var(--FONT-COLOR-SECONDARY);
+
+    font-family: var(--FONT-STYLE-BODY) ;
+}
+
+.out {
+
+    color: #db0d30;
+}
+
+/* Low Stock Badge */
+.low {
+    color: #bd910f; /* Amber/orange for alert */
+}
+
+/* Optional: Add a subtle background for emphasis */
+.product-card.low-stock {
+    border: 2px solid #fbbf24; /* amber border */
+    box-shadow: 0 10px 25px rgba(251, 191, 36, 0.2);
+}
+
+.product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-price {
+    font-weight: 900;
+    font-size: 1rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+}
+
+.order-btn {
+    padding: 0.5rem 1.2rem;
+    border: none;
+    background: #2563eb;
+    color: VAR(--FONT-COLOR-BASIC);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 800;
+}
+
+.order-btn:hover {
+    background: #1d4ed8;
+}
+
+.order-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}

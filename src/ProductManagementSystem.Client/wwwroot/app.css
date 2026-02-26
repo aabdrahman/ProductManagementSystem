@@ -6,13 +6,14 @@
 :root {
     --BG-COLOR: #addeb2;
     --BG-COLOR-SECONDARY: #71e37d;
-    --BG-COLOR-TERTIARY: #434a43;
+    --BG-COLOR-TERTIARY: #31ba1c;
     --BG-COLOR-NAV: #111827;
     --BG-COLOR-BTN-SUCCESS: #2f963a;
     --BG-COLOR-BTN-SUCCESS-HOVER: #0b7016;
     --BG-COLOR-BTN-SUCCESS-HOVER: #0bb31c;
-    --FONT-COLOR-PRIMARY: #0f1c10;
-    --FONT-COLOR-SECONDARY: #5b635c;
+    --FONT-COLOR-PRIMARY: #0c6b18;
+    --FONT-COLOR-SECONDARY: #0b120c;
+    --FONT-COLOR-SECONDARY: #000000;
     --FONT-COLOR-BASIC: #d7d9d7;
     --FONT-COLOR-MAIN: #11b822;
     --FONT-COLOR-LINK-HOVER: #0bb31c;
@@ -39,7 +40,7 @@ body {
 }
 
 main {
-    padding: 6rem 6%;
+    padding: 6rem 8%;
 }
 
 
@@ -78,7 +79,7 @@ h1:focus {
     border-color: #929292;
 }
 
-h1 {
+h1, h2, h3 {
     font-family: var(--FONT-STYLE-HEADER);
     font-weight: 400;
     font-style: normal;

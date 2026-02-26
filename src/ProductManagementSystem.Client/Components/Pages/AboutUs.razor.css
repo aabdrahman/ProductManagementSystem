@@ -1,0 +1,94 @@
+﻿
+/* =========================
+   ABOUT US SECTION
+========================= */
+
+.about-us {
+    padding: 6rem 8%;
+    background: var(--BG-COLOR-SECONDARY);
+}
+
+/* Header */
+.about-us-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 4rem auto;
+}
+
+.about-us-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: VAR(--FONT-COLOR-SECONDARY);
+    margin-bottom: 1rem;
+}
+
+.about-us-header p {
+    font-size: 1.25rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    line-height: 1.8;
+    font-weight: 400;
+    font-family: var(--FONT-STYLE-BODY);
+}
+
+/* Items Grid */
+.about-us-items {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+/* Card */
+.about-us-item {
+    background: var(--BG-COLOR-TERTIARY);
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.about-us-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Title */
+.about-us-item-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY-TITLE);
+}
+
+/* Description */
+.about-us-item-desc {
+    font-size: 0.95rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    line-height: 1.6;
+    font-family: var(--FONT-STYLE-BODY);
+}
+
+/* =========================
+   RESPONSIVE BREAKPOINTS
+========================= */
+
+@media (max-width: 1100px) {
+    .about-us-items {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .about-us {
+        padding: 4rem 6%;
+    }
+
+    .about-us-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .about-us-items {
+        grid-template-columns: 1fr;
+    }
+}

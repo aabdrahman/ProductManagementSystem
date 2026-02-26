@@ -1,0 +1,100 @@
+﻿
+
+@if(_products is not null)
+{
+    <section id="products" class="products">
+
+        <div class="products-header">
+            <h2>Featured Products</h2>
+            <p>
+                Browse our available products and place your order quickly and easily.
+            </p>
+        </div>
+
+        <div class="products-grid">
+
+            @foreach (var product in _products)
+            {
+                <ProductCard Product="product" />
+            }
+
+        </div>
+
+    </section>
+}
+
+
+@code{
+    private IEnumerable<ProductDto> _products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+
+        var testProducts = new List<ProductDto>
+        {
+            new ProductDto
+            {
+                Id = 1,
+                Name = "Smart Fitness Watch",
+                Description = "Track your health, workouts, and notifications seamlessly.",
+                CategoryName = "Electronics",
+                CurrentCount = 12,
+                CostPrice = 120m,
+                SellingPrice = 150m
+            },
+            new ProductDto
+            {
+                Id = 2,
+                Name = "Air Purifier Pro",
+                Description = "Keep your home air clean with smart filtration technology.",
+                CategoryName = "Home Appliances",
+                CurrentCount = 3, // Low stock
+                CostPrice = 90m,
+                SellingPrice = 120m
+            },
+            new ProductDto
+            {
+                Id = 3,
+                Name = "Wireless Earbuds X",
+                Description = "High-quality sound with long-lasting battery.",
+                CategoryName = "Gadgets",
+                CurrentCount = 0, // Out of stock
+                CostPrice = 60m,
+                SellingPrice = 80m
+            },
+            new ProductDto
+            {
+                Id = 4,
+                Name = "Bluetooth Speaker",
+                Description = "Portable speaker with immersive sound quality.",
+                CategoryName = "Electronics",
+                CurrentCount = 20,
+                CostPrice = 70m,
+                SellingPrice = 90m
+            },
+            new ProductDto
+            {
+                Id = 5,
+                Name = "Ergonomic Keyboard",
+                Description = "Reduce strain with our ergonomic mechanical keyboard.",
+                CategoryName = "Office",
+                CurrentCount = 2, // Low stock
+                CostPrice = 50m,
+                SellingPrice = 75m
+            },
+            new ProductDto
+            {
+                Id = 6,
+                Name = "Smart Home Hub",
+                Description = "Connect and control your smart devices effortlessly.",
+                CategoryName = "Gadgets",
+                CurrentCount = 0, // Out of stock
+                CostPrice = 150m,
+                SellingPrice = 200m
+            }
+        };
+
+        _products = testProducts;
+    }
+}
