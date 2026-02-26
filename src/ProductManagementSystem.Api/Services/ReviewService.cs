@@ -68,6 +68,7 @@ public class ReviewService : IReviewService
             Log.ForContext(_className, "ReviewService").ForContext(_methodName, "GetReviewsAsync").Information("Getting All Reviews");
 
             List<ReviewDto> reviews = await _repositoryContext.Reviews
+                                    .AsNoTracking()
                                     .OrderBy(x => Guid.NewGuid()).ThenByDescending(x => x.Rating)
                                     .Select(x => new ReviewDto()
                                     {

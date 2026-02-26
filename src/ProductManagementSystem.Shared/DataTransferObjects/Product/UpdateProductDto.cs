@@ -2,9 +2,9 @@
 
 namespace ProductManagementSystem.Shared.DataTransferObjects.Product;
 
-public record class CreateProductDto : IValidatableObject
+public record class UpdateProductDto : IValidatableObject
 {
-
+    public int Id { get; set; }
     public string Name { get; set; }
     public string? Description { get; set; }
     public int CategoryId { get; set; }
@@ -37,6 +37,11 @@ public record class CreateProductDto : IValidatableObject
         if (CategoryId <= 0)
         {
             yield return new ValidationResult("Category Id must be greater than 0");
+        }
+
+        if(Id < 1)
+        {
+            yield return new ValidationResult("Product Id must be greater than 0");
         }
     }
 }

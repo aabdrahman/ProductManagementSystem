@@ -27,7 +27,7 @@ public class OrderController : ControllerBase
         {
             var result = await _orderService.GetAllAsync();
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -43,7 +43,7 @@ public class OrderController : ControllerBase
         {
             var result = await _orderService.GetByIdAsync(Id);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -59,7 +59,7 @@ public class OrderController : ControllerBase
         {
             var result = await _orderService.GetByProductIdAsync(productId);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -75,7 +75,7 @@ public class OrderController : ControllerBase
         {
             var result = await _orderService.DeleteAsync(Id);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -91,7 +91,7 @@ public class OrderController : ControllerBase
         {
             var result = await _orderService.CreateAsync(createOrderDto);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         { 
@@ -107,7 +107,7 @@ public class OrderController : ControllerBase
         {
             var result = await _orderService.UpdateAsync(updateOrder);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -123,7 +123,7 @@ public class OrderController : ControllerBase
         {
             var result = await _orderService.UpdateOrderStatusAsync(updateStatus);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {

@@ -175,7 +175,7 @@ public sealed class ProductCategoryService : IProductCategoryService
 
             productToUpdate.Name = updateProductCategory.Name;
 
-           _repositoryContext.ProductCategories.Update(productToUpdate);
+           //_repositoryContext.ProductCategories.Update(productToUpdate);
 
             await _repositoryContext.SaveChangesAsync();
 

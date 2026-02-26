@@ -5,6 +5,7 @@ using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Product;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
+using System.Data.Common;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Api.Services;
@@ -99,7 +100,7 @@ public sealed class ProductService : IProductService
             if (isSoftDelete)
             {
                 productToRemove.IsActive = false;
-                _repositoryContext.Products.Update(productToRemove);
+                //_repositoryContext.Products.Update(productToRemove);
             }
             else
             {
@@ -297,7 +298,7 @@ public sealed class ProductService : IProductService
             productToUpdate.ProductCategoryId = updatedProduct.CategoryId;
             productToUpdate.IsActive = true;
 
-            _repositoryContext.Update(productToUpdate);
+            //_repositoryContext.Update(productToUpdate);
 
             await _repositoryContext.SaveChangesAsync();
 
@@ -326,6 +327,41 @@ public sealed class ProductService : IProductService
         {
             Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateAsync").Error(ex, "An error occurred updating product details.");
             return GenericResponse<ProductDto>.Failure(null, "An error occurred updating product details.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+    }
+
+    public async Task<GenericResponse<string>> UpdateStockAsync(UpdateProductStockDto productStock)
+    {
+        try
+        {
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Update Stock Request - {0}", JsonSerializer.Serialize(productStock));
+
+            Product? productToUpdateStock = await _repositoryContext.Products.FindAsync(productStock.Id);
+
+            if(productToUpdateStock is null)
+            {
+                Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Product with Id - {0} does not exist.", productStock.Id);
+                return GenericResponse<string>.Failure("Operation Failed", "No product with specified id exists", System.Net.HttpStatusCode.NotFound);
+            }
+
+            productToUpdateStock.CurrentCount += productStock.StockToAdd;
+
+            await _repositoryContext.SaveChangesAsync();
+
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Product with Id: {0} Stock Updated Successfully. Current Count - {1}", productToUpdateStock.Id, productToUpdateStock.CurrentCount);
+
+            return GenericResponse<string>.Success("Operation Successful", $"Product Stock successfully updated. Current Count: {productToUpdateStock.CurrentCount}", System.Net.HttpStatusCode.OK);
+
+        }
+        catch(DbException ex)
+        {
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Error(ex, "A Database Error Occurred Updating Product Stock.");
+            return GenericResponse<string>.Failure(null, "Error Occurred Updating Stock.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Error(ex, "A Database Error Occurred Updating Product Stock.");
+            return GenericResponse<string>.Failure(null, "Error Occurred Updating Stock.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
     }
 }

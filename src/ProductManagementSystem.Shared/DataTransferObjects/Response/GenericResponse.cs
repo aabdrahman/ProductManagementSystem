@@ -5,7 +5,7 @@ namespace ProductManagementSystem.Shared.DataTransferObjects.Response;
 public class GenericResponse<TEntity>
 {
     public TEntity Data { get; set; }
-    public int StatusCode { get; set; }
+    public HttpStatusCode StatusCode { get; set; }
     public string ResponseMessage { get; set; }
     public bool IsSuccessStatus { get; set; }
     public object ErrorDetails { get; set; }
@@ -14,7 +14,7 @@ public class GenericResponse<TEntity>
     {
         Data = data;
         ResponseMessage = message;
-        StatusCode = (int)httpStatus;
+        StatusCode = httpStatus;
         IsSuccessStatus = isSuccessful;
         ErrorDetails = errorDetails;
     }

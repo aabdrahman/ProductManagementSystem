@@ -111,14 +111,14 @@ public class OrderService : IOrderService
 
                 order.OrderedProduct.CurrentCount += order.OrderCount;
 
-                _repositoryContext.Orders.Update(order);
+                //_repositoryContext.Orders.Update(order);
 
             }
             else
             {
                 order.OrderedProduct.CurrentCount += order.OrderCount;
 
-                _repositoryContext.Products.Update(order.OrderedProduct);
+                //_repositoryContext.Products.Update(order.OrderedProduct);
                 _repositoryContext.Orders.Remove(order);
             }
 
@@ -280,6 +280,7 @@ public class OrderService : IOrderService
             if(orderToUpdate.ProductId == updateOrder.ProductId && orderToUpdate.OrderCount == updateOrder.QuantityOrdered) //SAME ORDER PRODUCT AND THE QUANTITY DOES NOT CHANGE -- NO MODIFICATION TO PRODUCT COUNT
             {
                 Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("No modification to details");
+
                 return GenericResponse<OrderDto>.Success(new OrderDto()
                                                             {
                                                                 Id = orderToUpdate.Id,
@@ -329,12 +330,12 @@ public class OrderService : IOrderService
                 orderToUpdate.ProductId = updateOrder.ProductId;
                 orderToUpdate.OrderedProduct = productToOrder;
 
-                _repositoryContext.Products.Update(previousProduct);
+                //_repositoryContext.Products.Update(previousProduct);
             }
 
 
 
-            _repositoryContext.Orders.Update(orderToUpdate);
+            //_repositoryContext.Orders.Update(orderToUpdate);
 
             await _repositoryContext.SaveChangesAsync();
 
@@ -398,7 +399,7 @@ public class OrderService : IOrderService
                 orderToUpdate.OrderedProduct.CurrentCount += orderToUpdate.OrderCount;
             }
 
-            _repositoryContext.Orders.Update(orderToUpdate);
+            //_repositoryContext.Orders.Update(orderToUpdate);
 
             await _repositoryContext.SaveChangesAsync();
 

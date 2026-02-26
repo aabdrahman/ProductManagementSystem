@@ -26,7 +26,7 @@ public class ProductCategoryController : ControllerBase
         {
             var result = await _productCategoryService.GetAllAsync();
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -42,7 +42,7 @@ public class ProductCategoryController : ControllerBase
         {
             var result = await _productCategoryService.GetByIdAsync(Id);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -58,7 +58,7 @@ public class ProductCategoryController : ControllerBase
         {
             var result = await _productCategoryService.DeleteAsync(Id);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -74,7 +74,7 @@ public class ProductCategoryController : ControllerBase
         {
             var result = await _productCategoryService.CreateAsync(ProductName);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -90,7 +90,7 @@ public class ProductCategoryController : ControllerBase
         {
             var result = await _productCategoryService.UpdateAsync(updatedProductCategory);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {

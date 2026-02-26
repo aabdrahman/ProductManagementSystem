@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Product;
 using Serilog;
@@ -26,7 +25,7 @@ public class ProductController : ControllerBase
         try
         {
             var result = await _productService.GetAllAsync();
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -42,7 +41,7 @@ public class ProductController : ControllerBase
         {
             var result = await _productService.GetByIdAsync(Id);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -58,7 +57,7 @@ public class ProductController : ControllerBase
         {
             var result = await _productService.GetByCategoryIdAsync(categoryId);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -74,7 +73,7 @@ public class ProductController : ControllerBase
         {
             var result = await _productService.DeleteAsync(Id, isSoftDelete);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -89,7 +88,7 @@ public class ProductController : ControllerBase
         try
         {
             var result = await _productService.CreateAsync(productToCreate);
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
@@ -105,11 +104,27 @@ public class ProductController : ControllerBase
         {
             var result = await _productService.UpdateAsync(productToUpdate);
 
-            return StatusCode(result.StatusCode, result);
+            return StatusCode((int)result.StatusCode, result);
         }
         catch (Exception ex)
         {
             Log.ForContext(_className, "ProductController").ForContext(_methodName, "Update").Error(ex, "An Error Occurred Invoking Endpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpPatch("update-stock")]
+    public async Task<IActionResult> UpdateStock([FromBody] UpdateProductStockDto productToUpdateStock)
+    {
+        try
+        {
+            var result = await _productService.UpdateStockAsync(productToUpdateStock);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "ProductController").ForContext(_methodName, "UpdateStock").Error(ex, "An Error Occurred Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
