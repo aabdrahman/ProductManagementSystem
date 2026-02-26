@@ -7,4 +7,5 @@ public class Review
     public string ReviewText { get; set; }
     public string ReviewerName { get; set; }
     public string? ProductName { get; set; }
+    public DateTime CreatedDate { get; set; }
 }

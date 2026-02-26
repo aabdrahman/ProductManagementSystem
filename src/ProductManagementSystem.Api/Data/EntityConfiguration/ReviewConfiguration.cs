@@ -16,6 +16,8 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
 
         builder.HasIndex(x => x.ReviewerName);
 
+        builder.HasIndex(x => x.CreatedDate);
+
         builder.Property(x => x.ReviewerName)
             .IsRequired()
             .HasMaxLength(150);
@@ -29,6 +31,9 @@ public class ReviewConfiguration : IEntityTypeConfiguration<Review>
             .HasMaxLength(250);
 
         builder.Property(x => x.Rating)
+            .IsRequired();
+
+        builder.Property(x => x.CreatedDate)
             .IsRequired();
     }
 }
