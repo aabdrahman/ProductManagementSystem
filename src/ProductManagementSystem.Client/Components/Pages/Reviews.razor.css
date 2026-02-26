@@ -1,0 +1,112 @@
+﻿/* =========================
+   REVIEWS SECTION
+========================= */
+
+.reviews {
+    padding: 6rem 8%;
+    margin-top: 1.2rem;
+    background: var(--BG-COLOR-SECONDARY);
+}
+
+.reviews-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.reviews-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #111827;
+}
+
+.reviews-header p {
+    font-size: 1rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+}
+
+/* Reviews Grid */
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+/* Review Card */
+.review-card {
+    background: var(--BG-COLOR-TERTIARY);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.review-text {
+    font-size: 1rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+}
+
+.review-author {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY-TITLE);
+}
+
+.no-reviews {
+    text-align: center;
+    padding: 3rem 2rem;
+    border: 1px dashed #d1d5db;
+    border-radius: 14px;
+    background: var(--BG-COLOR-TERTIARY);
+}
+
+.no-reviews h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    color: #111827;
+}
+
+.no-reviews p {
+    color: var(--FONT-COLOR-SECONDARY);
+    margin-bottom: 1.5rem;
+    max-width: 500px;
+    margin-inline: auto;
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+}
+
+.add-review-btn {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    background: var(--BG-COLOR-BTN-SUCCESS);
+    color: var(--FONT-COLOR-BASIC);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: 0.2s ease;
+    font-family: var(--FONT-STYLE-BODY);
+}
+
+    .add-review-btn:hover {
+        background: var(--BG-COLOR-BTN-SUCCESS-HOVER);
+    }
+
+/* Responsive */
+@media (max-width: 1000px) {
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
+}

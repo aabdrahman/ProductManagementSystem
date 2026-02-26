@@ -64,7 +64,7 @@
 }
 
 /* Optional: Add a subtle background for emphasis */
-.product-card.low-stock {
+.product-card.low {
     border: 2px solid #fbbf24; /* amber border */
     box-shadow: 0 10px 25px rgba(251, 191, 36, 0.2);
 }

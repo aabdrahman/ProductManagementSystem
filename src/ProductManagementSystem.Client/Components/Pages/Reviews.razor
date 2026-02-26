@@ -1,0 +1,120 @@
+﻿
+
+@if(_reviews is not null)
+{
+
+    <section id="reviews" class="reviews">
+
+        <div class="reviews-header">
+            <h2>What Our Customers Say</h2>
+            <p>
+                Real feedback from users who trust our products.
+            </p>
+        </div>
+
+        @if (_reviews.Any())
+        {
+
+            <div class="reviews-grid">
+
+                @foreach (var review in _reviews)
+                {
+                    <div class="review-card">
+                        <p class="review-text">"@review.ReviewText"</p>
+                        <p class="review-author">– @review.ReviewerName</p>
+                        <p class="review-rating">
+                            @for (int i = 0; i < review.Rating; i++)
+                            {
+                                <span>★</span>
+                            }
+                            @for (int i = review.Rating; i < 5; i++)
+                            {
+                                <span>☆</span>
+                            }
+                        </p>
+                    </div>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="no-reviews" id="noReviews">
+                <h3>No reviews yet</h3>
+                <p>
+                    Be the first to share your experience with our products.
+                    Your feedback helps others make better choices.
+                </p>
+                <a href="#add-review" class="add-review-btn">Write a Review</a>
+            </div>
+        }
+
+
+    </section>
+}
+
+
+@code {
+
+    private IEnumerable<ReviewDto> _reviews;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+
+        var testReviews = new List<ReviewDto>
+        {
+            new ReviewDto
+            {
+                Id = 1,
+                ReviewerName = "John Doe",
+                ReviewText = "The Smart Fitness Watch completely transformed my workout routine. Highly recommended!",
+                Rating = 5,
+                ProductName = "Smart Fitness Watch"
+            },
+            new ReviewDto
+            {
+                Id = 2,
+                ReviewerName = "Jane Smith",
+                ReviewText = "The Customer Order Portal is intuitive and reliable. Placing orders has never been easier.",
+               Rating = 4,
+                ProductName = "Customer Order Portal"
+            },
+            new ReviewDto
+            {
+                Id = 3,
+                ReviewerName = "Michael Brown",
+                ReviewText = "Excellent support and quick delivery. The product quality exceeded my expectations!",
+                Rating = 5,
+                ProductName = "Air Purifier Pro"
+            },
+            new ReviewDto
+            {
+                Id = 4,
+                ReviewerName = "Sarah Johnson",
+                ReviewText = "I love the Sales Analytics Dashboard! It's simple yet provides all the insights I need.",
+                Rating = 4,
+                ProductName = "Sales Analytics Dashboard"
+            },
+            new ReviewDto
+            {
+                Id = 5,
+                ReviewerName = "Emma Williams",
+                ReviewText = "Fast ordering process and great customer support.",
+                Rating = 5,
+                ProductName = "Customer Order Portal"
+            },
+            new ReviewDto
+            {
+                Id = 6,
+                ReviewerName = "David Lee",
+                ReviewText = "The Ergonomic Keyboard is super comfortable for long hours of work.",
+                Rating = 4,
+                ProductName = "Ergonomic Keyboard"
+            }
+        };
+
+        _reviews = DateTime.Now.Second % 2 == 0 ? testReviews : [];
+    }
+
+}
