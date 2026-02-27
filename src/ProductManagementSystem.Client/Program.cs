@@ -1,9 +1,21 @@
 using ProductManagementSystem.Client.Components;
+using ProductManagementSystem.Client.Handlers;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+
+builder.Services.AddScoped<GetReviewsHandler>();
+builder.Services.AddScoped<GetProductsHandler>();
+
+builder.Services.AddHttpClient(builder.Configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"), opts =>
+{
+    opts.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiClient:BaseUri") ?? throw new ArgumentNullException("The api base uri is not provided yet"));
+    opts.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<double>("ApiClient:TimeoutAfterSeconds"));
+    opts.DefaultRequestVersion = HttpVersion.Version11;
+});
 
 var app = builder.Build();
 

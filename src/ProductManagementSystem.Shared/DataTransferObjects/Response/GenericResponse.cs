@@ -2,23 +2,23 @@
 
 namespace ProductManagementSystem.Shared.DataTransferObjects.Response;
 
-public class GenericResponse<TEntity>
+public class GenericResponse<T>
 {
-    public TEntity Data { get; set; }
+    public T Data { get; set; }
     public HttpStatusCode StatusCode { get; set; }
     public string ResponseMessage { get; set; }
     public bool IsSuccessStatus { get; set; }
     public object ErrorDetails { get; set; }
 
-    public GenericResponse(TEntity? data, string message, bool isSuccessful, HttpStatusCode httpStatus, object errorDetails)
+    public GenericResponse(T? data, string responseMessage, bool isSuccessStatus, HttpStatusCode statusCode, object errorDetails)
     {
-        Data = data;
-        ResponseMessage = message;
-        StatusCode = httpStatus;
-        IsSuccessStatus = isSuccessful;
-        ErrorDetails = errorDetails;
+        this.Data = data;
+        this.ResponseMessage = responseMessage;
+        this.StatusCode = statusCode;
+        this.IsSuccessStatus = isSuccessStatus;
+        this.ErrorDetails = errorDetails;
     }
 
-    public static GenericResponse<TEntity> Success(TEntity entityData, string message, HttpStatusCode httpStatusCode) => new GenericResponse<TEntity>(entityData, message, true, httpStatusCode, null);
-    public static GenericResponse<TEntity> Failure(TEntity? entity, string message, HttpStatusCode httpStatusCode, object error = null) => new GenericResponse<TEntity>(entity, message, false, httpStatusCode, error);
+    public static GenericResponse<T> Success(T entityData, string message, HttpStatusCode httpStatusCode) => new GenericResponse<T>(entityData, message, true, httpStatusCode, null);
+    public static GenericResponse<T> Failure(T? entity, string message, HttpStatusCode httpStatusCode, object error = null) => new GenericResponse<T>(entity, message, false, httpStatusCode, error);
 }

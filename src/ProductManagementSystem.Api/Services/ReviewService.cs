@@ -79,7 +79,7 @@ public class ReviewService : IReviewService
                                         ReviewText = x.ReviewText
                                     }).ToListAsync();
 
-            Log.ForContext(_className, "ReviewService").ForContext(_methodName, "GetReviewsAsync").Information($"Fetched Reviews - {0}", JsonSerializer.Serialize(reviews));
+            Log.ForContext(_className, "ReviewService").ForContext(_methodName, "GetReviewsAsync").Information("Fetched Reviews - {0}", JsonSerializer.Serialize(reviews));
 
             return GenericResponse<IEnumerable<ReviewDto>>.Success(reviews, "Reviews Fetched Successfully", System.Net.HttpStatusCode.OK);
         }

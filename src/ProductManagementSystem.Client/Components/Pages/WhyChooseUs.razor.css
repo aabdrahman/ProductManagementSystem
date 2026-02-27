@@ -23,9 +23,9 @@
 }
 
 .why-choose-header p {
-    font-size: 1.05rem;
+    font-size: 1.25rem;
     color: var(--FONT-COLOR-BODY);
-    line-height: 1.6;
+    line-height: 1.8;
     font-family: var(--FONT-STYLE-BODY);
     font-weight: 400;
 }

@@ -21,10 +21,11 @@
 }
 
 .reviews-header p {
-    font-size: 1rem;
+    font-size: 1.25rem;
     color: var(--FONT-COLOR-SECONDARY);
     font-family: var(--FONT-STYLE-BODY);
     font-weight: 400;
+    line-height: 1.8;
 }
 
 /* Reviews Grid */

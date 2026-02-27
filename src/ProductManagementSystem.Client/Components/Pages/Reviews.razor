@@ -1,4 +1,7 @@
 ﻿
+@inject GetReviewsHandler getReviewsHandler
+
+@rendermode InteractiveServer
 
 @if(_reviews is not null)
 {
@@ -57,64 +60,70 @@
 @code {
 
     private IEnumerable<ReviewDto> _reviews;
+    private string _responseMessage;
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(500);
 
-        var testReviews = new List<ReviewDto>
-        {
-            new ReviewDto
-            {
-                Id = 1,
-                ReviewerName = "John Doe",
-                ReviewText = "The Smart Fitness Watch completely transformed my workout routine. Highly recommended!",
-                Rating = 5,
-                ProductName = "Smart Fitness Watch"
-            },
-            new ReviewDto
-            {
-                Id = 2,
-                ReviewerName = "Jane Smith",
-                ReviewText = "The Customer Order Portal is intuitive and reliable. Placing orders has never been easier.",
-               Rating = 4,
-                ProductName = "Customer Order Portal"
-            },
-            new ReviewDto
-            {
-                Id = 3,
-                ReviewerName = "Michael Brown",
-                ReviewText = "Excellent support and quick delivery. The product quality exceeded my expectations!",
-                Rating = 5,
-                ProductName = "Air Purifier Pro"
-            },
-            new ReviewDto
-            {
-                Id = 4,
-                ReviewerName = "Sarah Johnson",
-                ReviewText = "I love the Sales Analytics Dashboard! It's simple yet provides all the insights I need.",
-                Rating = 4,
-                ProductName = "Sales Analytics Dashboard"
-            },
-            new ReviewDto
-            {
-                Id = 5,
-                ReviewerName = "Emma Williams",
-                ReviewText = "Fast ordering process and great customer support.",
-                Rating = 5,
-                ProductName = "Customer Order Portal"
-            },
-            new ReviewDto
-            {
-                Id = 6,
-                ReviewerName = "David Lee",
-                ReviewText = "The Ergonomic Keyboard is super comfortable for long hours of work.",
-                Rating = 4,
-                ProductName = "Ergonomic Keyboard"
-            }
-        };
+        var result = await getReviewsHandler.Handle();
 
-        _reviews = DateTime.Now.Second % 2 == 0 ? testReviews : [];
+        _reviews = result.reviews;
+        _responseMessage = result.message;
+
+        // var testReviews = new List<ReviewDto>
+        // {
+        //     new ReviewDto
+        //     {
+        //         Id = 1,
+        //         ReviewerName = "John Doe",
+        //         ReviewText = "The Smart Fitness Watch completely transformed my workout routine. Highly recommended!",
+        //         Rating = 5,
+        //         ProductName = "Smart Fitness Watch"
+        //     },
+        //     new ReviewDto
+        //     {
+        //         Id = 2,
+        //         ReviewerName = "Jane Smith",
+        //         ReviewText = "The Customer Order Portal is intuitive and reliable. Placing orders has never been easier.",
+        //        Rating = 4,
+        //         ProductName = "Customer Order Portal"
+        //     },
+        //     new ReviewDto
+        //     {
+        //         Id = 3,
+        //         ReviewerName = "Michael Brown",
+        //         ReviewText = "Excellent support and quick delivery. The product quality exceeded my expectations!",
+        //         Rating = 5,
+        //         ProductName = "Air Purifier Pro"
+        //     },
+        //     new ReviewDto
+        //     {
+        //         Id = 4,
+        //         ReviewerName = "Sarah Johnson",
+        //         ReviewText = "I love the Sales Analytics Dashboard! It's simple yet provides all the insights I need.",
+        //         Rating = 4,
+        //         ProductName = "Sales Analytics Dashboard"
+        //     },
+        //     new ReviewDto
+        //     {
+        //         Id = 5,
+        //         ReviewerName = "Emma Williams",
+        //         ReviewText = "Fast ordering process and great customer support.",
+        //         Rating = 5,
+        //         ProductName = "Customer Order Portal"
+        //     },
+        //     new ReviewDto
+        //     {
+        //         Id = 6,
+        //         ReviewerName = "David Lee",
+        //         ReviewText = "The Ergonomic Keyboard is super comfortable for long hours of work.",
+        //         Rating = 4,
+        //         ProductName = "Ergonomic Keyboard"
+        //     }
+        // };
+
+        // _reviews = DateTime.Now.Second % 2 == 0 ? testReviews : [];
     }
 
 }
