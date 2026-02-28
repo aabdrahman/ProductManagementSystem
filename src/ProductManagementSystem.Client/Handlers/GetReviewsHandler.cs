@@ -23,12 +23,12 @@ public class GetReviewsHandler
 
             GenericResponse<IEnumerable<ReviewDto>> responseBody = JsonSerializer.Deserialize<GenericResponse<IEnumerable<ReviewDto>>>(httpResponseContent, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true }) ?? 
                                                                         throw new ArgumentException("Response could not be deserialized");
-            Console.WriteLine($"Response - {JsonSerializer.Serialize(responseBody)}");
+            //Console.WriteLine($"Response - {JsonSerializer.Serialize(responseBody)}");
             return (responseBody.Data, responseBody.ResponseMessage);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error - {ex.Message} {ex}");
+            //Console.WriteLine($"Error - {ex.Message} {ex}");
             return ([], ex.Message);
         }
     }

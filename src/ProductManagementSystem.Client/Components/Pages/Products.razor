@@ -1,5 +1,8 @@
 ﻿
 @inject GetProductsHandler getProductsHandler
+@inject GetProductCategoryHandler getProductCategoryHandler
+
+@rendermode InteractiveServer
 
 @if(_products is not null)
 {
@@ -12,14 +15,66 @@
             </p>
         </div>
 
-        <div class="products-grid">
+        <!-- 🔎 Filter Bar -->
+        <div class="products-filter">
+            @if(_categories is not null && _categories.Any())
+            {
+                <div class="filter-group">
+                    <label>Category</label>
+                    <select class="filter-input" @bind="_selectedCategory" @bind:after="FilterProducts">
+                        <option value="">All Categories</option>
+                        @foreach (var category in _categories)
+                        {
+                            <option value="@category.Name">@category.Name</option>
+                        }
+                    </select>
+                </div>
+            }
+            
 
-            @foreach (var product in _products)
+            <div class="filter-group">
+                <label>Product Name</label>
+                <input class="filter-input"
+                           placeholder="Search by name..."
+                           @bind="_searchTerm" @bind:event="oninput" @bind:after="FilterProducts" />
+            </div>
+
+            <!-- Clear Filters Button -->
+            <button class="clear-filter-btn" disabled="@(!_isClearFilterAllowed)" type="button" @onclick="ClearFilters">
+                Clear Filters
+            </button>
+        </div>
+
+        @if (!_isLoading)
+        {
+            if (!_filteredProducts.Any())
+            {
+                <div class="no-products" id="noProducts">
+                    <h3>No products found</h3>
+                    <p>
+                        Try adjusting your filters or search keywords.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="products-grid">
+                    @foreach (var product in _filteredProducts)
+                    {
+                        <ProductCard Product="product" />
+                    }
+                </div>
+            }
+        }
+
+        @* <div class="products-grid">
+
+            @foreach (var product in _filteredProducts)
             {
                 <ProductCard Product="product" />
             }
 
-        </div>
+        </div> *@
 
     </section>
 }
@@ -27,6 +82,13 @@
 
 @code{
     private IEnumerable<ProductDto> _products;
+    private List<ProductDto> _filteredProducts;
+
+    private bool _isLoading = true;
+
+    private IEnumerable<ProductCategoryDto> _categories;
+    private string _selectedCategory;
+    private string _searchTerm;
     private string _reponseMessage;
 
     protected override async Task OnInitializedAsync()
@@ -34,72 +96,45 @@
         await Task.Delay(500);
 
         var response = await getProductsHandler.Handle();
+
+
         _products = response.products; _reponseMessage = response.message;
 
-        // var testProducts = new List<ProductDto>
-        // {
-        //     new ProductDto
-        //     {
-        //         Id = 1,
-        //         Name = "Smart Fitness Watch",
-        //         Description = "Track your health, workouts, and notifications seamlessly.",
-        //         CategoryName = "Electronics",
-        //         CurrentCount = 12,
-        //         CostPrice = 120m,
-        //         SellingPrice = 150m
-        //     },
-        //     new ProductDto
-        //     {
-        //         Id = 2,
-        //         Name = "Air Purifier Pro",
-        //         Description = "Keep your home air clean with smart filtration technology.",
-        //         CategoryName = "Home Appliances",
-        //         CurrentCount = 3, Low stock
-        //         CostPrice = 90m,
-        //         SellingPrice = 120m
-        //     },
-        //     new ProductDto
-        //     {
-        //         Id = 3,
-        //         Name = "Wireless Earbuds X",
-        //         Description = "High-quality sound with long-lasting battery.",
-        //         CategoryName = "Gadgets",
-        //         CurrentCount = 0, Out of stock
-        //         CostPrice = 60m,
-        //         SellingPrice = 80m
-        //     },
-        //     new ProductDto
-        //     {
-        //         Id = 4,
-        //         Name = "Bluetooth Speaker",
-        //         Description = "Portable speaker with immersive sound quality.",
-        //         CategoryName = "Electronics",
-        //         CurrentCount = 20,
-        //         CostPrice = 70m,
-        //         SellingPrice = 90m
-        //     },
-        //     new ProductDto
-        //     {
-        //         Id = 5,
-        //         Name = "Ergonomic Keyboard",
-        //         Description = "Reduce strain with our ergonomic mechanical keyboard.",
-        //         CategoryName = "Office",
-        //         CurrentCount = 2, Low stock
-        //         CostPrice = 50m,
-        //         SellingPrice = 75m
-        //     },
-        //     new ProductDto
-        //     {
-        //         Id = 6,
-        //         Name = "Smart Home Hub",
-        //         Description = "Connect and control your smart devices effortlessly.",
-        //         CategoryName = "Gadgets",
-        //         CurrentCount = 0, Out of stock
-        //         CostPrice = 150m,
-        //         SellingPrice = 200m
-        //     }
-        // };
+        var getProductCategoryResponse = await getProductCategoryHandler.Handle();
+        _categories = getProductCategoryResponse.productCategories;
 
-        //_products = testProducts;
+        // var testProducts = new List<ProductDto>
+
+        _filteredProducts = _products.ToList();
+        _isLoading = false;
+
+    }
+
+    private bool _isClearFilterAllowed => !(string.IsNullOrWhiteSpace(_searchTerm) && string.IsNullOrWhiteSpace(_selectedCategory));
+
+    private void FilterProducts()
+    {
+        // Console.WriteLine($"Filtering Products with - Category:{_selectedCategory}, Search Term: {_searchTerm}");
+
+        _isLoading = true;
+
+        _filteredProducts = _products.Where
+                        (
+                            x => 
+
+                                (string.IsNullOrWhiteSpace(_selectedCategory) || x.CategoryName.Contains(_selectedCategory, StringComparison.CurrentCultureIgnoreCase)) &&
+                                (string.IsNullOrWhiteSpace(_searchTerm) || x.Name.Contains(_searchTerm, StringComparison.CurrentCultureIgnoreCase))
+
+                        ).ToList();
+
+        _isLoading = false;
+    }
+
+    private void ClearFilters()
+    {
+        _searchTerm = "";
+        _selectedCategory = "";
     }
 }
+
+

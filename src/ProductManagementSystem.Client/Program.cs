@@ -10,6 +10,7 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddScoped<GetReviewsHandler>();
 builder.Services.AddScoped<GetProductsHandler>();
 builder.Services.AddScoped<AddReviewHandler>();
+builder.Services.AddScoped<GetProductCategoryHandler>();
 
 builder.Services.AddHttpClient(builder.Configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"), opts =>
 {
