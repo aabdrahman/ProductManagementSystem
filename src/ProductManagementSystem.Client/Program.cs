@@ -13,6 +13,8 @@ builder.Services.AddScoped<AddReviewHandler>();
 builder.Services.AddScoped<GetProductCategoryHandler>();
 builder.Services.AddScoped<AddProductHandler>();
 builder.Services.AddScoped<RestockProductHandler>();
+builder.Services.AddScoped<GetProductUpdateDetailsHandler>();
+builder.Services.AddScoped<UpdateProductHandler>();
 
 builder.Services.AddHttpClient(builder.Configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"), opts =>
 {

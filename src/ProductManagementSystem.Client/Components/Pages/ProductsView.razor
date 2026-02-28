@@ -34,8 +34,8 @@
                             @(product.CurrentCount == 0 ? "Out of stock" : "Available")
                         </td>
                         <td class="actions">
-                            @* <button class="btn edit" @onclick="() => EditProduct(product.Id)">Edit</button> *@
-                        <button class="btn restock" @onclick="(() => OnHandleRestock(product))">Restock</button>
+                            <button class="btn edit" @onclick="() => OnHandleUpdate(product)">Edit</button>
+                            <button class="btn restock" @onclick="(() => OnHandleRestock(product))">Restock</button>
                             @*<button class="btn delete" @onclick="() => DeleteProduct(product.Id)">Delete</button> *@
                         </td>
                     </tr>
@@ -61,6 +61,9 @@
     [Parameter, EditorRequired]
     public EventCallback<ProductDto> HandleRestock { get; set; }
 
+    [Parameter, EditorRequired]
+    public EventCallback<ProductDto> HandleUpdate { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
         await Task.Delay(500);
@@ -72,5 +75,11 @@
     {
         await Task.Delay(250);
         await HandleRestock.InvokeAsync(selectedProduct);
+    }
+
+    private async Task OnHandleUpdate(ProductDto selectedProduct)
+    {
+        await Task.Delay(250);
+        await HandleUpdate.InvokeAsync(selectedProduct);
     }
 }

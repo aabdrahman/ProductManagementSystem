@@ -1,0 +1,171 @@
+﻿@using ProductManagementSystem.Client.Components.SharedContent
+
+@inject GetProductCategoryHandler getProductCategoryHandler
+@inject GetProductUpdateDetailsHandler getProductUpdateDetailsHandler
+@inject UpdateProductHandler updateProductHandler
+
+<section class="product-form-page">
+    <div class="form-header">
+        <h2>Edit Product</h2>
+        <p>Update product details and inventory.</p>
+    </div>
+
+    @if (_isLoading)
+    {
+        <p>Loading product...</p>
+    }
+    else
+    {
+        if(_updateProductModel is not null)
+        {
+            <EditForm Model="_updateProductModel" OnValidSubmit="OnUpdateProduct">
+                <DataAnnotationsValidator />
+
+                @if(_responseMessage is not null)
+                {
+                    <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+                }
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <InputText @bind-Value="_updateProductModel.Name" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <InputTextArea @bind-Value="_updateProductModel.Description" rows="3" />
+                    </div>
+
+                    @if (_productCategories is not null && _productCategories.Any())
+                    {
+
+                        <div class="form-group">
+                            <label>Category</label>
+
+                            <InputSelect @bind-Value="_updateProductModel.CategoryId">
+                                @foreach (var category in _productCategories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </InputSelect>
+
+
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        <label>Cost Price</label>
+                        <InputNumber @bind-Value="_updateProductModel.CostPrice" step="0.01" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Selling Price</label>
+                        <InputNumber @bind-Value="_updateProductModel.SellingPrice" step="0.01" />
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn submit" disabled="@(_isUpdating || _isSuccessful)" type="submit">
+                        @(_isUpdating ? "Saving Changes" : "Save Changes")
+                    </button>
+                    <button class="btn cancel" type="button" disabled="@_isUpdating" @onclick="(() => OnHandleClose(_isSuccessful))">Cancel</button>
+                </div>
+            </EditForm>
+        }
+        else
+        {
+            <p>
+                An Error Occurred loading form details: @_getProductResponseMessage
+            </p>
+        }
+
+    }
+</section>
+
+@code {
+
+    private ProductDto _productToUpdate;
+    private IEnumerable<ProductCategoryDto> _productCategories;
+
+    private UpdateProductDto _updateProductModel;
+    private UpdateProductDto? _updateProductDetails;
+    private bool _isLoading;
+
+    private string _responseMessage;
+    private bool _isSuccessful;
+    private bool _isUpdating;
+
+    private string _getProductResponseMessage;
+
+    [Parameter, EditorRequired]
+    public ProductDto ProductToUpdate { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+
+
+        await Task.Delay(250);
+        _productToUpdate = ProductToUpdate;
+
+        if(_productToUpdate is not null)
+        {
+            var getProductCategory = getProductCategoryHandler.Handle();
+            var getProductUpdate = getProductUpdateDetailsHandler.Handle(_productToUpdate.Id);
+
+            await Task.WhenAll(getProductCategory, getProductUpdate);
+
+            _productCategories = (getProductCategory.Result).productCategories;
+            _updateProductDetails = (getProductUpdate.Result).productToUpdate;
+            _getProductResponseMessage = (getProductUpdate.Result).responseMessage;
+
+            if(_updateProductDetails is null)
+            {
+                _isLoading = false;
+                return;
+            }
+
+            _updateProductModel = new UpdateProductDto()
+            {
+                Id = _updateProductDetails.Id,
+                CategoryId = _updateProductDetails.CategoryId,
+                CostPrice = _updateProductDetails.CostPrice,
+                CurrentCount = _updateProductDetails.CurrentCount,
+                SellingPrice = _updateProductDetails.SellingPrice,
+                Name = _updateProductDetails.Name,
+                Description = _updateProductDetails.Description
+            };
+        }
+
+
+        _isLoading = false;
+    }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+        _updateProductModel = null;
+        _responseMessage = null;
+        _productToUpdate = null;
+
+
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+
+    private async Task OnUpdateProduct()
+    {
+        _isUpdating = true;
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Product Successfully Updated." : "Product Update Failed.";
+
+        var response = await updateProductHandler.Handle(_updateProductModel);
+        _isSuccessful = response.isSuccessful; _responseMessage = response.responseMessage;
+
+        _isUpdating = false;
+    }
+}
