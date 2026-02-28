@@ -1,0 +1,44 @@
+﻿
+
+.add-review {
+    padding: 4rem 8%;
+    background: var(--BG-COLOR-TERTIARY);
+    max-width: 700px;
+    margin: 0 auto;
+    border-radius: 16px;
+}
+
+.add-review-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.add-review-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #111827;
+}
+
+.add-review-header p {
+    font-size: 1.25rem;
+    color: var(--FONT-COLOR-BODY);
+    line-height: 1.8;
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+}
+
+/*.add-review button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.add-review button:hover {
+    background: #1d4ed8;
+}*/

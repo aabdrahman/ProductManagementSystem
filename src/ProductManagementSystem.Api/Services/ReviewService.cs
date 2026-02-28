@@ -26,7 +26,7 @@ public class ReviewService : IReviewService
 
         try
         {
-            Log.ForContext(_className, "ReviewService").ForContext(_methodName, "AddReviewAsync").Information($"Create Review - {0}", JsonSerializer.Serialize(createReview));
+            Log.ForContext(_className, "ReviewService").ForContext(_methodName, "AddReviewAsync").Information("Create Review - {0}", JsonSerializer.Serialize(createReview));
 
             Review reviewToInsert = new Review()
             {
@@ -44,9 +44,10 @@ public class ReviewService : IReviewService
 
             ReviewDto reviewToReturn = new ReviewDto() { Id = reviewToInsert.Id, ProductName = reviewToInsert.ProductName, Rating = reviewToInsert.Rating, ReviewerName = reviewToInsert .ReviewerName, ReviewText = reviewToInsert.ReviewText };
 
+            Log.ForContext(_className, "ReviewService").ForContext(_methodName, "AddReviewAsync").Information("Review Created Successfully - {0}", JsonSerializer.Serialize(reviewToReturn));
+
             return GenericResponse<ReviewDto>.Success(reviewToReturn, "Review Created Successfully.", System.Net.HttpStatusCode.OK);
 
-            throw new NotImplementedException();
         }
         catch(DbException ex)
         {

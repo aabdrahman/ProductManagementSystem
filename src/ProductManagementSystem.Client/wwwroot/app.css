@@ -12,10 +12,11 @@
     --BG-COLOR-BTN-SUCCESS: #2f963a;
     --BG-COLOR-BTN-SUCCESS-HOVER: #0b7016;
     --BG-COLOR-BTN-SUCCESS-HOVER: #0bb31c;
+    --BG-COLOR-BTN-CANCEL: #B4B5B6;
     --FONT-COLOR-PRIMARY: #0c6b18;
     --FONT-COLOR-SECONDARY: #0b120c;
     --FONT-COLOR-SECONDARY: #000000;
-    --FONT-COLOR-BASIC: #d7d9d7;
+    --FONT-COLOR-BASIC: #dedede;
     --FONT-COLOR-MAIN: #11b822;
     --FONT-COLOR-LINK-HOVER: #0bb31c;
     --FONT-STYLE-HEADER: "Bungee Spice", sans-serif;
@@ -84,4 +85,85 @@ h1, h2, h3 {
     font-family: var(--FONT-STYLE-HEADER);
     font-weight: 400;
     font-style: normal;
+}
+
+
+.form-group {
+    display: flex;
+    justify-content:flex-start;
+    align-items:flex-start;
+    width: 100%;
+    gap: .5rem;
+    flex-direction: column;
+}
+
+.form-button-group {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    font-family: var(--FONT-STYLE-BODY);
+    color: VAR(--FONT-COLOR-BASIC);
+    font-weight: 800;
+    border-radius: 8px;
+    cursor: pointer;
+    
+    transition: 0.3s ease;
+}
+
+.submit {
+    background: var(--BG-COLOR-BTN-SUCCESS);
+}
+
+.cancel {
+    color: VAR(--FONT-COLOR-SECONDARY)!important;
+    background: var(--BG-COLOR-BTN-CANCEL);
+}
+
+.submit:hover {
+
+    background: var(--BG-COLOR-BTN-SUCCESS-HOVER);
+
+}
+
+.btn[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--FONT-COLOR-SECONDARY);
+    text-align: left!important;
+    font-family: var(--FONT-STYLE-BODY-TITLE);
+}
+
+ form {
+    display: flex;
+    flex-direction: column;
+    gap: .95rem;
+}
+
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input::placeholder,
+textarea::placeholder {
+    font-family: var(--FONT-STYLE-BODY);
+    font-style: italic;
 }

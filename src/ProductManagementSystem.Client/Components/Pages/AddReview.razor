@@ -1,0 +1,160 @@
+﻿@using ProductManagementSystem.Client.Components.SharedContent
+
+@inject GetProductsHandler getProductsHandler
+@inject AddReviewHandler addReviewHandler
+
+@rendermode InteractiveServer
+
+<section id="add-review" class="add-review">
+
+    <div class="add-review-header">
+        <h2>Leave a Review</h2>
+        <p>Share your experience with this product.</p>
+    </div>
+
+    @if(_createReviewModel is not null)
+    {
+        <EditForm Model="_createReviewModel" FormName="add-review" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+
+            @if (_products is not null && _products.Any())
+            {
+                <div class="form-group">
+                    <label>Product</label>
+                    <InputSelect @bind-Value="_createReviewModel.ProductName">
+                        <option value="" selected>Select product to review</option>
+                        @foreach (var product in _products)
+                        {
+                            <option value="@product.Name">@product.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => _createReviewModel.ProductName)" />
+                </div>
+            }
+
+            <div class="form-group">
+                <label>Name</label>
+                <InputText @bind-Value="_createReviewModel.ReviewerName" placeholder="Your Name" class="form-control" />
+                <ValidationMessage For="@(() => _createReviewModel.ReviewerName)" />
+            </div>
+
+            <div class="form-group">
+                <label>Your Review</label>
+                <InputTextArea @bind-Value="_createReviewModel.Review" placeholder="Write your review..." class="form-control" rows="5" />
+                <ValidationMessage For="(() => _createReviewModel.Review)" />
+            </div>
+
+            <div class="form-group">
+                <label>Rating</label>
+                <InputSelect @bind-Value="_createReviewModel.Rating" class="form-control">
+                    <option value="0" selected>Select Review Rating</option>
+                    <option value="5">5 - Excellent</option>
+                    <option value="4">4 - Good</option>
+                    <option value="3">3 - Average</option>
+                    <option value="2">2 - Poor</option>
+                    <option value="1">1 - Terrible</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => _createReviewModel.Rating)" />
+            </div>
+
+            @if(_responseMessage is not null)
+            {
+                <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+            }
+
+            <div class="form-button-group">
+                <button class="btn cancel" disabled="@_isProcessing" @onclick="Clear" type="button">Cancel Review</button>
+                <button class="btn submit" disabled="@_isProcessing" type="submit">
+                    @(_isProcessing ? "Submitting Review" : "Submit Review")
+                </button>
+            </div>
+
+        </EditForm>
+    }
+
+</section>
+
+@* <Popup @ref="popup" Title="@_title" ShowCloseButton="true" ShowFooter="false">
+    <Body>
+        @if(_isSuccessful && _responseMessage is not null)
+        {
+            <p>Your review has been submitted successfully!</p>
+        }
+        else if (!_isSuccessful && _responseMessage is not null)
+        {
+            <p>There was an error submitting your review. Please try again later.</p>
+        }
+    </Body>
+</Popup> *@
+
+
+@code {
+
+    private CreateReviewDto _createReviewModel;
+
+    private List<ProductDto> _products;
+
+    private bool _isSuccessful;
+    private string _responseMessage;
+    private bool _isProcessing = false;
+
+    private string _title;
+    private Popup popup;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+
+        var getProductsResponse = await getProductsHandler.Handle();
+        _products = getProductsResponse.products.ToList();
+
+        _createReviewModel = new CreateReviewDto();
+    }
+
+
+
+    private async Task HandleValidSubmit()
+    {
+        _isProcessing = true; _responseMessage = null;
+
+        var response = await addReviewHandler.Handle(_createReviewModel);
+        _isSuccessful = response.isSuccessful; _responseMessage = response.message;
+
+        //_title = "Review Notification";
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Review submitted successfully!" : "Failed to submit review.";
+
+        // popup.OpenModal();
+
+        if (_isSuccessful)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(5000);
+                _responseMessage = null;
+                _isSuccessful = default;
+
+                var getProductsResponse = await getProductsHandler.Handle();
+                _products = getProductsResponse.products.ToList();
+
+                _createReviewModel = new CreateReviewDto();
+
+                await InvokeAsync(StateHasChanged);
+            });
+        }
+
+        _isProcessing = false;
+    }
+
+    private async Task Clear()
+    {
+
+        var getProductsResponse = await getProductsHandler.Handle();
+        _products = getProductsResponse.products.ToList();
+
+        _createReviewModel = new CreateReviewDto();
+    }
+}
