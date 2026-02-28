@@ -364,4 +364,47 @@ public sealed class ProductService : IProductService
             return GenericResponse<string>.Failure(null, "Error Occurred Updating Stock.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
     }
+
+    public async Task<GenericResponse<UpdateProductDto>> GetProductUpdateDetails(int Id)
+    {
+        try
+        {
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetProductUpdateDetails").Information("Getting Product Details - {0}", Id);
+
+            UpdateProductDto? productUpdateDetails = await _repositoryContext.Products
+                                                        .Select(x => new UpdateProductDto()
+                                                        {
+                                                            CategoryId = x.ProductCategoryId,
+                                                            Name = x.NormalizedName,
+                                                            Description = x.Description,
+                                                            CostPrice = x.CostPrice,
+                                                            SellingPrice = x.SellingPrice,
+                                                            Id = x.Id,
+                                                            CurrentCount = x.CurrentCount
+
+                                                        })
+                                                        .SingleOrDefaultAsync(x => x.Id == Id);
+
+            if(productUpdateDetails is null)
+            {
+                Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetProductUpdateDetails").Information("No product with Id - {0}", Id);
+                return GenericResponse<UpdateProductDto>.Failure(null, $"Product Details with Id - {Id} does not exist.", System.Net.HttpStatusCode.NotFound);
+            }
+
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetProductUpdateDetails").Information("Product deails with Id: {0} fetched successfully - {1}", Id, JsonSerializer.Serialize(productUpdateDetails));
+
+            return GenericResponse<UpdateProductDto>.Success(productUpdateDetails, "Product Details fetched successfully.", System.Net.HttpStatusCode.OK);
+
+        }
+        catch(DbException ex)
+        {
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetProductUpdateDetails").Error(ex, "An Error Occurred Fetching Product.");
+            return GenericResponse<UpdateProductDto>.Failure(null, "An Error Occurred Fetching Product from database.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetProductUpdateDetails").Error(ex, "An Error Occurred Fetching Product from database.");
+            return GenericResponse<UpdateProductDto>.Failure(null, "An Error Occurred Fetching Product Details.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+    }
 }

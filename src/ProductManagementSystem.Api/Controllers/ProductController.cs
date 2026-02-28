@@ -66,6 +66,22 @@ public class ProductController : ControllerBase
         }
     }
 
+    [HttpGet("get-product-update-details/{Id:int}")]
+    public async Task<IActionResult> GetProductUpdateDetails(int Id)
+    {
+        try
+        {
+            var result = await _productService.GetProductUpdateDetails(Id);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "ProductController").ForContext(_methodName, "GetProductUpdateDetails").Error(ex, "An Error Occurred Invoking Endpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
     [HttpDelete("{Id:int}")]
     public async Task<IActionResult> Delete(int Id, bool isSoftDelete = true)
     {

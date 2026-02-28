@@ -1,0 +1,91 @@
+﻿@using ProductManagementSystem.Client.Components.SharedContent
+
+@inject RestockProductHandler restockProductHandler
+
+
+@if(_productToUpdate is not null)
+{
+    <div class="restock-info">
+        <p><strong>Product:</strong> @_productToUpdate.Name</p>
+        <p><strong>Current Stock:</strong> @_productToUpdate.CurrentCount</p>
+
+        @if (_updateProductStockModel is not null)
+        {
+            <EditForm Model="_updateProductStockModel" OnValidSubmit="HandleStockUpdate">
+                <DataAnnotationsValidator />
+
+                @if (_responseMessage is not null)
+                {
+                    <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+                }
+
+                <div class="form-group">
+                    <label>Stock To Add</label>
+                    <InputNumber @bind-Value="_updateProductStockModel.StockToAdd" min="0" />
+                    <ValidationMessage For="(() => _updateProductStockModel.StockToAdd)" />
+                </div>
+
+                <div class="form-actions">
+
+                    <button class="btn submit" type="submit" disabled="@(_isRestocking || _isSuccessful)">
+                        @(!_isRestocking ? "Restock" : "Restocking...")
+                    </button>
+
+                    <button class="btn cancel" disabled="@(_isRestocking)" type="button" @onclick="(() => OnHandleClose(_isSuccessful))">
+                        Cancel
+                    </button>
+
+                </div>
+
+            </EditForm>
+        }
+
+    </div>
+
+    
+
+}
+
+
+@code {
+
+    private ProductDto _productToUpdate;
+    private UpdateProductStockDto _updateProductStockModel;
+
+    private bool _isRestocking;
+    private bool _isSuccessful;
+    private string _responseMessage;
+
+    [Parameter, EditorRequired]
+    public ProductDto ProductToUpdate { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(250);
+        _productToUpdate = ProductToUpdate;
+        _updateProductStockModel = new UpdateProductStockDto() { Id = _productToUpdate.Id };
+    }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+
+    private async Task HandleStockUpdate()
+    {
+        _isRestocking = true;
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Product Stock Successfully Updated." : "Product Stock Update Failed.";
+
+        var response = await restockProductHandler.Handle(_updateProductStockModel);
+        _isSuccessful = response.isSuccessful; _responseMessage = response.responseMessage;
+
+        _isRestocking = false;
+    }
+}

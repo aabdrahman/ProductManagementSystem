@@ -29,14 +29,6 @@
     border: 1px solid #e5e7eb;
 }
 
-.form-actions {
-    margin-top: 2rem;
-    display: flex;
-    gap: 1rem;
-    flex-direction:row-reverse;
-    justify-content: space-between;
-    align-items: center;
-}
 
 /*.btn.primary {
     background: #4f46e5;

@@ -31,7 +31,7 @@
         }
         else if(_products is not null && _products.Any())
         {
-            <ProductsView Products="_products" />
+            <ProductsView Products="_products" HandleRestock="HandleRestockProduct" />
         }
 
     }
@@ -44,6 +44,10 @@
         {
             <AddNewProduct HandleClose="HandleAddProductClose" />
         }
+        else if(_operationToPerform == OperationType.RestockProduct)
+        {
+            <RestockProduct ProductToUpdate="_selectedProduct" HandleClose="HandleRestockProductClose" />
+        }
     </Body>
 </Popup>
 
@@ -55,8 +59,10 @@
     private bool _isSuccessful;
 
     private string _title;
+    private bool _showCloseButton = false;
     private OperationType _operationToPerform;
     private Popup popup;
+    private ProductDto _selectedProduct;
 
 
     protected override async Task OnInitializedAsync()
@@ -89,6 +95,30 @@
         popup.CloseModal();
     }
 
+
+    private async Task HandleRestockProductClose(bool refreshDecision)
+    {
+        _title = null;
+        _selectedProduct = null;
+        _operationToPerform = default;
+
+        if (refreshDecision)
+        {
+            var response = await getProductsHandler.Handle();
+            _products = response.products;
+        }
+
+        popup.CloseModal();
+    }
+
+    private void HandleRestockProduct(ProductDto selectedProduct)
+    {
+        _selectedProduct = selectedProduct;
+        _operationToPerform = OperationType.RestockProduct;
+
+        HandleOpen("Restock Product", false);
+    }
+
 }
 
 
@@ -97,12 +127,14 @@
     enum OperationType
     {
         None,
-        AddNewProduct
+        AddNewProduct,
+        RestockProduct
     }
 
     private void HandleOpen(string title, bool showCloseButton)
     {
         _title = title;
+        _showCloseButton = false;
 
         popup.OpenModal();
     }
