@@ -1,0 +1,49 @@
+﻿
+.danger-zone .form-header h2 {
+    color: #b91c1c;
+}
+
+.delete-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid #fee2e2;
+    max-width: 100%;
+}
+
+.delete-card p, .form-header p{
+    font-family: var(--FONT-STYLE-BODY);
+    margin-bottom: .5rem;
+}
+
+.delete-actions {
+    display: flex;
+    gap: 1rem;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+.btn.danger {
+    background: #dc2626;
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn.danger:hover {
+    background: #b91c1c;
+}
+
+.btn.danger:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/*.status.error {
+    margin-top: 1rem;
+    color: #b91c1c;
+    font-weight: 500;
+}*/

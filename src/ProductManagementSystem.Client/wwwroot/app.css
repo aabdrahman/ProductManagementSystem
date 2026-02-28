@@ -141,7 +141,7 @@ h1, h2, h3 {
 
 }
 
-.btn[disabled] {
+.btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }

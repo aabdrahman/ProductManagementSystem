@@ -1,0 +1,98 @@
+﻿@using ProductManagementSystem.Client.Components.SharedContent
+
+@inject DeleteProductHandler deleteProductHandler
+
+
+<section class="product-form-page danger-zone">
+    <div class="form-header">
+        <h2>Delete Product</h2>
+        <p>
+            You’re about to permanently delete this product.
+            This action cannot be undone.
+        </p>
+    </div>
+
+    @if (_isLoading)
+    {
+        <p>Loading product...</p>
+    }
+    else if (_productToDelete is null)
+    {
+        <p>Product not found.</p>
+    }
+    else
+    {
+        <div class="delete-card">
+
+            @if (_responseMessage is not null)
+            {
+                <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+            }
+
+            <h3>@_productToDelete.Name</h3>
+            <p><strong>Category:</strong> @_productToDelete.CategoryName</p>
+            <p><strong>Stock:</strong> @_productToDelete.CurrentCount</p>
+            <p><strong>Selling Price:</strong> @_productToDelete.SellingPrice.ToString("C")</p>
+
+
+
+            <div class="delete-actions">
+                <button class="btn danger" @onclick="ConfirmDelete" disabled="@(_isDeleting || _isSuccessful)">
+                    @(!_isDeleting ? "Yes, Delete Product" : "Deleting Product...")
+                </button>
+
+                <button class="btn cancel" disabled="@_isDeleting" @onclick="(() => OnHandleClose(_isSuccessful))">Cancel</button>
+            </div>
+
+            
+        </div>
+    }
+</section>
+
+@code {
+
+    private ProductDto _productToDelete;
+
+    private bool _isLoading;
+    private bool _isDeleting;
+    private bool _isSuccessful;
+    private string _responseMessage;
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    [Parameter, EditorRequired]
+    public ProductDto ProductToDelete { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(250);
+        _productToDelete = ProductToDelete;
+
+        _isLoading = false;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        _isDeleting = true;
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Product Deletion Successful" : "Product Deletion Failed.";
+
+        var response = await deleteProductHandler.Handle(_productToDelete.Id);
+        _responseMessage = response.responseMessage; _isSuccessful = response.isSuccessful;
+
+        _isDeleting = false;
+    }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+        _productToDelete = null;
+        _responseMessage = null;
+
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+}

@@ -2,24 +2,29 @@
 .product-form-page {
     max-width: 900px;
     margin: auto;
-    padding: 2rem 2rem;
-    background: var(--BG-COLOR-SECONDARY);
+    padding: 1rem 1rem;
+/*    background: var(--BG-COLOR-SECONDARY);*/
 }
 
 .form-header {
-    margin-bottom: 2rem;
+    margin-bottom: .5rem;
+}
+
+.form-header p{
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 500;
 }
 
 .form-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.25rem;
 }
 
 .form-group input,

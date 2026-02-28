@@ -36,7 +36,7 @@
                         <td class="actions">
                             <button class="btn edit" @onclick="() => OnHandleUpdate(product)">Edit</button>
                             <button class="btn restock" @onclick="(() => OnHandleRestock(product))">Restock</button>
-                            @*<button class="btn delete" @onclick="() => DeleteProduct(product.Id)">Delete</button> *@
+                            <button class="btn delete" @onclick="() => OnHandleDelete(product)">Delete</button>
                         </td>
                     </tr>
                 }
@@ -64,6 +64,9 @@
     [Parameter, EditorRequired]
     public EventCallback<ProductDto> HandleUpdate { get; set; }
 
+    [Parameter, EditorRequired]
+    public EventCallback<ProductDto> HandleDelete { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
         await Task.Delay(500);
@@ -81,5 +84,11 @@
     {
         await Task.Delay(250);
         await HandleUpdate.InvokeAsync(selectedProduct);
+    }
+
+    private async Task OnHandleDelete(ProductDto selectedProduct)
+    {
+        await Task.Delay(250);
+        await HandleDelete.InvokeAsync(selectedProduct);
     }
 }

@@ -31,7 +31,7 @@
         }
         else if(_products is not null && _products.Any())
         {
-            <ProductsView Products="_products" HandleRestock="HandleRestockProduct" HandleUpdate="HandleUpdateProduct" />
+            <ProductsView Products="_products" HandleRestock="HandleRestockProduct" HandleUpdate="HandleUpdateProduct" HandleDelete="HandleDeleteProduct" />
         }
 
     }
@@ -51,6 +51,10 @@
         else if(_operationToPerform == OperationType.UpdateProduct)
         {
             <UpdateProduct ProductToUpdate="_selectedProduct" HandleClose="HandleUpdateProductClose" />
+        }
+        else if(_operationToPerform == OperationType.DeleteProduct)
+        {
+            <DeleteProduct ProductToDelete="@_selectedProduct" HandleClose="HandleDeleteProductClose" />
         }
     </Body>
 </Popup>
@@ -131,6 +135,29 @@
         HandleOpen($"Update Product - {_selectedProduct.Name}", false);
     }
 
+    private void HandleDeleteProduct(ProductDto selectedProduct)
+    {
+        _selectedProduct = selectedProduct;
+        _operationToPerform = OperationType.DeleteProduct;
+
+        HandleOpen($"Delete Product - {_selectedProduct.Name}", false);
+    }
+
+    private async Task HandleDeleteProductClose(bool refreshDecision)
+    {
+        _title = null;
+        _selectedProduct = null;
+        _operationToPerform = default;
+
+        if (refreshDecision)
+        {
+            var response = await getProductsHandler.Handle();
+            _products = response.products;
+        }
+
+        popup.CloseModal();
+    }
+
     private async Task HandleUpdateProductClose(bool refreshDecision)
     {
         _title = null;
@@ -156,7 +183,8 @@
         None,
         AddNewProduct,
         RestockProduct,
-        UpdateProduct
+        UpdateProduct,
+        DeleteProduct
     }
 
     private void HandleOpen(string title, bool showCloseButton)
