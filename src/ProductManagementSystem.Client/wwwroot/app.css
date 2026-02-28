@@ -171,8 +171,9 @@ textarea::placeholder {
 .add-product-btn {
     display: inline-block;
     padding: 10px 16px;
-    background: var(--BG-COLOR-BTN-SUCCESS); /* indigo-ish */
+    background: var(--BG-COLOR-BTN-SUCCESS); 
     color: var(--FONT-COLOR-BASIC);
+    cursor: pointer;
     text-decoration: none;
     border-radius: 8px;
     font-weight: 600;

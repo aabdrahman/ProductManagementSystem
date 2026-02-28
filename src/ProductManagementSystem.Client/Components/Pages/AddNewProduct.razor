@@ -1,0 +1,161 @@
+﻿@using ProductManagementSystem.Client.Components.SharedContent
+
+@inject GetProductCategoryHandler getProductCategoryHandler
+@inject AddProductHandler addProductHandler
+
+
+<section class="product-form-page">
+    <div class="form-header">
+        <h2>Add New Product</h2>
+        <p>Create a new product and add it to your inventory.</p>
+    </div>
+
+    @if(_createProductModel is not null)
+    {
+        <EditForm Model="_createProductModel" OnValidSubmit="AddProduct">
+            <DataAnnotationsValidator />
+
+            @if(_responseMessage is not null)
+            {
+                <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+            }
+
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <InputText @bind-Value="_createProductModel.Name" />
+                    <ValidationMessage For="(() => _createProductModel.Name)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <InputTextArea @bind-Value="_createProductModel.Description" rows="3" />
+                    <ValidationMessage For="(() => _createProductModel.Description)" />
+                </div>
+
+                @if (_productCategories is not null && _productCategories.Any())
+                {
+                    <div class="form-group">
+
+                        <label>Category</label>
+
+                        <InputSelect @bind-Value="_createProductModel.CategoryId">
+                            <option value="0"></option>
+                            @foreach (var category in _productCategories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </InputSelect>
+
+                        <ValidationMessage For="(() => _createProductModel.CategoryId)" />
+
+                        @* <InputText @bind-Value="_product.CategoryName" required /> *@
+                    </div>
+                }
+
+
+
+                <div class="form-group">
+                    <label>Initial Stock</label>
+                    <InputNumber @bind-Value="_createProductModel.CurrentCount" min="0" />
+                    <ValidationMessage For="(() => _createProductModel.CurrentCount)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Cost Price</label>
+                    <InputNumber @bind-Value="_createProductModel.CostPrice" step="0.01" />
+                    <ValidationMessage For="(() => _createProductModel.CostPrice)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Selling Price</label>
+                    <InputNumber @bind-Value="_createProductModel.SellingPrice" step="0.01" />
+                    <ValidationMessage For="(() => _createProductModel.SellingPrice)" />
+                </div>
+            </div>
+
+            <div class="form-actions">
+
+                <button class="btn submit" disabled="@(_isSubmitting || _isSuccessful)" type="submit">
+                    @(_isSubmitting ? "Adding Product" : "Add Product")
+                </button>
+
+                <button class="btn cancel" type="button" disabled="@_isSubmitting" @onclick="(() => OnHandleClose(_isSuccessful))">Cancel</button>
+            </div>
+        </EditForm>
+    }
+
+</section>
+
+@code {
+
+    private CreateProductDto _createProductModel;
+    private IEnumerable<ProductCategoryDto> _productCategories;
+
+    private bool _isSubmitting;
+    private bool _isSuccessful;
+    private string _responseMessage;
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await Task.Delay(200);
+
+    //     _createProductModel = new CreateProductDto();
+    // }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(200);
+
+        var response = await getProductCategoryHandler.Handle();
+        _productCategories = response.productCategories;
+
+        _createProductModel = new CreateProductDto();
+    }
+
+    private async Task AddProduct()
+    {
+        _isSubmitting = true;
+        _responseMessage = null;
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Product Added Scuuessfully" : "Product Add Operation Failed.";
+
+        var response = await addProductHandler.Handle(_createProductModel);
+        _isSuccessful = response.isSuccessful; _responseMessage = response.responseMessage;
+
+        _isSubmitting = false;
+
+
+        if (_isSuccessful)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(5000);
+                // _responseMessage = null;
+                // _createProductModel = null;
+
+                // await InvokeAsync(StateHasChanged);
+
+                await OnHandleClose(true);
+            });
+        }
+
+
+    }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+        _createProductModel = null;
+        _productCategories = null;
+        _responseMessage = null;
+
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+}
