@@ -1,0 +1,69 @@
+﻿
+@page "/products/manage"
+
+@inject GetProductsHandler getProductsHandler
+
+<section class="product-management">
+    <div class="management-header">
+        <h2>Product Management</h2>
+        <p>Manage inventory, update pricing, and control available products.</p>
+
+        <a href="/products/#add-products" role="button" class="add-product-btn">
+            ➕ Add New Product
+        </a>
+    </div>
+
+    @if (_isLoading)
+    {
+        <p>Loading products...</p>
+    }
+    else 
+    {
+        if (_products is not null && !_products.Any())
+        {
+            <div class="no-products">
+                <h3>No products available</h3>
+                <p>Start by adding your first product.</p>
+            </div>
+        }
+        else if(_products is not null && _products.Any())
+        {
+            <ProductsView Products="_products" />
+        }
+
+    }
+
+</section>
+
+@code {
+    private IEnumerable<ProductDto> _products;
+    private bool _isLoading;
+
+    private string _responseMessage;
+    private bool _isSuccessful;
+
+    private string _title;
+    private OperationType _operationToPerform;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(500);
+
+        var response = await getProductsHandler.Handle();
+        _products = response.products; 
+
+        _isLoading = false;
+    }
+}
+
+
+@code{
+
+    enum OperationType
+    {
+        None
+    }
+}

@@ -1,0 +1,66 @@
+﻿
+@if(_products is not null)
+{
+    <div class="management-table-wrapper">
+
+        <table class="management-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Stock</th>
+                    <th>Cost</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var product in _products)
+                {
+                    <tr class="@(product.CurrentCount < 3 ? "low-stock-row" : "")">
+                        <td>@product.Name</td>
+                        <td>@product.CategoryName</td>
+                        <td>
+                            <span class="stock-badge @(product.CurrentCount < 3 ? "low" : "ok")">
+                                @product.CurrentCount
+                            </span>
+                        </td>
+                        <td>@product.CostPrice.ToString("C")</td>
+                        <td>@product.SellingPrice.ToString("C")</td>
+                        <td>
+                            @(product.CurrentCount == 0 ? "Out of stock" : "Available")
+                        </td>
+                        <td class="actions">
+                            @* <button class="btn edit" @onclick="() => EditProduct(product.Id)">Edit</button>
+                        <button class="btn restock" @onclick="() => Restock(product.Id)">Restock</button>
+                        <button class="btn delete" @onclick="() => DeleteProduct(product.Id)">Delete</button> *@
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+
+
+        </table>
+
+    </div>
+}
+
+
+@code {
+
+    private List<ProductDto> _products;
+
+    [Parameter, EditorRequired]
+    public IEnumerable<ProductDto> Products { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(500);
+        _products = Products.ToList();
+    }
+}
