@@ -38,6 +38,8 @@
 
 </section>
 
+<ProductCategoryView HandleAddCategory="HandleAddNewProductCategory" />
+
 <Popup @ref="popup" Title="@_title" ShowCloseButton="false">
     <Body>
         @if(_operationToPerform == OperationType.AddNewProduct)
@@ -55,6 +57,10 @@
         else if(_operationToPerform == OperationType.DeleteProduct)
         {
             <DeleteProduct ProductToDelete="@_selectedProduct" HandleClose="HandleDeleteProductClose" />
+        }
+        else if(_operationToPerform == OperationType.AddNewProductCategory)
+        {
+            <AddProductCategory HandleClose="HandleAddProductCategoryClose" />
         }
     </Body>
 </Popup>
@@ -184,7 +190,8 @@
         AddNewProduct,
         RestockProduct,
         UpdateProduct,
-        DeleteProduct
+        DeleteProduct,
+        AddNewProductCategory
     }
 
     private void HandleOpen(string title, bool showCloseButton)
@@ -193,5 +200,24 @@
         _showCloseButton = false;
 
         popup.OpenModal();
+    }
+
+
+    private void HandleAddNewProductCategory()
+    {
+        _operationToPerform = OperationType.AddNewProductCategory;
+        HandleOpen("Add New Product Category", false);
+    }
+
+    private async Task HandleAddProductCategoryClose(bool refreshDecision)
+    {
+
+        if (refreshDecision)
+        {
+            var response = await getProductsHandler.Handle();
+            _products = response.products;
+        }
+
+        popup.CloseModal();
     }
 }

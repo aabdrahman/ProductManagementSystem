@@ -1,0 +1,99 @@
+﻿
+.product-management {
+    margin-top: 1rem;
+    padding: 4rem 2rem;
+    background: var(--BG-COLOR-SECONDARY);
+}
+
+
+.management-table-wrapper {
+    overflow-x: auto;
+}
+
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.management-header p {
+    font-size: 1.25rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+.management-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--BG-COLOR-TERTIARY);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.management-table th,
+.management-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 500;
+}
+
+.management-table th {
+    background: #11912d;
+    font-weight: 600;
+    font-family: var(--FONT-STYLE-BODY-TITLE);
+    padding: 18px;
+}
+
+.low-stock-row {
+    background: #fff7ed;
+}
+
+.stock-badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.stock-badge.low {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.stock-badge.ok {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actions .btn {
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: none;
+}
+
+.actions .edit {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.actions .restock {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.actions .delete {
+    background: #fee2e2;
+    color: #991b1b;
+}

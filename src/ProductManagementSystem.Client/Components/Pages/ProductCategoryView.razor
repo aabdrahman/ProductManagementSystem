@@ -1,0 +1,87 @@
+﻿
+@inject GetProductCategoryHandler getProductCategoryHandler
+
+@rendermode InteractiveServer
+
+<section class="product-management">
+    <div class="management-header">
+        <h2>Product Categories</h2>
+        <p>Manage product categories for your inventory.</p>
+
+        <button role="button" @onclick="OnHandleAddCategory" class="add-product-btn">
+            ➕ Add New Category
+        </button>
+    </div>
+
+    @if (_isLoading)
+    {
+        <p>Loading categories...</p>
+    }
+    else
+    {
+        if (!_categories.Any())
+        {
+            <div class="no-products">
+                <h3>No categories available</h3>
+                <p>@_responseMessage</p>
+            </div>
+        }
+        else
+        {
+            <div class="management-table-wrapper">
+                <table class="management-table">
+                    <thead>
+                        <tr>
+                            <th>Category Name</th>
+                            @* <th>Number of Products</th> *@
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var category in _categories)
+                        {
+                            <tr>
+                                <td>@category.Name</td>
+                                @* <td>@category.ProductCount</td> *@
+                                <td class="actions">
+                                    @* <button class="btn edit" @onclick="() => EditCategory(category.Id)">Edit</button>
+                                    <button class="btn delete" @onclick="() => DeleteCategory(category.Id)">Delete</button> *@
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        
+    }
+</section>
+
+@code {
+
+    private bool _isLoading;
+    private IEnumerable<ProductCategoryDto> _categories;
+    private string _responseMessage;
+
+    [Parameter, EditorRequired]
+    public EventCallback HandleAddCategory { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(250);
+        var response = await getProductCategoryHandler.Handle();
+        _categories = response.productCategories;
+        _responseMessage = response.message;
+
+        _isLoading = false;
+    }
+
+
+    private async Task OnHandleAddCategory()
+    {
+        await HandleAddCategory.InvokeAsync();
+    }
+}

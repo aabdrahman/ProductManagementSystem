@@ -1,0 +1,90 @@
+﻿@using ProductManagementSystem.Client.Components.SharedContent
+@rendermode InteractiveServer
+
+@inject AddProductCategoryHandler addProductCategoryHandler
+
+<section class="product-category-form-page">
+    <div class="form-header">
+        <h2>Add New Product Category</h2>
+        <p>Create a new product category and add it to your inventory.</p>
+    </div>
+
+    @if(_responseMessage is not null)
+    {
+        <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+    }
+
+    <div class="form-group">
+        <label>Product Category</label>
+        <InputText @bind-Value="_productCategory" />
+        @if(!string.IsNullOrEmpty(_validationMessage))
+        {
+           <span class="validation-message">@_validationMessage</span> 
+        }
+    </div>
+
+    <div class="form-actions">
+        <button class="btn submit" @onclick="HandleSubmit" disabled="@(_isSubmitting || _isSuccessful)" type="button">
+            @(_isSubmitting ? "Adding Product Category" : "Add Product Category")
+        </button>
+
+        <button class="btn cancel" type="button" disabled="@_isSubmitting" @onclick="(() => OnHandleClose(_isSuccessful))">Cancel</button>
+    </div>
+
+</section>
+
+@code {
+    private string _productCategory = "";
+    private string _validationMessage;
+
+    private bool _isSubmitting;
+    private bool _isSuccessful;
+    private string _responseMessage;
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+
+    private async Task OnHandleClose(bool refreshDecision)
+    {
+        await Task.Delay(250);
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+
+    private async Task HandleSubmit()
+    {
+        _validationMessage = null;
+        Validate();
+
+        if(!string.IsNullOrEmpty(_validationMessage))
+        {
+            return;
+        }
+
+        _isSubmitting = true;
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Product Category Create Successful" : "Product Category Create Failed";
+
+        var response = await addProductCategoryHandler.Handle(_productCategory);
+        _isSuccessful = response.isSuccessful; _responseMessage = response.responseMessage;
+
+        _isSubmitting = false;
+    }
+
+    private void Validate()
+    {
+        if (string.IsNullOrEmpty(_productCategory))
+        {
+            _validationMessage = "Product Category is required.";
+            return;
+        }
+
+        if(_productCategory.Length > 100)
+        {
+            _validationMessage = "Product Category cannot exceed 100 characters";
+            return;
+        }
+    }
+}
