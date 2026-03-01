@@ -1,0 +1,104 @@
+﻿@using ProductManagementSystem.Client.Components.SharedContent
+
+@inject DeleteProductCategoryHandler deleteProductCategoryHandler
+
+<section class="product-form-page danger-zone">
+    <div class="form-header">
+        <h2>Delete Product Category</h2>
+        <p>
+            You’re about to permanently delete this product category.
+            This action cannot be undone.
+        </p>
+    </div>
+
+    @if (_isLoading)
+    {
+        <p>Loading product...</p>
+    }
+
+    else
+    {
+        if(_productCategoryToDelete is null)
+        {
+            <p>Product not found.</p>
+        }
+        else
+        {
+            <div class="delete-card">
+
+                @if (_responseMessage is not null)
+                {
+                    <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+                }
+                
+                <p><strong>Product Category:</strong> @_productCategoryToDelete.Name</p>
+                @*<p><strong>Stock:</strong> @_productToDelete.CurrentCount</p>
+                    <p><strong>Selling Price:</strong> @_productToDelete.SellingPrice.ToString("C")</p> 
+                    <p>@_productCategoryToDelete.Name</p>*@
+
+
+
+                <div class="delete-actions">
+                    <button class="btn danger" @onclick="ConfirmDelete" disabled="@(_isDeleting || _isSuccessful)">
+                        @(!_isDeleting ? "Yes, Delete Category" : "Deleting Category...")
+                    </button>
+
+                    <button class="btn cancel" disabled="@_isDeleting" @onclick="(() => OnHandleClose(_isSuccessful))">Cancel</button>
+                </div>
+
+
+            </div>
+        }
+        
+    }
+</section>
+
+
+@code {
+
+    private bool _isLoading;
+    private ProductCategoryDto _productCategoryToDelete;
+
+    private bool _isDeleting;
+    private bool _isSuccessful;
+    private string _responseMessage;
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    [Parameter, EditorRequired]
+    public ProductCategoryDto ProductCategoryToDelete { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(250);
+
+        _productCategoryToDelete = ProductCategoryToDelete;
+
+
+        _isLoading = false;
+
+    }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+
+    private async Task ConfirmDelete()
+    {
+        _isDeleting = true;
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Product Category Delete Successful." : "Product Category Delete Failed.";
+
+        var response = await deleteProductCategoryHandler.Handle(_productCategoryToDelete.Id);
+        _isSuccessful = response.isSuccessful; _responseMessage = response.responseMessage;
+
+        _isDeleting = false;
+    }
+}

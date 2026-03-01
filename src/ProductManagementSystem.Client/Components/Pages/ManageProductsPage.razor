@@ -38,7 +38,7 @@
 
 </section>
 
-<ProductCategoryView HandleAddCategory="HandleAddNewProductCategory" />
+<ProductCategoryView HandleAddCategory="HandleAddNewProductCategory" HandleDelete="HandleDeleteProductCategory" />
 
 <Popup @ref="popup" Title="@_title" ShowCloseButton="false">
     <Body>
@@ -62,6 +62,10 @@
         {
             <AddProductCategory HandleClose="HandleAddProductCategoryClose" />
         }
+        else if(_operationToPerform == OperationType.DeleteProductCategory)
+        {
+            <DeleteProductCategory HandleClose="HandleDeleteProductCategoryClose" ProductCategoryToDelete="_selectedProductCategory" />
+        }
     </Body>
 </Popup>
 
@@ -77,6 +81,7 @@
     private OperationType _operationToPerform;
     private Popup popup;
     private ProductDto _selectedProduct;
+    private ProductCategoryDto _selectedProductCategory;
 
 
     protected override async Task OnInitializedAsync()
@@ -191,7 +196,8 @@
         RestockProduct,
         UpdateProduct,
         DeleteProduct,
-        AddNewProductCategory
+        AddNewProductCategory,
+        DeleteProductCategory
     }
 
     private void HandleOpen(string title, bool showCloseButton)
@@ -209,7 +215,26 @@
         HandleOpen("Add New Product Category", false);
     }
 
+    private void HandleDeleteProductCategory(ProductCategoryDto selectedProductCategory)
+    {
+        _selectedProductCategory = selectedProductCategory;
+        _operationToPerform = OperationType.DeleteProductCategory;
+        HandleOpen($"Delete Product Category - {_selectedProductCategory.Name}", false);
+    }
+
     private async Task HandleAddProductCategoryClose(bool refreshDecision)
+    {
+
+        if (refreshDecision)
+        {
+            var response = await getProductsHandler.Handle();
+            _products = response.products;
+        }
+
+        popup.CloseModal();
+    }
+
+    private async Task HandleDeleteProductCategoryClose(bool refreshDecision)
     {
 
         if (refreshDecision)

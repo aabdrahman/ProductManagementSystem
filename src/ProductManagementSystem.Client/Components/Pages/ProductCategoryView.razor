@@ -45,8 +45,8 @@
                                 <td>@category.Name</td>
                                 @* <td>@category.ProductCount</td> *@
                                 <td class="actions">
-                                    @* <button class="btn edit" @onclick="() => EditCategory(category.Id)">Edit</button>
-                                    <button class="btn delete" @onclick="() => DeleteCategory(category.Id)">Delete</button> *@
+                                    @* <button class="btn edit" @onclick="() => EditCategory(category.Id)">Edit</button> *@
+                                    <button class="btn delete" @onclick="() => OnHandleDelete(category)">Delete</button>
                                 </td>
                             </tr>
                         }
@@ -67,6 +67,9 @@
     [Parameter, EditorRequired]
     public EventCallback HandleAddCategory { get; set; }
 
+    [Parameter, EditorRequired]
+    public EventCallback<ProductCategoryDto> HandleDelete { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         _isLoading = true;
@@ -83,5 +86,10 @@
     private async Task OnHandleAddCategory()
     {
         await HandleAddCategory.InvokeAsync();
+    }
+
+    private async Task OnHandleDelete(ProductCategoryDto productCategory)
+    {
+        await HandleDelete.InvokeAsync(productCategory);
     }
 }
