@@ -13,4 +13,5 @@ public interface IProductService
     Task<GenericResponse<string>> DeleteAsync(int Id, bool isSoftDelete = true);
     Task<GenericResponse<string>> UpdateStockAsync(UpdateProductStockDto productStock);
     Task<GenericResponse<UpdateProductDto>> GetProductUpdateDetails(int Id);
+    Task<GenericResponse<IEnumerable<ProductDto>>> GetMultipleProductsAsync(List<int> Ids);
 }

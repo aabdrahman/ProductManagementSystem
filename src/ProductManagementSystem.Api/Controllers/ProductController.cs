@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProductManagementSystem.Api.Controllers.ModelBinders;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Product;
 using Serilog;
@@ -78,6 +79,22 @@ public class ProductController : ControllerBase
         catch (Exception ex)
         {
             Log.ForContext(_className, "ProductController").ForContext(_methodName, "GetProductUpdateDetails").Error(ex, "An Error Occurred Invoking Endpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpGet("collection")]
+    public async Task<IActionResult> GetProductCollection([FromQuery] IEnumerable<int> Ids)
+    {
+        try
+        {
+            var result = await _productService.GetMultipleProductsAsync(Ids.ToList());
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "ProductController").ForContext(_methodName, "GetProductCollection").Error(ex, "An Error Occurred Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }

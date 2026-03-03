@@ -16,7 +16,7 @@ public sealed class ProductService : IProductService
     private string _className = "ClassName";
 
     private readonly RepositoryContext _repositoryContext;
-    public ProductService(RepositoryContext repositoryContext = null)
+    public ProductService(RepositoryContext repositoryContext)
     {
         _repositoryContext = repositoryContext;
     }
@@ -405,6 +405,42 @@ public sealed class ProductService : IProductService
         {
             Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetProductUpdateDetails").Error(ex, "An Error Occurred Fetching Product from database.");
             return GenericResponse<UpdateProductDto>.Failure(null, "An Error Occurred Fetching Product Details.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+    }
+
+    public async Task<GenericResponse<IEnumerable<ProductDto>>> GetMultipleProductsAsync(List<int> Ids)
+    {
+        try
+        {
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetMultipleProductsAsync").Information("Get Products with Id in - {0}", JsonSerializer.Serialize(Ids));
+
+            List<ProductDto> products = await _repositoryContext.Products.Where(x => Ids.Contains(x.Id))
+                                                    .Select(x => new ProductDto()
+                                                    {
+                                                        Id = x.Id,
+                                                        Name = x.NormalizedName,
+                                                        CategoryName = x.productCategory.NormalizedName,
+                                                        CostPrice = x.CostPrice,
+                                                        SellingPrice = x.SellingPrice,
+                                                        Description = x.Description,
+                                                        CurrentCount = x.CurrentCount
+                                                    })
+                                                    .ToListAsync();
+
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetMultipleProductsAsync").Information("Products that Ids is in: {0} - {1}", JsonSerializer.Serialize(Ids), JsonSerializer.Serialize(products));
+
+
+            return products.Any() ? GenericResponse<IEnumerable<ProductDto>>.Success(products, "Products Fetchedd Successfully", System.Net.HttpStatusCode.OK) : GenericResponse<IEnumerable<ProductDto>>.Failure(null, "Products with Ids does not exist.", System.Net.HttpStatusCode.NotFound);
+        }
+        catch(DbException ex)
+        {
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetMultipleProductsAsync").Error(ex, "Error Fetching details from database.");
+            return GenericResponse<IEnumerable<ProductDto>>.Failure(null, "An Error Occurred Fetching details from database", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetMultipleProductsAsync").Error(ex, "Error Fetching details..");
+            return GenericResponse<IEnumerable<ProductDto>>.Failure(null, "An Error Occurred Fetching details.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
     }
 }

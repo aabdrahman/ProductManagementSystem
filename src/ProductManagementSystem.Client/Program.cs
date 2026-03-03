@@ -1,5 +1,7 @@
 using ProductManagementSystem.Client.Components;
 using ProductManagementSystem.Client.Handlers;
+using ProductManagementSystem.Client.Utilities;
+using ProductManagementSystem.Client.Utilities.Contracts;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +20,10 @@ builder.Services.AddScoped<UpdateProductHandler>();
 builder.Services.AddScoped<DeleteProductHandler>();
 builder.Services.AddScoped<AddProductCategoryHandler>();
 builder.Services.AddScoped<DeleteProductCategoryHandler>();
+builder.Services.AddScoped<GetProductHandler>();
+builder.Services.AddScoped<GetMultipleProductsHandler>();
+
+builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
 
 builder.Services.AddHttpClient(builder.Configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"), opts =>
 {

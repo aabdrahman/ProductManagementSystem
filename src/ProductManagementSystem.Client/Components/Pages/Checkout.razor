@@ -1,0 +1,119 @@
+﻿@page "/checkout"
+
+@rendermode InteractiveServer
+
+@inject GetMultipleProductsHandler getMultipleProductsHandler
+
+<section class="checkout-page">
+    <div class="checkout-header">
+        <h2>Checkout</h2>
+        <p>Review your selected products before placing your order.</p>
+    </div>
+
+    @if (_isLoading)
+    {
+        <p>Loading cart...</p>
+    }
+    else if (!_orders.Any())
+    {
+        <div class="empty-cart">
+            <h3>Your cart is empty</h3>
+            <p>You haven’t added any products yet.</p>
+            <a href="/#products" class="back-to-products">Browse Products</a>
+        </div>
+    }
+    else
+    {
+        if(_products is not null)
+        {
+            <div class="checkout-cards">
+                @foreach (var item in _orders)
+                {
+                    <div class="checkout-card">
+                        <div class="checkout-card-main">
+                            <h4 class="product-name">@(_products.Where(x => x.Id == item.ProductId).Select(x => x.Name).FirstOrDefault())</h4>
+
+                            <p class="price">
+                                Price: <strong>@((_products.Where(x => x.Id == item.ProductId).Select(x => x.SellingPrice).FirstOrDefault()).ToString("C"))</strong>
+                            </p>
+
+                            <p class="qty">
+                                Quantity: <strong>@item.QuantityOrdered</strong>
+                            </p>
+
+                            <p class="line-total">
+                                Total: <strong>@((item.QuantityOrdered * _products.Where(x => x.Id == item.ProductId).Select(x => x.SellingPrice).FirstOrDefault()).ToString("C"))</strong>
+                            </p>
+                        </div>
+
+                        <div class="checkout-card-actions">
+                            <button class="remove-btn" @onclick="() => RemoveItem(item)">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        
+
+        <div class="checkout-summary">
+            <p class="total">
+                Total: <strong>@TotalAmount.ToString("C")</strong>
+            </p>
+
+            <button class="place-order-btn" @onclick="PlaceOrder">
+                Place Order
+            </button>
+        </div>
+    }
+</section>
+
+@code {
+
+    private List<CreateOrderDto> _orders = new();
+    private bool _isLoading = true;
+    private IEnumerable<ProductDto> _products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCartAsync();
+    }
+
+    private async Task LoadCartAsync()
+    {
+        _isLoading = true;
+
+        var stored = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
+
+        _orders = stored?.ToList() ?? new();
+
+        if (_orders.Any())
+        {
+            var ids = _orders.Select(x => x.ProductId).ToList();
+
+            var result = await getMultipleProductsHandler.Handle(ids);
+
+            _products = result.products;
+        }
+
+        _isLoading = false;
+    }
+
+    private decimal TotalAmount => 
+               _products.Join(_orders, x => x.Id, y => y.ProductId, (x, y) => new{ Price = x.SellingPrice, Quantity = y.QuantityOrdered }).Sum(x => x.Price * x.Quantity);
+
+    private async Task RemoveItem(CreateOrderDto item)
+    {
+        _orders.Remove(item);
+        await localStorageUtility.PersistToStorageAsync(_orders, "orders");
+        StateHasChanged();
+    }
+
+    private async Task PlaceOrder()
+    {
+        // await localStorageUtility.RemoveItemFromStorageAsync("orders");
+        // _orders.Clear();
+        // StateHasChanged();
+    }
+}

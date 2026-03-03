@@ -61,7 +61,7 @@
                 <div class="products-grid">
                     @foreach (var product in _filteredProducts)
                     {
-                        <ProductCard Product="product" />
+                        <ProductCard Product="product" HandleOrderProduct="HandleOpenOrderProduct" />
                     }
                 </div>
             }
@@ -78,6 +78,15 @@
 
     </section>
 }
+
+<Popup @ref="popup" Title="@_title" ShowCloseButton="false">
+    <Body>
+        @if(_operationType == OperationToPerform.OrderProduct)
+        {
+            <OrderProduct ProductToOrder="_selectedProduct" HandleClose="OnHandleClose" />
+        }
+    </Body>
+</Popup>
 
 
 @code{
@@ -137,4 +146,47 @@
     }
 }
 
+@code{
+    private string _title;
+    private OperationToPerform _operationType;
+    private ProductDto _selectedProduct;
+    private Popup popup;
 
+    private async Task OnHandleClose(bool refreshDecision)
+    {
+        _operationType = default;
+        _title = "";
+
+        if (refreshDecision)
+        {
+            var response = await getProductsHandler.Handle();
+
+
+            _products = response.products; _reponseMessage = response.message;
+
+            var getProductCategoryResponse = await getProductCategoryHandler.Handle();
+            _categories = getProductCategoryResponse.productCategories;
+
+            // var testProducts = new List<ProductDto>
+
+            _filteredProducts = _products.ToList();
+        }
+
+        _selectedProduct = null;
+        popup.CloseModal();
+    }
+
+    private void HandleOpenOrderProduct(ProductDto selectedProduct)
+    {
+        _selectedProduct = selectedProduct;
+        _title = $"Order Product - {_selectedProduct.Name}";
+        _operationType = OperationToPerform.OrderProduct;
+        popup.OpenModal();
+    }
+
+    enum OperationToPerform
+    {
+        None,
+        OrderProduct
+    }
+}

@@ -26,6 +26,11 @@
     text-decoration: none;
 }
 
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
 .nav-links a {
     margin-left: 2rem;
     text-decoration: none;
@@ -61,6 +66,81 @@
     font-size: 1.5rem;
     cursor: pointer;
     color: #f9fafb;
+}
+
+
+/*.nav-links a {
+    text-decoration: none;
+    color: #374151;
+    font-weight: 500;
+}*/
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: .25rem;
+}
+
+.checkout-btn {
+    position: relative;
+    padding: 0.55rem 1.1rem;
+    background: #16a34a;
+    color: var(--FONT-COLOR-BASIC);
+    font-family: var(--FONT-STYLE-BODY);
+    border-radius: 18px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 6px 14px rgba(22, 163, 74, 0.35);
+    transition: 0.2s ease;
+}
+
+.checkout-btn:hover {
+    background: #15803d;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(22, 163, 74, 0.45);
+}
+
+.checkout-badge {
+    background: #dc2626;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+}
+
+.header-cta .cta-btn {
+    margin-left: 2rem;
+    padding: 0.6rem 1.4rem;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: var(--FONT-COLOR-BASIC);
+    font-family: var(--FONT-STYLE-BODY);
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.header-cta .cta-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.45);
+}
+
+.header-cta .cta-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.35);
 }
 
 /* Responsive */

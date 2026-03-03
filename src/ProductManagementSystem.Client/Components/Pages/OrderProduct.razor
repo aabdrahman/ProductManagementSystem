@@ -1,0 +1,195 @@
+﻿@using ProductManagementSystem.Client.Components.SharedContent
+
+@inject GetProductHandler getProductHandler
+
+@if (_isLoading)
+{
+    <p>Loading Order Details.......</p>
+}
+else
+{
+    if (_productToOrder is not null)
+    {
+        <div class="order-info">
+            <p><strong>@_productToOrder.Name</strong></p>
+            <p>@_productToOrder.Description</p>
+            <p><strong>Price:</strong> @_productToOrder.SellingPrice.ToString("C")</p>
+
+            <p>
+                <strong>Available:</strong>
+                @_productToOrder.CurrentCount
+            </p>
+
+            @if(_createOrderModel is not null)
+            {
+                <EditForm Model="_createOrderModel" OnValidSubmit="HandleSaveOrder">
+
+                    <DataAnnotationsValidator />
+
+                    @if (_responseMessage is not null)
+                    {
+                        <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+                    }
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label>User Email</label>
+                            <InputText @bind-Value="_createOrderModel.CreatedBy" readonly="@(!_isEmailExists)" />
+                            <ValidationMessage For="(() => _createOrderModel.CreatedBy)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <InputNumber @bind-Value="_createOrderModel.QuantityOrdered"
+                                         min="1"
+                                         max="@_productToOrder.CurrentCount"
+                                         class="form-control" />
+                            <ValidationMessage For="(() => _createOrderModel.QuantityOrdered)" />
+                        </div>
+
+                        <div class="form-actions">
+                            
+                            <button class="btn submit"
+                                    disabled="@(_productToOrder?.CurrentCount == 0 || _isSuccessful || _isOrdering)">
+                                @(!_isOrdering ? "Save Order To Cart" : "Saving Order To Cart...")
+                            </button>
+
+                            <button class="btn cancel" disabled="@_isOrdering" @onclick="(() => OnHandleClose(_isSuccessful))">Cancel</button>
+                        </div>
+
+                    </div>
+
+                </EditForm>
+            }
+
+            
+
+            @if (_productToOrder.CurrentCount == 0)
+            {
+                <p class="danger-text">This product is currently out of stock.</p>
+            }
+        </div>
+    }
+    @* else if (_createOrderModel is null)
+    {
+        <p>
+            Error Fetching Product Details: @_fetchProductDetailsResponseMessage
+        </p>
+    } *@
+}
+
+
+@code {
+
+    private ProductDto _selectedProductToOrder;
+    private ProductDto? _productToOrder;
+    private bool _isLoading;
+    private IEnumerable<CreateOrderDto> _existingCreatedOrders;
+
+    private CreateOrderDto _createOrderModel;
+    private bool _isOrdering;
+    private bool _isSuccessful;
+    private string _fetchProductDetailsResponseMessage;
+    private string _responseMessage;
+    private bool _isEmailExists = false;
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    [Parameter, EditorRequired]
+    public ProductDto ProductToOrder { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(250);
+
+        _selectedProductToOrder = ProductToOrder;
+
+        var response = await getProductHandler.Handle(_selectedProductToOrder.Id);
+        _productToOrder = response.product; _fetchProductDetailsResponseMessage = response.responseMessage;
+
+        if(_productToOrder is null)
+        {
+            _isLoading = false;
+            return;
+        }
+
+        _createOrderModel = new CreateOrderDto() { ProductId = _productToOrder.Id };
+
+        var existingOrders = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
+        _existingCreatedOrders = existingOrders ?? [];
+
+        var existingOrderList = _existingCreatedOrders.ToList();
+
+        var existingEmail = existingOrderList.Select(x => x.CreatedBy).FirstOrDefault();
+
+        _isEmailExists = string.IsNullOrEmpty(existingEmail);
+
+        _createOrderModel.CreatedBy = existingEmail ?? "";
+
+        _isLoading = false;
+    }
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         var existingOrders = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
+    //         _existingCreatedOrders = existingOrders ?? [];
+
+    //         var existingOrderList = _existingCreatedOrders.ToList();
+
+    //         var existingEmail = existingOrderList.Select(x => x.CreatedBy).FirstOrDefault();
+
+    //         _createOrderModel.CreatedBy = existingEmail ?? "";
+    //     }
+    // }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+        _productToOrder = null;
+        _selectedProductToOrder = null;
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+
+    private async Task HandleSaveOrder()
+    {
+        _isOrdering = true;
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Your order has been added to cart. Kindly checkout to complete." : "Your order could not be added to card. Kindly retry again.";
+
+        var existingOrders = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
+
+        _existingCreatedOrders = existingOrders ?? [];
+
+        var existingOrderList = _existingCreatedOrders.ToList();
+
+        if (!existingOrderList.Any())
+        {
+            existingOrderList.Add(_createOrderModel);
+        }
+        else
+        {
+            var existingOrderProduct = existingOrderList.Where(x => x.ProductId == _createOrderModel.ProductId).FirstOrDefault();
+
+            if(existingOrderProduct is not null)
+            {
+                existingOrderList.Remove(existingOrderProduct);
+            }
+
+            existingOrderList.Add(_createOrderModel);
+        }
+
+
+        _isSuccessful = await localStorageUtility.PersistToStorageAsync<IEnumerable<CreateOrderDto>>(existingOrderList, "orders");
+
+        _responseMessage = _isSuccessful ? "Your order has been added to cart. Kindly checkout to complete." : "Your order could not be added to card. Kindly retry again.";
+
+        _isOrdering = false;
+    }
+}

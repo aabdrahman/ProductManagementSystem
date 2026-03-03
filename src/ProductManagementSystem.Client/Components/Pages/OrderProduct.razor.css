@@ -1,0 +1,28 @@
+﻿
+.order-info p {
+    margin-bottom: 0.5rem;
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 500;
+}
+
+p strong {
+    font-weight: 900;
+}
+
+.order-info .form-group {
+    margin-top: 1rem;
+}
+
+.order-info label {
+    font-weight: 600;
+    font-family: var(--FONT-STYLE-BODY-TITLE) ;
+}
+
+.order-info input {
+    max-width: 120px;
+}
+
+.price {
+    font-weight: 600;
+    color: #4f46e5;
+}

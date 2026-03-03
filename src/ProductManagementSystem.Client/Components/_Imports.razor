@@ -9,6 +9,9 @@
 @using ProductManagementSystem.Client
 @using ProductManagementSystem.Client.Components
 @using ProductManagementSystem.Client.Handlers
+@using ProductManagementSystem.Client.Components.SharedContent
+@using ProductManagementSystem.Client.Utilities.Contracts
+@using System.Text.Json
 
 
 @using ProductManagementSystem.Shared
@@ -16,5 +19,7 @@
 @using ProductManagementSystem.Shared.DataTransferObjects.Product
 @using ProductManagementSystem.Shared.DataTransferObjects.Review
 @using ProductManagementSystem.Shared.DataTransferObjects.ProductCategory
+@using ProductManagementSystem.Shared.DataTransferObjects.Order
 
 @inject NavigationManager navigationManager
+@inject ILocalStorageUtility localStorageUtility

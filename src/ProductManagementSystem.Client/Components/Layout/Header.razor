@@ -1,4 +1,5 @@
 ﻿
+@rendermode InteractiveServer
 
 <header class="site-header">
     <div class="header-container">
@@ -22,6 +23,17 @@
             <a href="#products" class="cta-btn">Order Now</a>
         </div>
 
+        <div class="header-actions">
+            <a href="/login" class="login-link">Login</a>
+            <a href="/checkout" class="checkout-btn">
+                🛒 Checkout
+                @if (_cartCount > 0)
+                {
+                    <span class="checkout-badge">@_cartCount</span>
+                }
+            </a>
+        </div>
+
         <!-- Mobile Menu Icon -->
         <div class="menu-toggle" id="menu-toggle">
             ☰
@@ -34,4 +46,20 @@
 
 @code {
 
+    private int _cartCount = 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        var savedOrders = await localStorageUtility
+            .GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
+
+        Console.WriteLine($"Saved Orders - {JsonSerializer.Serialize(savedOrders)}");
+
+        _cartCount = savedOrders?.Count() ?? 0;
+
+        StateHasChanged();
+    }
 }

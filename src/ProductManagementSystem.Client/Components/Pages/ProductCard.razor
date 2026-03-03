@@ -30,7 +30,7 @@
     <!-- Footer: Price & Order Button -->
     <div class="product-footer">
         <span class="product-price">@(_product.CostPrice.ToString("C"))</span>
-        <button class="order-btn" disabled="@(_product.CurrentCount == 0)">Order Now</button>
+        <button class="order-btn" disabled="@(_product.CurrentCount == 0)" @onclick="(() => OnHandleOrderProduct(_product))" >Order Now</button>
     </div>
 </div>
 
@@ -40,8 +40,16 @@
     [Parameter, EditorRequired]
     public ProductDto Product { get; set; }
 
+    [Parameter, EditorRequired]
+    public EventCallback<ProductDto> HandleOrderProduct { get; set; }
+
     protected override void OnParametersSet()
     {
         _product = Product;
+    }
+
+    private async Task OnHandleOrderProduct(ProductDto productToOrder)
+    {
+        await HandleOrderProduct.InvokeAsync(productToOrder);
     }
 }
