@@ -16,6 +16,8 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasIndex(x => x.OrderStatus);
 
+        builder.HasIndex(x => x.OrderTrackingId);
+
         builder.ToTable(table => table.HasCheckConstraint("CK_OrderStatus", "[OrderStatus] IN ('Pending', 'Processing', 'Delivered', 'Cancelled')"));
 
         builder.HasIndex(x => x.CreatedAt);
@@ -48,6 +50,10 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .OnDelete(DeleteBehavior.ClientCascade);
 
         builder.HasQueryFilter(x => x.IsActive);
+
+        builder.Property(x => x.OrderTrackingId)
+            .IsRequired()
+            .HasMaxLength(100);
 
     }
 }
