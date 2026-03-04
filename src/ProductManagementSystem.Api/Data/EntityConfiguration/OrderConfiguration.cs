@@ -38,6 +38,10 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .IsRequired()
             .HasDefaultValue(true);
 
+        builder.Property(x => x.IsConfirmed)
+            .IsRequired()
+            .HasDefaultValue(false);
+
         builder.Property(x => x.DeliveryDate)
             .IsRequired(false);
 
