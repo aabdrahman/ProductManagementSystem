@@ -12,7 +12,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasIndex(x => x.Id);
 
-        builder.HasIndex(x => x.ProductId);
+        //builder.HasIndex(x => x.ProductId);
 
         builder.HasIndex(x => x.OrderStatus);
 
@@ -41,19 +41,24 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(x => x.DeliveryDate)
             .IsRequired(false);
 
-        builder.Property(x => x.OrderCount)
-            .IsRequired();
+        //builder.Property(x => x.OrderCount)
+        //    .IsRequired();
 
-        builder.HasOne(x => x.OrderedProduct)
-            .WithMany(x => x.Orders)
-            .HasForeignKey(x => x.ProductId)
-            .OnDelete(DeleteBehavior.ClientCascade);
+        //builder.HasOne(x => x.OrderedProduct)
+        //    .WithMany(x => x.Orders)
+        //    .HasForeignKey(x => x.ProductId)
+        //    .OnDelete(DeleteBehavior.ClientCascade);
 
         builder.HasQueryFilter(x => x.IsActive);
 
         builder.Property(x => x.OrderTrackingId)
             .IsRequired()
             .HasMaxLength(100);
+
+        builder.HasMany(x => x.OrderLineItems)
+            .WithOne(x => x.order)
+            .HasForeignKey(x => x.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
 
     }
 }

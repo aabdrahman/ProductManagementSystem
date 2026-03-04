@@ -16,5 +16,5 @@ public class Product
     public ProductCategory productCategory { get; set; }
 
     //Order
-    public ICollection<Order> Orders { get; set; }
+    public ICollection<OrderLineItem> OrderLineItems { get; set; } = [];
 }

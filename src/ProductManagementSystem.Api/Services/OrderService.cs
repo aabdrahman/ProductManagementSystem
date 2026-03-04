@@ -48,11 +48,12 @@ public class OrderService : IOrderService
 
             productToOrder.CurrentCount -= createOrder.QuantityOrdered;
 
+
             Order orderToInsert = new Order()
             {
                 CreatedBy = createOrder.CreatedBy,
-                OrderCount = createOrder.QuantityOrdered,
-                OrderedProduct = productToOrder,
+                //OrderCount = createOrder.QuantityOrdered,
+                //OrderedProduct = productToOrder,
                 OrderStatus = Entities.StaticValues.OrderStatus.Pending,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow.ToLocalTime()
@@ -70,7 +71,7 @@ public class OrderService : IOrderService
                 OrderStatus = orderToInsert.OrderStatus.ToString(),
                 CreatedDate = orderToInsert.CreatedAt,
                 Product = productToOrder.NormalizedName,
-                QuantityOrdered = orderToInsert.OrderCount
+                //QuantityOrdered = orderToInsert.OrderCount
             };
 
             Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("Order Successfully created - {createdOrder}", JsonSerializer.Serialize(orderCreated));
@@ -96,7 +97,7 @@ public class OrderService : IOrderService
         {
             Log.ForContext(_methodName, "DeleteAsync").ForContext(_className, "OrderService").Information("Deleting Created Order - {Id}. Parameter: {isSoftDelete}", Id, isSoftDelete);
 
-            Order? order = await _repositoryContext.Orders.IgnoreQueryFilters().Include(x => x.OrderedProduct).SingleOrDefaultAsync(x => x.Id == Id);
+            Order? order = await _repositoryContext.Orders.IgnoreQueryFilters().Include(x => x.OrderLineItems).SingleOrDefaultAsync(x => x.Id == Id);
 
             if(order is null)
             {
@@ -109,14 +110,14 @@ public class OrderService : IOrderService
                 order.OrderStatus = Entities.StaticValues.OrderStatus.Cancelled;
                 order.IsActive = false;
 
-                order.OrderedProduct.CurrentCount += order.OrderCount;
+                //order.OrderedProduct.CurrentCount += order.OrderCount;
 
                 //_repositoryContext.Orders.Update(order);
 
             }
             else
             {
-                order.OrderedProduct.CurrentCount += order.OrderCount;
+                //order.OrderedProduct.CurrentCount += order.OrderCount;
 
                 //_repositoryContext.Products.Update(order.OrderedProduct);
                 _repositoryContext.Orders.Remove(order);
@@ -149,9 +150,9 @@ public class OrderService : IOrderService
                                         .Select(x => new OrderDto()
                                         {
                                             Id = x.Id,
-                                            QuantityOrdered = x.OrderCount,
+                                            //QuantityOrdered = x.OrderCount,
                                             OrderStatus = x.OrderStatus.ToString(),
-                                            Product = x.OrderedProduct.NormalizedName,
+                                            //Product = x.OrderedProduct.NormalizedName,
                                             CreatedDate = x.CreatedAt,
                                             CreatedBy = x.CreatedBy
                                         })
@@ -185,9 +186,9 @@ public class OrderService : IOrderService
                                             .Select(x => new OrderDto()
                                             {
                                                 Id = x.Id,
-                                                QuantityOrdered = x.OrderCount,
+                                                //QuantityOrdered = x.OrderCount,
                                                 OrderStatus = x.OrderStatus.ToString(),
-                                                Product = x.OrderedProduct.NormalizedName,
+                                                //Product = x.OrderedProduct.NormalizedName,
                                                 CreatedDate = x.CreatedAt,
                                                 CreatedBy = x.CreatedBy
                                             })
@@ -226,9 +227,9 @@ public class OrderService : IOrderService
                                         .Select(x => new OrderDto()
                                         {
                                             Id = x.Id,
-                                            QuantityOrdered = x.OrderCount,
+                                            //QuantityOrdered = x.OrderCount,
                                             OrderStatus = x.OrderStatus.ToString(),
-                                            Product = x.OrderedProduct.NormalizedName,
+                                            //Product = x.OrderedProduct.NormalizedName,
                                             CreatedDate = x.CreatedAt,
                                             CreatedBy = x.CreatedBy
                                         })    
@@ -263,7 +264,7 @@ public class OrderService : IOrderService
         {
             Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("Update Order Details - {orderDetails}", JsonSerializer.Serialize(updateOrder));
 
-            Order? orderToUpdate = await _repositoryContext.Orders.IgnoreQueryFilters().Include(x => x.OrderedProduct).SingleOrDefaultAsync(x => x.Id == updateOrder.Id);
+            Order? orderToUpdate = await _repositoryContext.Orders.IgnoreQueryFilters().Include(x => x.OrderLineItems).SingleOrDefaultAsync(x => x.Id == updateOrder.Id);
 
             if(orderToUpdate is null)
             {
@@ -277,61 +278,61 @@ public class OrderService : IOrderService
                 return GenericResponse<OrderDto>.Failure(null, $"Cannot perform operation as order is already: {orderToUpdate.OrderStatus.ToString()}", System.Net.HttpStatusCode.Conflict);
             }
 
-            if(orderToUpdate.ProductId == updateOrder.ProductId && orderToUpdate.OrderCount == updateOrder.QuantityOrdered) //SAME ORDER PRODUCT AND THE QUANTITY DOES NOT CHANGE -- NO MODIFICATION TO PRODUCT COUNT
-            {
-                Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("No modification to details");
+            //if(orderToUpdate.ProductId == updateOrder.ProductId && orderToUpdate.OrderCount == updateOrder.QuantityOrdered) //SAME ORDER PRODUCT AND THE QUANTITY DOES NOT CHANGE -- NO MODIFICATION TO PRODUCT COUNT
+            //{
+            //    Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("No modification to details");
 
-                return GenericResponse<OrderDto>.Success(new OrderDto()
-                                                            {
-                                                                Id = orderToUpdate.Id,
-                                                                QuantityOrdered = orderToUpdate.OrderCount,
-                                                                CreatedDate = orderToUpdate.CreatedAt,
-                                                                CreatedBy = orderToUpdate.CreatedBy,
-                                                                Product = orderToUpdate.OrderedProduct.NormalizedName,
-                                                                OrderStatus = orderToUpdate.OrderStatus.ToString()
-                                                            }, 
-                                                            "Update Successful", System.Net.HttpStatusCode.OK);
-            }
-            else if(orderToUpdate.ProductId == updateOrder.ProductId && orderToUpdate.OrderCount != updateOrder.QuantityOrdered)
-            {
-                orderToUpdate.OrderedProduct.CurrentCount += orderToUpdate.OrderCount;
+            //    return GenericResponse<OrderDto>.Success(new OrderDto()
+            //                                                {
+            //                                                    Id = orderToUpdate.Id,
+            //                                                    QuantityOrdered = orderToUpdate.OrderCount,
+            //                                                    CreatedDate = orderToUpdate.CreatedAt,
+            //                                                    CreatedBy = orderToUpdate.CreatedBy,
+            //                                                    Product = orderToUpdate.OrderedProduct.NormalizedName,
+            //                                                    OrderStatus = orderToUpdate.OrderStatus.ToString()
+            //                                                }, 
+            //                                                "Update Successful", System.Net.HttpStatusCode.OK);
+            //}
+            //else if(orderToUpdate.ProductId == updateOrder.ProductId && orderToUpdate.OrderCount != updateOrder.QuantityOrdered)
+            //{
+            //    orderToUpdate.OrderedProduct.CurrentCount += orderToUpdate.OrderCount;
 
-                if(orderToUpdate.OrderedProduct.CurrentCount < updateOrder.QuantityOrdered)
-                {
-                    Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("The available stock: {currentStock} for product: {Id} cannot accommodate requested quantity: {requestedCount}", orderToUpdate.OrderedProduct.CurrentCount, orderToUpdate.ProductId, updateOrder.QuantityOrdered);
-                    return GenericResponse<OrderDto>.Failure(null, $"The current product stock: {orderToUpdate.OrderedProduct.CurrentCount} cannot accommodate requested quantity: {updateOrder.QuantityOrdered}.", System.Net.HttpStatusCode.Conflict);
-                }
+            //    if(orderToUpdate.OrderedProduct.CurrentCount < updateOrder.QuantityOrdered)
+            //    {
+            //        Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("The available stock: {currentStock} for product: {Id} cannot accommodate requested quantity: {requestedCount}", orderToUpdate.OrderedProduct.CurrentCount, orderToUpdate.ProductId, updateOrder.QuantityOrdered);
+            //        return GenericResponse<OrderDto>.Failure(null, $"The current product stock: {orderToUpdate.OrderedProduct.CurrentCount} cannot accommodate requested quantity: {updateOrder.QuantityOrdered}.", System.Net.HttpStatusCode.Conflict);
+            //    }
 
-                orderToUpdate.OrderedProduct.CurrentCount -= updateOrder.QuantityOrdered;
-            }
-            else if(orderToUpdate.ProductId != updateOrder.ProductId)
-            {
+            //    orderToUpdate.OrderedProduct.CurrentCount -= updateOrder.QuantityOrdered;
+            //}
+            //else if(orderToUpdate.ProductId != updateOrder.ProductId)
+            //{
 
-                Product? productToOrder = await _repositoryContext.Products.SingleOrDefaultAsync(x => x.Id == updateOrder.ProductId);
+            //    Product? productToOrder = await _repositoryContext.Products.SingleOrDefaultAsync(x => x.Id == updateOrder.ProductId);
 
-                if(productToOrder is null)
-                {
-                    Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("The provided product id does not exist - {Id}", updateOrder.ProductId);
-                    return GenericResponse<OrderDto>.Failure(null, $"No product exists with specified Id: {updateOrder.ProductId}", System.Net.HttpStatusCode.NotFound);
-                }
+            //    if(productToOrder is null)
+            //    {
+            //        Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("The provided product id does not exist - {Id}", updateOrder.ProductId);
+            //        return GenericResponse<OrderDto>.Failure(null, $"No product exists with specified Id: {updateOrder.ProductId}", System.Net.HttpStatusCode.NotFound);
+            //    }
 
-                if(productToOrder.CurrentCount < updateOrder.QuantityOrdered)
-                {
-                    Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("The available stock: {currentStock} for product: {Id} cannot accommodate requested quantity: {requestedCount}", productToOrder.CurrentCount, updateOrder.ProductId, updateOrder.QuantityOrdered);
-                    return GenericResponse<OrderDto>.Failure(null, $"The current product stock: {productToOrder.CurrentCount} cannot accommodate requested quantity: {updateOrder.QuantityOrdered}.", System.Net.HttpStatusCode.Conflict);
-                }
+            //    if(productToOrder.CurrentCount < updateOrder.QuantityOrdered)
+            //    {
+            //        Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("The available stock: {currentStock} for product: {Id} cannot accommodate requested quantity: {requestedCount}", productToOrder.CurrentCount, updateOrder.ProductId, updateOrder.QuantityOrdered);
+            //        return GenericResponse<OrderDto>.Failure(null, $"The current product stock: {productToOrder.CurrentCount} cannot accommodate requested quantity: {updateOrder.QuantityOrdered}.", System.Net.HttpStatusCode.Conflict);
+            //    }
 
-                var previousProduct = orderToUpdate.OrderedProduct;
-                previousProduct.CurrentCount += orderToUpdate.OrderCount;
+            //    var previousProduct = orderToUpdate.OrderedProduct;
+            //    previousProduct.CurrentCount += orderToUpdate.OrderCount;
 
-                productToOrder.CurrentCount -= updateOrder.QuantityOrdered;
+            //    productToOrder.CurrentCount -= updateOrder.QuantityOrdered;
 
-                orderToUpdate.OrderCount = updateOrder.QuantityOrdered;
-                orderToUpdate.ProductId = updateOrder.ProductId;
-                orderToUpdate.OrderedProduct = productToOrder;
+            //    orderToUpdate.OrderCount = updateOrder.QuantityOrdered;
+            //    orderToUpdate.ProductId = updateOrder.ProductId;
+            //    orderToUpdate.OrderedProduct = productToOrder;
 
-                //_repositoryContext.Products.Update(previousProduct);
-            }
+            //    //_repositoryContext.Products.Update(previousProduct);
+            //}
 
 
 
@@ -342,10 +343,10 @@ public class OrderService : IOrderService
             OrderDto orderUpdated = new OrderDto()
             {
                 Id = orderToUpdate.Id,
-                QuantityOrdered = orderToUpdate.OrderCount,
+                //QuantityOrdered = orderToUpdate.OrderCount,
                 CreatedDate = orderToUpdate.CreatedAt,
                 CreatedBy = orderToUpdate.CreatedBy,
-                Product = orderToUpdate.OrderedProduct.NormalizedName,
+                //Product = orderToUpdate.OrderedProduct.NormalizedName,
                 OrderStatus = orderToUpdate.OrderStatus.ToString()
             };
 
@@ -370,7 +371,7 @@ public class OrderService : IOrderService
         {
             Log.ForContext(_methodName, "UpdateOrderStatusAsync").ForContext(_className, "OrderService").Information("Update Order Stattus - {orderOperationDetails}", JsonSerializer.Serialize(updateOrderStatus));
 
-            Order? orderToUpdate = await _repositoryContext.Orders.Include(x => x.OrderedProduct).SingleOrDefaultAsync(x => x.Id == updateOrderStatus.Id);
+            Order? orderToUpdate = await _repositoryContext.Orders.Include(x => x.OrderLineItems).SingleOrDefaultAsync(x => x.Id == updateOrderStatus.Id);
 
             if(orderToUpdate is null)
             {
@@ -396,7 +397,7 @@ public class OrderService : IOrderService
             {
                 orderToUpdate.DeliveryDate = DateTime.UtcNow.ToLocalTime();
 
-                orderToUpdate.OrderedProduct.CurrentCount += orderToUpdate.OrderCount;
+                //orderToUpdate.OrderedProduct.CurrentCount += orderToUpdate.OrderCount;
             }
 
             //_repositoryContext.Orders.Update(orderToUpdate);
@@ -418,5 +419,11 @@ public class OrderService : IOrderService
             Log.ForContext(_methodName, "UpdateOrderStatusAsync").ForContext(_className, "OrderService").Error(ex, "An Error Occurred Updating Order Details.");
             return GenericResponse<string>.Failure("Operation Failed.", "An Error Occurred Updating Order Details.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
+    }
+
+
+    private string GetOrderTrackingId()
+    {
+        return $"O-{DateTime.Now.ToString("F")}";
     }
 }

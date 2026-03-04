@@ -52,12 +52,17 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasForeignKey(x => x.ProductCategoryId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasMany(x => x.Orders)
+        //builder.HasMany(x => x.Orders)
+        //    .WithOne(x => x.OrderedProduct)
+        //    .HasForeignKey(x => x.ProductId)
+        //    .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(x => x.IsActive);
+
+        builder.HasMany(x => x.OrderLineItems)
             .WithOne(x => x.OrderedProduct)
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasQueryFilter(x => x.IsActive);
 
     }
 }

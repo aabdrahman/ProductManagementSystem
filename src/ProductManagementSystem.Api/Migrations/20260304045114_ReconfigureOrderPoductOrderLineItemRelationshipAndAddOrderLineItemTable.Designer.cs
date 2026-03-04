@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProductManagementSystem.Api.Data;
 
@@ -11,9 +12,11 @@ using ProductManagementSystem.Api.Data;
 namespace ProductManagementSystem.Api.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    partial class RepositoryContextModelSnapshot : ModelSnapshot
+    [Migration("20260304045114_ReconfigureOrderPoductOrderLineItemRelationshipAndAddOrderLineItemTable")]
+    partial class ReconfigureOrderPoductOrderLineItemRelationshipAndAddOrderLineItemTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,7 +69,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("OrderTrackingId");
 
-                    b.ToTable("Orders", null, t =>
+                    b.ToTable("Orders", t =>
                         {
                             t.HasCheckConstraint("CK_OrderStatus", "[OrderStatus] IN ('Pending', 'Processing', 'Delivered', 'Cancelled')");
                         });
@@ -102,7 +105,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderLineItems", null, t =>
+                    b.ToTable("OrderLineItems", t =>
                         {
                             t.HasCheckConstraint("CK_OrderLineItem_QuantityOrdered", "[QuantityOrdered] > 0");
                         });
@@ -157,7 +160,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("ProductCategoryId");
 
-                    b.ToTable("Products", null, t =>
+                    b.ToTable("Products", t =>
                         {
                             t.HasCheckConstraint("CK_Product_Current_Count", "[CurrentCount] >= 0");
                         });
@@ -190,7 +193,7 @@ namespace ProductManagementSystem.Api.Migrations
                     b.HasIndex("NormalizedName")
                         .IsUnique();
 
-                    b.ToTable("ProductCategories", (string)null);
+                    b.ToTable("ProductCategories");
                 });
 
             modelBuilder.Entity("ProductManagementSystem.Api.Entities.Models.Review", b =>
@@ -229,7 +232,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("ReviewerName");
 
-                    b.ToTable("Reviews", null, t =>
+                    b.ToTable("Reviews", t =>
                         {
                             t.HasCheckConstraint("CK_Review_Rating", "[Rating] BETWEEN 1 AND 5");
                         });

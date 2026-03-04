@@ -104,13 +104,13 @@ public sealed class ProductService : IProductService
             }
             else
             {
-                bool isOrderExists = await _repositoryContext.Orders.AnyAsync(x => x.ProductId == Id && (x.OrderStatus == Entities.StaticValues.OrderStatus.Pending || x.OrderStatus == Entities.StaticValues.OrderStatus.Processing));
+                //bool isOrderExists = await _repositoryContext.Orders.AnyAsync(x => x.ProductId == Id && (x.OrderStatus == Entities.StaticValues.OrderStatus.Pending || x.OrderStatus == Entities.StaticValues.OrderStatus.Processing));
 
-                if (isOrderExists)
-                {
-                    Log.ForContext(_className, "ProductService").ForContext(_methodName, "DeleteAsync").Information("The product to remove has one or more orders still not concluded");
-                    return GenericResponse<string>.Failure("Operation Failed", "Pending order exists for selected product to remove.", System.Net.HttpStatusCode.Conflict);
-                }
+                //if (isOrderExists)
+                //{
+                //    Log.ForContext(_className, "ProductService").ForContext(_methodName, "DeleteAsync").Information("The product to remove has one or more orders still not concluded");
+                //    return GenericResponse<string>.Failure("Operation Failed", "Pending order exists for selected product to remove.", System.Net.HttpStatusCode.Conflict);
+                //}
 
                 _repositoryContext.Products.Remove(productToRemove);
             }
