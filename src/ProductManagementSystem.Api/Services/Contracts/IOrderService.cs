@@ -13,4 +13,5 @@ public interface IOrderService
     Task<GenericResponse<string>> CancelOrderAsync(int Id);
     Task<GenericResponse<string>> UpdateOrderStatusAsync(UpdateOrderStatusDto updateOrderStatus);
     Task<GenericResponse<OrderDto>> UpdateAsync(UpdateOrderDto updateOrder);
+    Task<GenericResponse<OrderDetailsDto>> GetOrderDetailsAsync(int OrderId);
 }

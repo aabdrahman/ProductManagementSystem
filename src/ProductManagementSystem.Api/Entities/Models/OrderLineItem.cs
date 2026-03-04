@@ -3,7 +3,7 @@
 public class OrderLineItem
 {
     public int Id { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsActive { get; set; } = true;
     public int QuantityOrdered { get; set; }
 
     //Relationship

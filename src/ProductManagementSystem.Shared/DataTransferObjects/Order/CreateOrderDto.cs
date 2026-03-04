@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ProductManagementSystem.Shared.DataTransferObjects.OrderLineItem;
+using System.ComponentModel.DataAnnotations;
 
 namespace ProductManagementSystem.Shared.DataTransferObjects.Order;
 
@@ -12,6 +13,13 @@ public record class CreateOrderDto : IValidatableObject
     [Required(ErrorMessage = "Email is a required field.")]
     [EmailAddress(ErrorMessage = "Kindly provide a valid email address.")]
     public string CreatedBy { get; set; }
+
+    [Required(ErrorMessage = "Delivery Address is a required field.")]
+    [StringLength(255, ErrorMessage = "Delivery Address cannot exceed 255 characters")]
+    public string DeliveryAddress { get; set; }
+    [Required(ErrorMessage = "Order Line Items is required.")]
+    [MinLength(1, ErrorMessage = "Order must contain at least one item.")]
+    public List<CreateOrderLineItemDto> OrderLineItems { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
