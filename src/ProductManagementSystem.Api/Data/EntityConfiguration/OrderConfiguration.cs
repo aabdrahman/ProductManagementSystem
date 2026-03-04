@@ -49,6 +49,10 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         //    .HasForeignKey(x => x.ProductId)
         //    .OnDelete(DeleteBehavior.ClientCascade);
 
+        builder.Property(x => x.DeliveryAddress)
+            .IsRequired()
+            .HasMaxLength(255);
+
         builder.HasQueryFilter(x => x.IsActive);
 
         builder.Property(x => x.OrderTrackingId)
