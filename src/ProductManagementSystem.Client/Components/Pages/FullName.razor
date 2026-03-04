@@ -1,0 +1,72 @@
+﻿@using System.Diagnostics.CodeAnalysis
+
+@inherits InputBase<string>
+
+
+<div class="full-name-group">
+    
+    <div class="form-group">
+        <label>First Name</label>
+        <input type="text" value="@_firstName" @onchange="OnChangeFirstName" />
+        @if (string.IsNullOrEmpty(_firstName))
+        {
+            <span class="validation-message">First Name is required.</span>
+        }
+    </div>
+
+    <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" value="@_lastName" @onchange="OnChangeLastName" />
+        @if(string.IsNullOrEmpty(_lastName))
+        {
+            <span class="validation-message">Last Name is required.</span>
+        }
+    </div>
+
+</div>
+
+
+@code {
+
+    private string _firstName = string.Empty;
+    private string _lastName = string.Empty;
+
+    // protected override void OnParametersSet()
+    // {
+    //     if(!string.IsNullOrEmpty(CurrentValue))
+    //     {
+    //         var arrStr = CurrentValue.Split(" ");
+    //         _firstName = arrStr[0];
+    //         _lastName = arrStr[1];
+    //         SetCurrentValue();
+    //     }
+    //     else
+    //     {
+    //         _firstName = string.Empty;
+    //         _lastName = string.Empty;
+    //         SetCurrentValue();
+    //     }
+    // }
+
+    private void OnChangeFirstName(ChangeEventArgs args)
+    {
+        _firstName = args?.Value?.ToString() ?? string.Empty;
+        SetCurrentValue();
+    }
+
+    private void OnChangeLastName(ChangeEventArgs args)
+    {
+        _lastName = args?.Value?.ToString() ?? string.Empty;
+        SetCurrentValue();
+    }
+
+    private void SetCurrentValue()
+    {
+        CurrentValue = string.Join(" ", new[] { _firstName, _lastName }.Where(s => !string.IsNullOrWhiteSpace(s)));
+    }
+
+    protected override bool TryParseValueFromString(string value, [MaybeNullWhen(false)] out string result, [NotNullWhen(false)] out string validationErrorMessage)
+    {
+        throw new NotImplementedException();
+    }
+}

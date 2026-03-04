@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 
 @inject GetMultipleProductsHandler getMultipleProductsHandler
+@inject AddOrderHandler addOrderHandler
 
 <section class="checkout-page">
     <div class="checkout-header">
@@ -52,28 +53,85 @@
                             </button>
                         </div>
                     </div>
+
+                    
                 }
             </div>
+
+            @if(_createOrderModel is not null)
+            {
+                <div class="checkout-form-card">
+                    <h3>Customer Details</h3>
+
+                    @if(_responseMessage is not null)
+                    {
+                        <Status SuccessStatus="@_isSuccessful" StatusMessage="@_responseMessage" />
+                    }
+
+                    <EditForm Model="_createOrderModel" OnValidSubmit="PlaceOrder">
+                        <DataAnnotationsValidator />
+
+                        <div class="form-group">
+                            @* <label>Full Name</label> *@
+
+                            <FullName @bind-Value="_createOrderModel.FullName" />
+
+                          @*   <InputText @bind-Value="_createOrderModel.FullName" /> *@
+                            <ValidationMessage For="(() => _createOrderModel.FullName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <InputText @bind-Value="_createOrderModel.CreatedBy" />
+                            <ValidationMessage For="(() => _createOrderModel.CreatedBy)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <InputText @bind-Value="_createOrderModel.PhoneNumber" />
+                            <ValidationMessage For="(() => _createOrderModel.PhoneNumber)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Delivery Address</label>
+                            <InputTextArea @bind-Value="_createOrderModel.DeliveryAddress" rows="3" />
+                            <ValidationMessage For="(() => _createOrderModel.DeliveryAddress)" />
+                        </div>
+
+                        <button type="submit" disabled="@_isPlacingOrder" class="place-order-btn">
+                            @(_isPlacingOrder ? "Placing Order........" : "Place Order")
+                        </button>
+                    </EditForm>
+                </div>
+            }
+
+            <div class="checkout-summary">
+                <p class="total">
+                    Total: <strong>@TotalAmount.ToString("C")</strong>
+                </p>
+
+              @*   <button class="place-order-btn" @onclick="PlaceOrder">
+                    Place Order
+                </button> *@
+            </div>
+
         }
         
 
-        <div class="checkout-summary">
-            <p class="total">
-                Total: <strong>@TotalAmount.ToString("C")</strong>
-            </p>
 
-            <button class="place-order-btn" @onclick="PlaceOrder">
-                Place Order
-            </button>
-        </div>
     }
 </section>
 
 @code {
 
-    private List<CreateOrderDto> _orders = new();
+    private List<CreateOrderLineItemDto> _orders = new();
     private bool _isLoading = true;
     private IEnumerable<ProductDto> _products;
+
+    private CreateOrderDto _createOrderModel;
+    private bool _isPlacingOrder = false;
+    private string _responseMessage;
+    private bool _isSuccessful;
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,7 +142,7 @@
     {
         _isLoading = true;
 
-        var stored = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
+        var stored = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderLineItemDto>>("orders");
 
         _orders = stored?.ToList() ?? new();
 
@@ -95,6 +153,9 @@
             var result = await getMultipleProductsHandler.Handle(ids);
 
             _products = result.products;
+
+            _createOrderModel = new CreateOrderDto();
+            _createOrderModel.OrderLineItems = _orders;
         }
 
         _isLoading = false;
@@ -103,7 +164,7 @@
     private decimal TotalAmount => 
                _products.Join(_orders, x => x.Id, y => y.ProductId, (x, y) => new{ Price = x.SellingPrice, Quantity = y.QuantityOrdered }).Sum(x => x.Price * x.Quantity);
 
-    private async Task RemoveItem(CreateOrderDto item)
+    private async Task RemoveItem(CreateOrderLineItemDto item)
     {
         _orders.Remove(item);
         await localStorageUtility.PersistToStorageAsync(_orders, "orders");
@@ -112,8 +173,33 @@
 
     private async Task PlaceOrder()
     {
-        // await localStorageUtility.RemoveItemFromStorageAsync("orders");
-        // _orders.Clear();
-        // StateHasChanged();
+
+        _isPlacingOrder = true;
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Order Placed Successfully." : "Order could not be placed";
+
+        var result = await addOrderHandler.Handle(_createOrderModel);
+        _isSuccessful = result.isSuccessul; _responseMessage = result.responseMessage;
+
+        if (_isSuccessful)
+        {
+
+            await localStorageUtility.RemoveItemFromStorageAsync("orders");
+            //_orders.Clear();
+
+            _responseMessage = string.Concat(_responseMessage, "Kindly proceed to confirm your order via email sent to the provided email address.");
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(7500);
+                navigationManager.NavigateTo("/");
+            });
+        }
+
+
+
+        _isPlacingOrder = false;
     }
 }

@@ -48,7 +48,7 @@ public class OrderService : IOrderService
                 return GenericResponse<OrderDto>.Failure(null, $"The following product Ids do not exist: {JsonSerializer.Serialize(nonExistingProductIds)}", System.Net.HttpStatusCode.NotFound);
             }
 
-            var joinedOrderItems = createOrder.OrderLineItems.Join(productsToOrder, oli => oli.ProductId, p => p.Id, (oli, p) => new { OrderLineItem = oli, Product = p, StockAvailable = oli.QuantityOrdered < p.CurrentCount }).ToList();
+            var joinedOrderItems = createOrder.OrderLineItems.Join(productsToOrder, oli => oli.ProductId, p => p.Id, (oli, p) => new { OrderLineItem = oli, Product = p, StockAvailable = p.CurrentCount >= oli.QuantityOrdered }).ToList();
 
             if(joinedOrderItems.Any(x => !x.StockAvailable))
             {
@@ -82,6 +82,7 @@ public class OrderService : IOrderService
                 orderLineItem.Product.CurrentCount -= orderLineItem.OrderLineItem.QuantityOrdered;
             }
 
+            //DO NOT UNCOMMENT TO PREVENT MULTIPLE STOCK COUNT REDUCTION(THIS WILL BE DELETED LATER) !!IMPORTANT!!
             //foreach (var product in productsToOrder)
             //{
             //    int productCount = createOrder.OrderLineItems.Where(x => x.ProductId == product.Id).Select(x => x.QuantityOrdered).FirstOrDefault();

@@ -33,11 +33,11 @@ else
 
                     <div class="form-grid">
 
-                        <div class="form-group">
+                        @* <div class="form-group">
                             <label>User Email</label>
                             <InputText @bind-Value="_createOrderModel.CreatedBy" readonly="@(!_isEmailExists)" />
                             <ValidationMessage For="(() => _createOrderModel.CreatedBy)" />
-                        </div>
+                        </div> *@
 
                         <div class="form-group">
                             <label>Quantity</label>
@@ -85,9 +85,9 @@ else
     private ProductDto _selectedProductToOrder;
     private ProductDto? _productToOrder;
     private bool _isLoading;
-    private IEnumerable<CreateOrderDto> _existingCreatedOrders;
+    private IEnumerable<CreateOrderLineItemDto> _existingCreatedOrders;
 
-    private CreateOrderDto _createOrderModel;
+    private CreateOrderLineItemDto _createOrderModel;
     private bool _isOrdering;
     private bool _isSuccessful;
     private string _fetchProductDetailsResponseMessage;
@@ -117,18 +117,18 @@ else
             return;
         }
 
-        _createOrderModel = new CreateOrderDto() { ProductId = _productToOrder.Id };
+        _createOrderModel = new CreateOrderLineItemDto() { ProductId = _productToOrder.Id };
 
-        var existingOrders = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
+        var existingOrders = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderLineItemDto>>("orders");
         _existingCreatedOrders = existingOrders ?? [];
 
         var existingOrderList = _existingCreatedOrders.ToList();
 
-        var existingEmail = existingOrderList.Select(x => x.CreatedBy).FirstOrDefault();
+        // var existingEmail = existingOrderList.Select(x => x.CreatedBy).FirstOrDefault();
 
-        _isEmailExists = string.IsNullOrEmpty(existingEmail);
+        // _isEmailExists = string.IsNullOrEmpty(existingEmail);
 
-        _createOrderModel.CreatedBy = existingEmail ?? "";
+        // _createOrderModel.CreatedBy = existingEmail ?? "";
 
         _isLoading = false;
     }
@@ -163,7 +163,7 @@ else
         // _isSuccessful = DateTime.Now.Second % 2 == 0;
         // _responseMessage = _isSuccessful ? "Your order has been added to cart. Kindly checkout to complete." : "Your order could not be added to card. Kindly retry again.";
 
-        var existingOrders = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
+        var existingOrders = await localStorageUtility.GetItemFromStorageAsync<IEnumerable<CreateOrderLineItemDto>>("orders");
 
         _existingCreatedOrders = existingOrders ?? [];
 
@@ -186,7 +186,7 @@ else
         }
 
 
-        _isSuccessful = await localStorageUtility.PersistToStorageAsync<IEnumerable<CreateOrderDto>>(existingOrderList, "orders");
+        _isSuccessful = await localStorageUtility.PersistToStorageAsync<IEnumerable<CreateOrderLineItemDto>>(existingOrderList, "orders");
 
         _responseMessage = _isSuccessful ? "Your order has been added to cart. Kindly checkout to complete." : "Your order could not be added to card. Kindly retry again.";
 
