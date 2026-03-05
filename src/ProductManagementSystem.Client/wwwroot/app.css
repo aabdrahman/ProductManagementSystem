@@ -87,6 +87,9 @@ h1, h2, h3 {
     font-style: normal;
 }
 
+form{
+    margin-top: 1rem!important;
+}
 
 .form-group {
     display: flex;

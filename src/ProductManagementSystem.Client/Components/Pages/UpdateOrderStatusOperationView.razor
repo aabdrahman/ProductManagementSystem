@@ -1,0 +1,131 @@
+﻿
+@rendermode InteractiveServer
+
+@inject UpdateOrderStatusHandler updateOrderStatusHandler
+
+@if (_isLoading)
+{
+    <p>Loading........</p>
+}
+else if(!_isLoading)
+{
+    if (_orderToUpdate is not null)
+    {
+        <OrderDetail OrderToView="_orderToUpdate" />
+
+        @if(_updateOrderStatusModel is not null)
+        {
+            <EditForm Model="_updateOrderStatusModel" OnValidSubmit="HandleUpdateStatus">
+
+                <DataAnnotationsValidator />
+
+                @if(_responseMessage is not null)
+                {
+                    <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+                }
+
+                <div class="form-group">
+                    <label>Status To update</label>
+
+                    <InputSelect @bind-Value="_updateOrderStatusModel.UpdatedStatus">
+                        <option value=""></option>
+                        @foreach (var status in Enum.GetValues<OrderStatus>())
+                        {
+                            if (((int)status) > _currentStatus)
+                            {
+                                <option value="@status.ToString()">@status.ToString()</option>
+                            }
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="(() => _updateOrderStatusModel.UpdatedStatus)" />
+                </div>
+
+                <div class="form-actions">
+
+                    <button class="btn submit"
+                            disabled="@( _isSuccessful || _isUpdating)">
+                        @(!_isUpdating ? "Update Order Status" : "Updating Order Status...")
+                    </button>
+
+                    <button class="btn cancel" disabled="@_isUpdating" @onclick="(() => OnHandleClose(_isSuccessful))">Cancel</button>
+
+                </div>
+
+            </EditForm>
+        }
+
+        
+    }
+    else if(_orderToUpdate is null)
+    {
+        <p>
+            Order could not be fetched.
+        </p>
+    }
+}
+
+
+
+@code {
+
+    private bool _isLoading;
+    private OrderDto _orderToUpdate;
+
+    private UpdateOrderStatusDto _updateOrderStatusModel;
+    private int _currentStatus;
+
+    private bool _isUpdating;
+    private bool _isSuccessful = false;
+    private string _responseMessage;
+
+
+    [Parameter, EditorRequired]
+    public OrderDto OrderToUpdate { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(250);
+
+        _orderToUpdate = OrderToUpdate;
+
+        await Task.Delay(500);
+
+        var currStatus = Enum.Parse<OrderStatus>(_orderToUpdate.OrderStatus, ignoreCase: true);
+        _currentStatus = (int)currStatus;
+
+        _updateOrderStatusModel = new UpdateOrderStatusDto() { Id = _orderToUpdate.Id };
+
+
+        _isLoading = false;
+
+    }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+        _orderToUpdate = null;
+        _updateOrderStatusModel = null;
+
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+
+    private async Task HandleUpdateStatus()
+    {
+        _responseMessage = null;
+        _isUpdating = true;
+
+        // await Task.Delay(5000);
+
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Order Status Updated Successfully." : "Sttaus Update Failed.";
+
+        var result = await updateOrderStatusHandler.Handle(_updateOrderStatusModel);
+        _isSuccessful = result.isSuccessful; _responseMessage = result.responseMessage;
+
+        _isUpdating = false;
+    }
+}

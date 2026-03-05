@@ -30,7 +30,7 @@
         }
         else
         {
-            <OrdersListView Orders="_orders" HandleViewOrder="OnHandleView" />
+            <OrdersListView Orders="_orders" HandleViewOrder="OnHandleView" HandleUpdateOrderStatus="OnHandleUpdateStatus" />
 
         }
     }
@@ -44,6 +44,10 @@
         @if(_operationToPerform == OperationType.ViewOrder)
         {
             <OrderDetail OrderToView="@_selectedOrder" />
+        }
+        else if(_operationToPerform == OperationType.UpdateOrderStatus)
+        {
+            <UpdateOrderStatusOperationView OrderToUpdate="_selectedOrder" HandleClose="HandleClose" />
         }
     </Body>
 </Popup>
@@ -85,9 +89,37 @@
         popup.OpenModal();
     }
 
+
+    private async Task OnHandleUpdateStatus(OrderDto selectedOrder)
+    {
+        _selectedOrder = selectedOrder;
+        _title = $"Update Status For {_selectedOrder.OrderNumber}";
+        _operationToPerform = OperationType.UpdateOrderStatus;
+        _showCloseButton = false;
+
+        popup.OpenModal();
+    }
+
+    private async Task HandleClose(bool refreshDecision)
+    {
+        _showCloseButton = false;
+        _selectedOrder = null;
+        _title = null;
+        _operationToPerform = default;
+
+        if (refreshDecision)
+        {
+            var result = await getOrdersHandler.Handle();
+            _orders = result.orders; _responseMessage = result.responseMessage;
+        }
+
+        popup.CloseModal();
+    }
+
     enum OperationType
     {
         None,
-        ViewOrder
+        ViewOrder,
+        UpdateOrderStatus
     }
 }

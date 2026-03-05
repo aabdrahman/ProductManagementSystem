@@ -25,6 +25,7 @@ builder.Services.AddScoped<GetMultipleProductsHandler>();
 builder.Services.AddScoped<AddOrderHandler>();
 builder.Services.AddScoped<GetOrderDetailsHandler>();
 builder.Services.AddScoped<GetOrdersHandler>();
+builder.Services.AddScoped<UpdateOrderStatusHandler>();
 
 builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
 

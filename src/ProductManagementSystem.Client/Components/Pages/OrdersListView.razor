@@ -35,14 +35,14 @@
 
                              <button class="btn view"
                                     @onclick="(() => OnView(order))">
-                            View
+                                View
+                            </button>
+                            
+                        <button class="btn complete"
+                                @onclick="() => OnHandleUpdateStatus(order)">
+                            Update Status
                         </button>
                             @*
-                        <button class="btn complete"
-                                @onclick="() => CompleteOrder(order.Id)">
-                            Complete
-                        </button>
-
                         <button class="btn cancel"
                                 @onclick="() => CancelOrder(order.Id)">
                             Cancel
@@ -77,6 +77,9 @@ else
     [Parameter, EditorRequired]
     public EventCallback<OrderDto> HandleViewOrder { get; set; }
 
+    [Parameter, EditorRequired]
+    public EventCallback<OrderDto> HandleUpdateOrderStatus { get; set; }
+
 
     protected override async Task OnParametersSetAsync()
     {
@@ -87,5 +90,10 @@ else
     private async Task OnView(OrderDto selectedOrder)
     {
         await HandleViewOrder.InvokeAsync(selectedOrder);
+    }
+
+    private async Task OnHandleUpdateStatus(OrderDto selectedOrder)
+    {
+        await HandleUpdateOrderStatus.InvokeAsync(selectedOrder);
     }
 }

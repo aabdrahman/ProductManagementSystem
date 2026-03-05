@@ -115,21 +115,26 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        _isLoading = true;
 
-        await Task.Delay(250);
-
-        if(OrderToView is not null)
+        if(_orderDetails is null)
         {
-            var result = await getOrderDetailsHandler.Handle(OrderToView.Id);
-            _orderDetails = result.orderDetails; _responseMessage = result.responseMessage;
-        }
-        else
-        {
-            _responseMessage = "No Order Selected.";
+            _isLoading = true;
+
+            await Task.Delay(250);
+
+            if (OrderToView is not null)
+            {
+                var result = await getOrderDetailsHandler.Handle(OrderToView.Id);
+                _orderDetails = result.orderDetails; _responseMessage = result.responseMessage;
+            }
+            else
+            {
+                _responseMessage = "No Order Selected.";
+            }
+
+            _isLoading = false;
         }
 
-        _isLoading = false;
     }
 
 }

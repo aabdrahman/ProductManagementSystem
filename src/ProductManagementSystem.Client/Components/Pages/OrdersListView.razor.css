@@ -46,27 +46,6 @@
     padding: 18px;
 }
 
-/*.low-stock-row {
-    background: #fff7ed;
-}*/
-
-/*.stock-badge {
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-    .stock-badge.low {
-        background: #fee2e2;
-        color: #b91c1c;
-    }
-
-    .stock-badge.ok {
-        background: #dcfce7;
-        color: #15803d;
-    }*/
-
 .actions {
     display: flex;
     gap: 0.5rem;
@@ -103,6 +82,8 @@
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 600;
+    text-align: center;
+    align-items: center;
 }
 
 .status-badge.pending {
@@ -110,7 +91,12 @@
     color: #92400e;
 }
 
-.status-badge.completed {
+.status-badge.processing {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.delivered {
     background: #dcfce7;
     color: #166534;
 }
