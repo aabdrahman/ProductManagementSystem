@@ -9,4 +9,5 @@ public record class OrderDto
     public DateTime CreatedDate { get; set; }
     public string CreatedBy { get; set; }
     public int LineItemsCount { get; set; }
+    public string OrderNumber { get; set; }
 }

@@ -9,5 +9,6 @@ public record class OrderDetailsDto
     public DateTime CreatedDate { get; set; }
     public string CreatedBy { get; set; }
     public string DeliveryAddress { get; set; }
+    public string OrderNumber { get; set; }
     public List<OrderLineItemDetailsDto> OrderLineItems { get; set; }
 }

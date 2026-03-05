@@ -126,7 +126,8 @@ public class OrderService : IOrderService
                 Id = orderToInsert.Id,
                 OrderStatus = orderToInsert.OrderStatus.ToString(),
                 CreatedDate = orderToInsert.CreatedAt,
-                LineItemsCount = orderToInsert.OrderLineItems.Count
+                LineItemsCount = orderToInsert.OrderLineItems.Count,
+                OrderNumber = orderToInsert.OrderTrackingId
                 //Product = productToOrder.NormalizedName,
                 //QuantityOrdered = orderToInsert.OrderCount
             };
@@ -221,7 +222,8 @@ public class OrderService : IOrderService
                                             //Product = x.OrderedProduct.NormalizedName,
                                             CreatedDate = x.CreatedAt,
                                             CreatedBy = x.CreatedBy,
-                                            LineItemsCount = x.OrderLineItems.Count
+                                            LineItemsCount = x.OrderLineItems.Count,
+                                            OrderNumber = x.OrderTrackingId
                                         })
                                         .ToListAsync();
 
@@ -258,7 +260,8 @@ public class OrderService : IOrderService
                                                 //Product = x.OrderedProduct.NormalizedName,
                                                 CreatedDate = x.CreatedAt,
                                                 CreatedBy = x.CreatedBy,
-                                                LineItemsCount = x.OrderLineItems.Count
+                                                LineItemsCount = x.OrderLineItems.Count,
+                                                OrderNumber = x.OrderTrackingId
                                             })
                                             .SingleOrDefaultAsync(x => x.Id == Id);
 
@@ -300,7 +303,8 @@ public class OrderService : IOrderService
                                             //Product = x.OrderedProduct.NormalizedName,
                                             CreatedDate = x.CreatedAt,
                                             CreatedBy = x.CreatedBy,
-                                            LineItemsCount = x.OrderLineItems.Count
+                                            LineItemsCount = x.OrderLineItems.Count,
+                                            OrderNumber = x.OrderTrackingId
                                         })    
                                         .ToListAsync();
 
@@ -416,7 +420,9 @@ public class OrderService : IOrderService
                 CreatedDate = orderToUpdate.CreatedAt,
                 CreatedBy = orderToUpdate.CreatedBy,
                 //Product = orderToUpdate.OrderedProduct.NormalizedName,
-                OrderStatus = orderToUpdate.OrderStatus.ToString()
+                OrderStatus = orderToUpdate.OrderStatus.ToString(),
+                OrderNumber = orderToUpdate.OrderTrackingId,
+                LineItemsCount = orderToUpdate.OrderLineItems.Count
             };
 
             return GenericResponse<OrderDto>.Success(orderUpdated, "Order Updated Successfully.", System.Net.HttpStatusCode.OK);
@@ -506,6 +512,7 @@ public class OrderService : IOrderService
                                             CreatedDate = x.CreatedAt,
                                             DeliveryAddress = x.DeliveryAddress,
                                             OrderStatus = x.OrderStatus.ToString(),
+                                            OrderNumber = x.OrderTrackingId,
                                             OrderLineItems = x.OrderLineItems.Select(oli => new OrderLineItemDetailsDto()
                                             {
                                                 Id = oli.Id,
