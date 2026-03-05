@@ -62,17 +62,17 @@
     font-weight: 800;
 }
 
-.actions .edit {
+.actions.view {
     background: #e0e7ff;
 /*    color: #3730a3;*/
 }
 
-.actions .restock {
+.actions.complete {
     background: #dcfce7;
 /*    color: #166534;*/
 }
 
-.actions .delete {
+.actions.cancel {
     background: #fee2e2;
 /*    color: #991b1b;*/
 }
