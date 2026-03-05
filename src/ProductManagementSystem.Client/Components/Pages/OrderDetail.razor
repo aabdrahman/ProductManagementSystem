@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 
 @inject GetOrderDetailsHandler getOrderDetailsHandler
+@inject DeleteOrderHandler deleteOrderHandler
 
 @if (_isLoading)
 {
@@ -25,7 +26,7 @@ else
                 <div>
                     <h2>Order #@_orderDetails.OrderNumber</h2>
                     <span class="order-date">
-                        @_orderDetails.CreatedDate.ToString("dd MMM yyyy")
+                        @_orderDetails.CreatedDate.ToString("dd MMMM yyyy")
                     </span>
                 </div>
 
@@ -89,14 +90,26 @@ else
 
             </div>
 
+            @if(_cancelOrderResponseMessage is not null)
+            {
+                <Status SuccessStatus="@_isSuccessful" StatusMessage="@_cancelOrderResponseMessage" />
+            }
 
             <!-- Order Actions -->
-            @* <div class="order-actions">
+            @if (ShowActionButtons)
+            {
+                <div class="order-actions">
 
-                <button class="btn cancel-btn">Cancel Order</button>
-                <button class="btn complete-btn">Mark Completed</button>
+                    <button class="btn cancel" disabled="@_isCancelling" @onclick="(() => OnHandleClose(_isSuccessful))">Close</button>
 
-            </div> *@
+                    <button class="btn cancel-btn" disabled="@_isSuccessful" @onclick="CancelOrder" >
+                        @(_isCancelling ? "Cancelling Order....." : "Cancel Order")
+                    </button>
+                    
+
+                </div>
+            }
+
 
         </div>
     }
@@ -110,8 +123,18 @@ else
     private OrderDetailsDto? _orderDetails;
     private string _responseMessage;
 
+    private bool _isSuccessful;
+    private bool _isCancelling;
+    private string _cancelOrderResponseMessage;
+
     [Parameter, EditorRequired]
     public OrderDto OrderToView { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    [Parameter]
+    public bool ShowActionButtons { get; set; } = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -135,6 +158,28 @@ else
             _isLoading = false;
         }
 
+    }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+        _orderDetails = null;
+        _responseMessage = null;
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+
+
+    private async Task CancelOrder()
+    {
+        _isCancelling = true;_cancelOrderResponseMessage = null;
+
+        // await Task.Delay(5000);
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _cancelOrderResponseMessage = _isSuccessful ? "Order Cancelled Successfully" : "Order Cancel Failed";
+
+        var result = await deleteOrderHandler.Handle(_orderDetails.Id);
+        _isSuccessful = result.isSuccessful; _cancelOrderResponseMessage = result.responseMessage;
+
+        _isCancelling = false;
     }
 
 }

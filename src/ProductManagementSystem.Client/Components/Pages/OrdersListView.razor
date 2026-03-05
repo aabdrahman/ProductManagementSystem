@@ -22,7 +22,7 @@
                 {
                     <tr>
 
-                        <td>@order.CreatedDate.ToString("dd MM yyyy")</td>
+                        <td>@order.CreatedDate.ToString("dd MMM yyyy")</td>
                         <td>
                             <span class="status-badge @order.OrderStatus.ToLower()">
                                 @order.OrderStatus
@@ -37,16 +37,21 @@
                                     @onclick="(() => OnView(order))">
                                 View
                             </button>
-                            
-                        <button class="btn complete"
-                                @onclick="() => OnHandleUpdateStatus(order)">
-                            Update Status
-                        </button>
-                            @*
-                        <button class="btn cancel"
-                                @onclick="() => CancelOrder(order.Id)">
-                            Cancel
-                        </button> *@
+                           
+
+                            @if (order.OrderStatus.ToString().Equals(OrderStatus.Pending.ToString(), StringComparison.CurrentCultureIgnoreCase) || order.OrderStatus.ToString().Equals(OrderStatus.Processing.ToString(), StringComparison.CurrentCultureIgnoreCase))
+                            {
+                                <button class="btn complete"
+                                        @onclick="() => OnHandleUpdateStatus(order)">
+                                    Update Status
+                                </button>
+
+                                <button class="btn cancel"
+                                        @onclick="() => OnHandleCancelOrder(order)">
+                                    Cancel
+                                </button>
+                            }
+
 
                         </td>
 
@@ -80,6 +85,9 @@ else
     [Parameter, EditorRequired]
     public EventCallback<OrderDto> HandleUpdateOrderStatus { get; set; }
 
+    [Parameter, EditorRequired]
+    public EventCallback<OrderDto> HandleCancelOrder { get; set; }
+
 
     protected override async Task OnParametersSetAsync()
     {
@@ -95,5 +103,10 @@ else
     private async Task OnHandleUpdateStatus(OrderDto selectedOrder)
     {
         await HandleUpdateOrderStatus.InvokeAsync(selectedOrder);
+    }
+
+    private async Task OnHandleCancelOrder(OrderDto selectedOrder)
+    {
+        await HandleCancelOrder.InvokeAsync(selectedOrder);
     }
 }

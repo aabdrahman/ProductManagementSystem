@@ -25,11 +25,11 @@ else if(!_isLoading)
                 }
 
                 <div class="form-group">
-                    <label>Status To update</label>
+                    <label>Status To Update</label>
 
                     <InputSelect @bind-Value="_updateOrderStatusModel.UpdatedStatus">
                         <option value=""></option>
-                        @foreach (var status in Enum.GetValues<OrderStatus>())
+                        @foreach (var status in Enum.GetValues<OrderStatus>().Where(x => !x.ToString().Equals("Cancelled", StringComparison.CurrentCultureIgnoreCase)))
                         {
                             if (((int)status) > _currentStatus)
                             {
@@ -47,7 +47,9 @@ else if(!_isLoading)
                         @(!_isUpdating ? "Update Order Status" : "Updating Order Status...")
                     </button>
 
-                    <button class="btn cancel" disabled="@_isUpdating" @onclick="(() => OnHandleClose(_isSuccessful))">Cancel</button>
+                    <button class="btn cancel" disabled="@_isUpdating" @onclick="(() => OnHandleClose(_isSuccessful))">
+                        @(_isSuccessful ? "Close" : "Cancel")
+                    </button>
 
                 </div>
 

@@ -84,11 +84,11 @@ public class OrderController : ControllerBase
     }
 
     [HttpDelete("{Id:int}")]
-    public async Task<IActionResult> Delete(int Id)
+    public async Task<IActionResult> Delete(int Id, bool isSoftDelete = true)
     {
         try
         {
-            var result = await _orderService.DeleteAsync(Id);
+            var result = await _orderService.DeleteAsync(Id, isSoftDelete);
 
             return StatusCode((int)result.StatusCode, result);
         }
