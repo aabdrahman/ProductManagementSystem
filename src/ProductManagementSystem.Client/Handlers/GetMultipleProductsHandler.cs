@@ -24,8 +24,6 @@ public class GetMultipleProductsHandler
                 queryString = $"{queryString}&Ids={id}";
             }
 
-            Console.WriteLine($"Query String: {queryString}");
-
             var httpResponse = await _httpClient.GetAsync($"api/product/collection?{queryString}");
 
             string responseContent = await httpResponse.Content.ReadAsStringAsync();

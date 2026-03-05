@@ -19,8 +19,6 @@ public class LocalStorageUtility : ILocalStorageUtility
         {
             var result = await _protectedLocalStorage.GetAsync<T>(key);
 
-            Console.WriteLine($"Result - {JsonSerializer.Serialize(result)}");
-
             return result.Value;
         }
         catch (Exception ex)

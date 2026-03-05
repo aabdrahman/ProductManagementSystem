@@ -541,6 +541,7 @@ public class OrderService : IOrderService
 
     private string GetOrderTrackingId()
     {
-        return $"O-{DateTime.Now.ToString("yyyyMMddhhmmss")}";
+        string dateToString = DateTime.Now.ToString("yyyyddMMHHmmssfff");
+        return $"O-{dateToString}-{Random.Shared.Next(1000, 9999)}";
     }
 }

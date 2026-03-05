@@ -23,7 +23,6 @@ public class ArrayModelBinders : IModelBinder
         }
 
         var objectArray = providedValue.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-        Console.WriteLine($"Object Model: {JsonSerializer.Serialize(objectArray)}");
 
         var objArray = objectArray.Select(x => Convert.ToInt32(x));
 

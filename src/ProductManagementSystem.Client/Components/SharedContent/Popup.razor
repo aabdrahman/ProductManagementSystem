@@ -80,7 +80,6 @@
 
     protected override void OnParametersSet()
     {
-        Console.WriteLine($"Popup On Parameter set run.......");
         _showCloseButton = ShowCloseButton;
         _modalTitle = Title ?? "";
         _showFooter = Footer is not null;
@@ -89,9 +88,7 @@
 
     public void OpenModal()
     {
-        Console.WriteLine($"Open Modal Called.........");
         _showModal = true;
-        Console.WriteLine($"Open Modal Executed: {_showModal}.........");
     }
 
     public void CloseModal()

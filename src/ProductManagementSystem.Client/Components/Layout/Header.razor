@@ -56,7 +56,6 @@
         var savedOrders = await localStorageUtility
             .GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
 
-        Console.WriteLine($"Saved Orders - {JsonSerializer.Serialize(savedOrders)}");
 
         _cartCount = savedOrders?.Count() ?? 0;
 
