@@ -10,5 +10,6 @@ public record class OrderDetailsDto
     public string CreatedBy { get; set; }
     public string DeliveryAddress { get; set; }
     public string OrderNumber { get; set; }
+    public bool IsConfirmed { get; set; }
     public List<OrderLineItemDetailsDto> OrderLineItems { get; set; }
 }

@@ -513,6 +513,7 @@ public class OrderService : IOrderService
                                             DeliveryAddress = x.DeliveryAddress,
                                             OrderStatus = x.OrderStatus.ToString(),
                                             OrderNumber = x.OrderTrackingId,
+                                            IsConfirmed = x.IsConfirmed,
                                             OrderLineItems = x.OrderLineItems.Select(oli => new OrderLineItemDetailsDto()
                                             {
                                                 Id = oli.Id,

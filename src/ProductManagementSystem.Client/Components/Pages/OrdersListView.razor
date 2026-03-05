@@ -1,0 +1,91 @@
+﻿
+
+@if(_orders is not null)
+{
+    <div class="management-table-wrapper">
+        <table class="management-table">
+
+            <thead>
+                <tr>
+                    <th>Created Date</th>
+                    <th>Status</th>
+                    <th>Order Tracking ID</th>
+                    <th>Ordered By</th>
+                    <th>Total Count</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var order in _orders)
+                {
+                    <tr>
+
+                        <td>@order.CreatedDate.ToString("dd MM yyyy")</td>
+                        <td>
+                            <span class="status-badge @order.OrderStatus.ToLower()">
+                                @order.OrderStatus
+                            </span>
+                        </td>
+                        <td>@order.OrderNumber</td>
+                        <td>@order.CreatedBy</td>
+                        <td>@order.LineItemsCount</td>
+                        <td class="actions">
+
+                             <button class="btn view"
+                                    @onclick="(() => OnView(order))">
+                            View
+                        </button>
+                            @*
+                        <button class="btn complete"
+                                @onclick="() => CompleteOrder(order.Id)">
+                            Complete
+                        </button>
+
+                        <button class="btn cancel"
+                                @onclick="() => CancelOrder(order.Id)">
+                            Cancel
+                        </button> *@
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+    </div>
+    
+}
+else
+{
+    <p>Loading Orders......</p>
+}
+
+
+
+
+@code {
+
+    private List<OrderDto> _orders;
+
+    [Parameter, EditorRequired]
+    public IEnumerable<OrderDto> Orders { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<OrderDto> HandleViewOrder { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(250);
+        _orders = Orders.ToList();
+    }
+
+    private async Task OnView(OrderDto selectedOrder)
+    {
+        await HandleViewOrder.InvokeAsync(selectedOrder);
+    }
+}

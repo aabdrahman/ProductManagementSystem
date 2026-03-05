@@ -195,3 +195,25 @@ textarea::placeholder {
     transform: translateY(-1px);
 /*    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);*/
 }
+
+/*MANAGEMENT SIDE*/
+
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.management-header p {
+    font-size: 1.25rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+.management-table-wrapper {
+    overflow-x: auto;
+}
+

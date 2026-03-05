@@ -1,0 +1,135 @@
+﻿
+@rendermode InteractiveServer
+
+@inject GetOrderDetailsHandler getOrderDetailsHandler
+
+@if (_isLoading)
+{
+    <p>Loading Details.......</p>
+}
+else
+{
+    if (_orderDetails is null)
+    {
+        <p>No order found.
+            @_responseMessage
+        </p>
+    }
+    else
+    {
+        <div class="order-container">
+
+            <!-- Order Header -->
+            <div class="order-header">
+
+                <div>
+                    <h2>Order #@_orderDetails.OrderNumber</h2>
+                    <span class="order-date">
+                        @_orderDetails.CreatedDate.ToString("dd MMM yyyy")
+                    </span>
+                </div>
+
+                <span class="order-status @_orderDetails.OrderStatus.ToLower()">
+                    @_orderDetails.OrderStatus
+                </span>
+
+            </div>
+
+
+            <!-- Order Information -->
+            <div class="order-info">
+
+                <div class="info-box">
+                    <span class="info-title">Created By</span>
+                    <span class="info-value">@_orderDetails.CreatedBy</span>
+                </div>
+
+                <div class="info-box">
+                    <span class="info-title">Delivery Address</span>
+                    <span class="info-value">@_orderDetails.DeliveryAddress</span>
+                </div>
+
+                <div class="info-box">
+                    <span class="info-title">Items</span>
+                    <span class="info-value">@_orderDetails.OrderLineItems.Count</span>
+                </div>
+
+                <div class="info-box">
+                    <span class="info-title">Confirmation</span>
+
+                    <span class="info-value confirm-badge @(_orderDetails.IsConfirmed ? "confirmed" : "not-confirmed")">
+                        @(_orderDetails.IsConfirmed ? "Confirmed" : "Awaiting Confirmation")
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Product List -->
+            <div class="order-products">
+
+                <h3>Ordered Products</h3>
+
+                @foreach (var item in _orderDetails.OrderLineItems)
+                {
+                    <div class="product-card">
+
+                        <div class="product-details">
+                            <span class="product-name">@item.ProductName</span>
+                            <span class="product-qty">Quantity: @item.OrderCount</span>
+                        </div>
+
+                        <span class="product-status @(item.IsActive ? "active" : "inactive")">
+                            @(item.IsActive ? "Active" : "Removed")
+                        </span>
+
+                    </div>
+                }
+
+            </div>
+
+
+            <!-- Order Actions -->
+            @* <div class="order-actions">
+
+                <button class="btn cancel-btn">Cancel Order</button>
+                <button class="btn complete-btn">Mark Completed</button>
+
+            </div> *@
+
+        </div>
+    }
+}
+
+
+
+@code {
+
+    private bool _isLoading;
+    private OrderDetailsDto? _orderDetails;
+    private string _responseMessage;
+
+    [Parameter, EditorRequired]
+    public OrderDto OrderToView { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(250);
+
+        if(OrderToView is not null)
+        {
+            var result = await getOrderDetailsHandler.Handle(OrderToView.Id);
+            _orderDetails = result.orderDetails; _responseMessage = result.responseMessage;
+        }
+        else
+        {
+            _responseMessage = "No Order Selected.";
+        }
+
+        _isLoading = false;
+    }
+
+}
