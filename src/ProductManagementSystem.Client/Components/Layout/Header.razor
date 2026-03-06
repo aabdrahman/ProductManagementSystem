@@ -1,6 +1,8 @@
 ﻿
 @rendermode InteractiveServer
 
+@implements IDisposable
+
 <header class="site-header">
     <div class="header-container">
 
@@ -15,6 +17,7 @@
             <a href="#about-us">About Us</a>
             <a href="#reviews">Reviews</a>
             <a href="/contact-us">Contact</a>
+            <a href="/orders">Manage Orders</a>
             <a href="/products/manage">Manage Products</a>
         </nav>
 
@@ -24,7 +27,53 @@
         </div>
 
         <div class="header-actions">
-            <a href="/login" class="login-link">Login</a>
+
+            @if (_isLoggedIn)
+            {
+                <div class="user-menu" @onclick="ToggleMenu">
+
+                    <div class="user-trigger">
+                        <span class="user-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                            </svg>
+                        </span>
+                        <span>@_username</span>
+                        <span class="arrow">▾</span>
+                    </div>
+
+                    @if (_showUserMenu)
+                    {
+                        <div class="user-dropdown">
+
+                            <a href="/profile">Profile</a>
+
+                            <a href="/orders">My Orders</a>
+
+                            <button class="logout-btn" @onclick="Logout">
+                                Logout
+                            </button>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else if (!_isLoggedIn)
+            {
+
+                <a @onclick="Login" class="login-btn">
+                    <span class="login-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+                        </svg>
+                    </span>
+                    <span class="login-text">Login</span>
+                </a>
+            }
+
+
             <a href="/checkout" class="checkout-btn">
                 🛒 Checkout
                 @if (_cartCount > 0)
@@ -47,11 +96,35 @@
 @code {
 
     private int _cartCount = 0;
+    private bool _isLoggedIn = true;
+
+    private string _username = "Abdrahman";
+
+    private bool _showUserMenu = false;
+
+    void ToggleMenu()
+    {
+        _showUserMenu = !_showUserMenu;
+    }
+
+    void Logout()
+    {
+        _isLoggedIn = false;
+        _showUserMenu = false;
+
+        // Clear token / session here
+    }
+
+    void Login()
+    {
+        _isLoggedIn = true;
+        _showUserMenu = false;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
-            return;
+        // if (!firstRender)
+        //     return;
 
         var savedOrders = await localStorageUtility
             .GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
@@ -60,5 +133,10 @@
         _cartCount = savedOrders?.Count() ?? 0;
 
         StateHasChanged();
+    }
+
+    void IDisposable.Dispose()
+    {
+        
     }
 }
