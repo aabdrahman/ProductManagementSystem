@@ -1,4 +1,6 @@
 ﻿using ProductManagementSystem.Api.Entities.StaticValues;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Net.Mail;
 
 namespace ProductManagementSystem.Api.Entities.Models;
 
@@ -22,4 +24,8 @@ public class Order
 
     //Order Line Items
     public ICollection<OrderLineItem> OrderLineItems { get; set; } = [];
+
+    //User Created By
+    public int? UserId { get; set; }
+    public User CreatedByUser { get; set; }
 }
