@@ -16,6 +16,9 @@ public class User
     public string PasswordHash { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
+    public DateTime? LastLoginDate { get; set; }
+    public DateTime? LastAuthenticatedDate { get; set; }
+    public DateTime? LastUpdatedAt { get; set; }
 
 
     //RELATIONSHIPS

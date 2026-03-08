@@ -6,6 +6,8 @@ using ProductManagementSystem.Api.Endpoints;
 using ProductManagementSystem.Api.Extensions;
 using ProductManagementSystem.Api.Services;
 using ProductManagementSystem.Api.Services.Contracts;
+using ProductManagementSystem.Api.Utilities;
+using ProductManagementSystem.Api.Utilities.Contracts;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +38,9 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IOrderLineItemService, OrderLineItemService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
 builder.Services.AddControllers();
 

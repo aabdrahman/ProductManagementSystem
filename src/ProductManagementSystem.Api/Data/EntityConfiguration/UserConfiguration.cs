@@ -15,6 +15,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(x => x.RoleId);
 
+        builder.Property(x => x.UserEmailAddress)
+            .IsRequired()
+            .HasMaxLength(100);
+
         builder.Property(x => x.FirstName)
             .IsRequired()
             .HasMaxLength(100);
