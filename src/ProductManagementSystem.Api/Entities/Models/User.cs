@@ -19,5 +19,10 @@ public class User
 
 
     //RELATIONSHIPS
+    //ORDERS
     public ICollection<Order> Orders { get; set; } = [];
+
+    //ROLE
+    public int RoleId { get; set; }
+    public Role AssignedRole { get; set; }
 }

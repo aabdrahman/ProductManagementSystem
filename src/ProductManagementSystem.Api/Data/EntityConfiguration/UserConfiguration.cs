@@ -13,6 +13,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(x => x.UserEmailAddress)
             .IsUnique();
 
+        builder.HasIndex(x => x.RoleId);
+
         builder.Property(x => x.FirstName)
             .IsRequired()
             .HasMaxLength(100);
@@ -44,6 +46,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasMany(x => x.Orders)
             .WithOne(x => x.CreatedByUser)
             .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.AssignedRole)
+            .WithMany(x => x.Users)
+            .HasForeignKey(x => x.RoleId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasQueryFilter(x => x.IsActive);
