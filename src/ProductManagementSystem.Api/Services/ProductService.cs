@@ -16,9 +16,11 @@ public sealed class ProductService : IProductService
     private string _className = "ClassName";
 
     private readonly RepositoryContext _repositoryContext;
-    public ProductService(RepositoryContext repositoryContext)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    public ProductService(RepositoryContext repositoryContext, IHttpContextAccessor httpContextAccessor)
     {
         _repositoryContext = repositoryContext;
+        _httpContextAccessor = httpContextAccessor;
     }
     public async Task<GenericResponse<ProductDto>> CreateAsync(CreateProductDto productToCreate)
     {
@@ -140,7 +142,10 @@ public sealed class ProductService : IProductService
     {
         try
         {
-            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetAllAsync").Information("Fetching All Products.....");
+            string ipAddress = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetAllAsync").Information("Fetching All Products From {0}.....", ipAddress);
+
 
             List<ProductDto> products = await _repositoryContext.Products
                                         .AsNoTracking()
