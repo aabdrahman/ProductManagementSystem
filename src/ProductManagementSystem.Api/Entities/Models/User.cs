@@ -24,6 +24,7 @@ public class User
     //RELATIONSHIPS
     //ORDERS
     public ICollection<Order> Orders { get; set; } = [];
+    public ICollection<Feedback> UserFeedbacks { get; set; } = [];
 
     //ROLE
     public int RoleId { get; set; }

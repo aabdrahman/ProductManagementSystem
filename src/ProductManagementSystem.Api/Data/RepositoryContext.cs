@@ -17,6 +17,7 @@ public class RepositoryContext : DbContext
     public DbSet<OrderLineItem> OrderLineItems { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
+    public DbSet<Feedback> Feedbacks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
