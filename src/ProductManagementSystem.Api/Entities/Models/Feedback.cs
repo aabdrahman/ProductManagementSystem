@@ -6,6 +6,7 @@ public class Feedback
     public string Message { get; set; }
     public string Name { get; set; }
     public string UserEmail { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     //FEEDBACK-USER RELATION
     public int? UserId { get; set; }

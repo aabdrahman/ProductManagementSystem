@@ -14,11 +14,21 @@ public class FeedbackConfiguration : IEntityTypeConfiguration<Feedback>
 
         builder.HasIndex(x => x.UserEmail);
 
+        builder.HasIndex(x => x.CreatedAt);
+
         builder.Property(x => x.Message)
             .IsRequired()
             .HasMaxLength(1000);
 
         builder.Property(x => x.Name)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.Property(x => x.CreatedAt)
+            .IsRequired()
+            .HasComputedColumnSql("GETUTCDATE()");
+
+        builder.Property(x => x.UserEmail)
             .IsRequired()
             .HasMaxLength(100);
 

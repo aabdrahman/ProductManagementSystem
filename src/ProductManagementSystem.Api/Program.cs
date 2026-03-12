@@ -41,6 +41,7 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IOrderLineItemService, OrderLineItemService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
