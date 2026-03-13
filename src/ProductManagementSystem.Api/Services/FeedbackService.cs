@@ -29,6 +29,12 @@ public class FeedbackService : IFeedbackService
 
             bool isExists = await _repositoryContext.Feedbacks.AnyAsync(f => f.UserEmail == createFeedbackDto.UserEmail && f.Message == createFeedbackDto.Message);
 
+            if (isExists)
+            {
+                Log.ForContext(_className, "FeedbackService").ForContext(_methodName, "CreateFeedbackAsync").Information("Feedback with details already provided by user. Email - {0}, Message - {1}", createFeedbackDto.UserEmail, createFeedbackDto.Message);
+                return GenericResponse<FeedbackDto>.Failure(null, "Possible duplicate feedbacks.", System.Net.HttpStatusCode.Conflict);
+            }
+
             Feedback feedbackToInsert = new();
 
             if (createFeedbackDto.UserId.HasValue && createFeedbackDto.UserId.Value != 0)
