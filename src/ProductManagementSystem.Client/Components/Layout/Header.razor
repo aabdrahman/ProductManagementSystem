@@ -96,7 +96,7 @@
 @code {
 
     private int _cartCount = 0;
-    private bool _isLoggedIn = true;
+    private bool _isLoggedIn = false;
 
     private string _username = "Abdrahman";
 
@@ -117,8 +117,10 @@
 
     void Login()
     {
-        _isLoggedIn = true;
-        _showUserMenu = false;
+        navigationManager.NavigateTo("/login");
+
+        // _isLoggedIn = true;
+        // _showUserMenu = false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

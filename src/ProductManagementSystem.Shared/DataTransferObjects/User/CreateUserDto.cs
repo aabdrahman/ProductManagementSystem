@@ -16,7 +16,7 @@ public record class CreateUserDto
     [Required(ErrorMessage = "Last Name is required.")]
     [StringLength(100, ErrorMessage = "First Name cannot exceed 100 characters.")]
     public string LastName { get; set; }
-    [StringLength(100, ErrorMessage = "First Name cannot exceed 100 characters.")]
+    //[StringLength(100, ErrorMessage = "First Name cannot exceed 100 characters.")]
     public string? MiddleName { get; set; }
     [Required(ErrorMessage = "PhoneNumber is required.")]
     [StringLength(50, ErrorMessage = "First Name cannot exceed 50 characters.")]

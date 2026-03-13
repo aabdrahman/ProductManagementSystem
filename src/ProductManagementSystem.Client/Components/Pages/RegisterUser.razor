@@ -1,0 +1,197 @@
+﻿@page "/register-user"
+
+
+@inject GetRoleHandler getRoleHandler
+@inject RegisterUserHandler registerUserHandler
+
+@rendermode InteractiveServer
+
+<PageTitle>Register User</PageTitle>
+
+
+<div class="auth-page">
+
+    <div class="auth-card">
+
+        <h2>Create Account</h2>
+        <p class="auth-subtitle">Register to start ordering products</p>
+
+        @if(_registerUserModel is not null)
+        {
+            <EditForm Model="_registerUserModel" OnValidSubmit="HandleRegisterUser">
+
+                <DataAnnotationsValidator />
+
+                @if(_responseMessage is not null)
+                {
+                    <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+                }
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <InputText @bind-Value="_registerUserModel.UserEmailAddress" placeholder="example@email.com" />
+                    <ValidationMessage For="@(() => _registerUserModel.UserEmailAddress)" />
+                </div>
+
+                <div class="form-group">
+                    <label>First Name</label>
+                    <InputText @bind-Value="_registerUserModel.FirstName" placeholder="John" />
+                    <ValidationMessage For="@(() => _registerUserModel.FirstName)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <InputText @bind-Value="_registerUserModel.LastName" placeholder="Doe" />
+                    <ValidationMessage For="@(() => _registerUserModel.LastName)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Middle Name</label>
+                    <InputText @bind-Value="_registerUserModel.MiddleName" placeholder="Enter your middle name(optional)" />
+                    <ValidationMessage For="@(() => _registerUserModel.MiddleName )" />
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <InputText @bind-Value="_registerUserModel.PhoneNumber" placeholder="+234 801 234 5678" />
+                    <ValidationMessage For="@(() => _registerUserModel.PhoneNumber)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Delivery Address</label>
+                    <InputTextArea @bind-Value="_registerUserModel.Address" rows="3" placeholder="12 Allen Avenue, Ikeja, Lagos" />
+                    <ValidationMessage For="@(() => _registerUserModel.Address)" />
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <InputText type="password" @bind-Value="_registerUserModel.Password" placeholder="Enter a strong password" />
+                    <ValidationMessage For="@(() => _registerUserModel.Password)" />
+                </div>
+
+            
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <InputText type="password" @bind-Value="_registerUserModel.ConfirmPassword" placeholder="Enter a strong password" />
+                    <ValidationMessage For="@(() => _registerUserModel.ConfirmPassword)" />
+                </div>
+
+                @if(_roles is not null && _roles.Any())
+                {
+                    <div class="form-group">
+                        <label>Role To Assign</label>
+                        <InputSelect @bind-Value="_registerUserModel.RoleId">
+
+                            <option value="0">Seect Role To Assign</option>
+
+                            @foreach(var role in _roles)
+                            {
+                                <option value="@role.RoleId">@role.RoleName</option>
+                            }
+
+                        </InputSelect>
+
+                        <ValidationMessage For="(() => _registerUserModel.RoleId)" />
+
+                    </div>
+                }
+                else if (_roles is not null && !_roles.Any() && string.IsNullOrEmpty(_registerUserModel.RoleId.ToString()))
+                {
+                    <p class="validation-message">
+                        No Role to assign to user
+                    </p>
+                }
+
+                <div class="form-actions">
+
+                    <button class="auth-btn" type="submit" disabled="@(_isSuccessful || _isRegistering)">
+                        @(_isRegistering ? "Registering....." : "Register")
+                    </button>
+
+                    <button class="btn cancel" type="button" @onclick="HandleCancel" disabled="@_isRegistering">
+                        Cancel
+                    </button>
+
+                </div>
+
+            </EditForm>
+        }
+        @if (_isSuccessful)
+        {
+            <div class="auth-footer">
+                Proceed to 
+                <a href="/login">Login</a>
+            </div>
+        }
+        else
+        {
+            <div class="auth-footer">
+                Already have an account?
+                <a href="/login">Login</a>
+            </div>
+        }
+
+
+    </div>
+
+</div>
+
+
+
+@code {
+
+    private CreateUserDto _registerUserModel;
+    private List<RoleDto> _roles;
+    private string _getRolesResponsemessage;
+
+    private bool _isLoading = false;
+    private string _responseMessage;
+    private bool _isSuccessful;
+    private bool _isRegistering = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(200);
+
+        var roleResult = await getRoleHandler.Handle();
+        _roles = roleResult.roles.ToList();
+        _getRolesResponsemessage = roleResult.message;
+
+        _registerUserModel = new CreateUserDto(){ RoleId = 1 };
+    }
+
+    private async Task HandleRegisterUser()
+    {
+        _isRegistering = true;
+        _responseMessage = null;
+
+        await Task.Delay(5000);
+        _isSuccessful = DateTime.Now.Second % 2 == 0;
+        _responseMessage = _isSuccessful ? "User registered successfully" : "Failed to register user. Please try again.";
+
+        // var result = await registerUserHandler.Handle(_registerUserModel);
+        // _isSuccessful = result.isSuccessful;
+        // _responseMessage = result.responseMessage;
+
+        if (_isSuccessful)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(5000);
+                navigationManager.NavigateTo("/login");
+
+            });
+        }
+
+        _isRegistering = false;
+    }
+
+    private async   Task HandleCancel()
+    {
+        _responseMessage = null;
+        _isSuccessful = false;
+        _isRegistering = false;
+        await Task.Delay(50);
+        _registerUserModel = new CreateUserDto();
+    }
+}

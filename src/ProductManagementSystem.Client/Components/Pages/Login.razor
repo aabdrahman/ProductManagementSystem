@@ -1,0 +1,70 @@
+﻿
+@page "/login"
+
+@rendermode InteractiveServer
+
+
+
+<div class="auth-page">
+
+    <div class="auth-card">
+
+        <h2>Login</h2>
+        <p class="auth-subtitle">Access your account</p>
+
+        @if(_loginUserModel is not null)
+        {
+            <EditForm Model="_loginUserModel" OnValidSubmit="LoginUser">
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <InputText @bind-Value="_loginUserModel.Email" />
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <InputText type="password" @bind-Value="_loginUserModel.Password" />
+                </div>
+
+                <button class="auth-btn">Login</button>
+
+            </EditForm>
+        }
+
+        
+
+        <div class="auth-footer">
+            Don't have an account?
+            <a href="/register-user">Register</a>
+        </div>
+
+    </div>
+
+</div>
+
+@code {
+
+    private LoginUserModel _loginUserModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(200);
+        _loginUserModel = new LoginUserModel();
+    }
+
+    private async Task LoginUser()
+    {
+        
+    }
+
+}
+
+
+@code{
+
+    class LoginUserModel
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}
