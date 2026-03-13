@@ -30,7 +30,7 @@ public class ReviewService : IReviewService
 
             Review reviewToInsert = new Review()
             {
-                CreatedDate = DateTime.Now,
+                CreatedDate = DateTime.UtcNow,
                 ReviewerName = createReview.ReviewerName,
                 ReviewText = createReview.Review,
                 ProductName = createReview.ProductName,

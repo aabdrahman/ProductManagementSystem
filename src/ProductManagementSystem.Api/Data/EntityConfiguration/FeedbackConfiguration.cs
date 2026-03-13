@@ -26,7 +26,7 @@ public class FeedbackConfiguration : IEntityTypeConfiguration<Feedback>
 
         builder.Property(x => x.CreatedAt)
             .IsRequired()
-            .HasComputedColumnSql("GETUTCDATE()");
+            .HasDefaultValueSql("GETUTCDATE()");
 
         builder.Property(x => x.UserEmail)
             .IsRequired()

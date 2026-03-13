@@ -37,7 +37,7 @@ public class RoleService : IRoleService
             Role roleToInsert = new Role()
             {
                 Name = roleName,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
             };
 
             await _repositoryContext.Roles.AddAsync(roleToInsert);

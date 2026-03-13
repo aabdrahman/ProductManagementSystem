@@ -32,7 +32,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasMaxLength(100);
 
         builder.Property(x => x.CreatedAt)
-            .IsRequired();
+            .IsRequired().HasDefaultValueSql("GETUTCDATE()");
 
         builder.Property(x => x.IsActive)
             .IsRequired()

@@ -37,7 +37,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.CreatedAt)
             .IsRequired()
-            .HasDefaultValueSql("GETDATE()");
+            .HasDefaultValueSql("GETUTCDATE()");
 
         builder.Property(x => x.PhoneNumber)
             .IsRequired()

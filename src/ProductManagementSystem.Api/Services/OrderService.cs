@@ -98,7 +98,7 @@ public class OrderService : IOrderService
                 //OrderedProduct = productToOrder,
                 OrderStatus = Entities.StaticValues.OrderStatus.Pending,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow.ToLocalTime(),
+                CreatedAt = DateTime.UtcNow,
                 DeliveryAddress = createOrder.DeliveryAddress,
                 OrderTrackingId = GetOrderTrackingId()
             };
@@ -220,7 +220,7 @@ public class OrderService : IOrderService
                                             //QuantityOrdered = x.OrderCount,
                                             OrderStatus = x.OrderStatus.ToString(),
                                             //Product = x.OrderedProduct.NormalizedName,
-                                            CreatedDate = x.CreatedAt,
+                                            CreatedDate = x.CreatedAt.ToLocalTime(),
                                             CreatedBy = x.CreatedBy,
                                             LineItemsCount = x.OrderLineItems.Count,
                                             OrderNumber = x.OrderTrackingId
@@ -258,7 +258,7 @@ public class OrderService : IOrderService
                                                 //QuantityOrdered = x.OrderCount,
                                                 OrderStatus = x.OrderStatus.ToString(),
                                                 //Product = x.OrderedProduct.NormalizedName,
-                                                CreatedDate = x.CreatedAt,
+                                                CreatedDate = x.CreatedAt.ToLocalTime(),
                                                 CreatedBy = x.CreatedBy,
                                                 LineItemsCount = x.OrderLineItems.Count,
                                                 OrderNumber = x.OrderTrackingId
@@ -301,7 +301,7 @@ public class OrderService : IOrderService
                                             //QuantityOrdered = x.OrderCount,
                                             OrderStatus = x.OrderStatus.ToString(),
                                             //Product = x.OrderedProduct.NormalizedName,
-                                            CreatedDate = x.CreatedAt,
+                                            CreatedDate = x.CreatedAt.ToLocalTime(),
                                             CreatedBy = x.CreatedBy,
                                             LineItemsCount = x.OrderLineItems.Count,
                                             OrderNumber = x.OrderTrackingId
@@ -417,7 +417,7 @@ public class OrderService : IOrderService
             {
                 Id = orderToUpdate.Id,
                 //QuantityOrdered = orderToUpdate.OrderCount,
-                CreatedDate = orderToUpdate.CreatedAt,
+                CreatedDate = orderToUpdate.CreatedAt.ToLocalTime(),
                 CreatedBy = orderToUpdate.CreatedBy,
                 //Product = orderToUpdate.OrderedProduct.NormalizedName,
                 OrderStatus = orderToUpdate.OrderStatus.ToString(),
@@ -470,7 +470,7 @@ public class OrderService : IOrderService
 
             if(orderToUpdate.OrderStatus == Entities.StaticValues.OrderStatus.Delivered)
             {
-                orderToUpdate.DeliveryDate = DateTime.UtcNow.ToLocalTime();
+                orderToUpdate.DeliveryDate = DateTime.UtcNow;
 
                 Log.ForContext(_methodName, "UpdateOrderStatusAsync").ForContext(_className, "OrderService").Information("Order with Id: {Id} has been delivered. Delivery date set to {deliveryDate}. Then, order line item products are increased", orderToUpdate.Id, orderToUpdate.DeliveryDate);
             }
@@ -509,7 +509,7 @@ public class OrderService : IOrderService
                                         {
                                             Id = x.Id,
                                             CreatedBy = x.CreatedBy,
-                                            CreatedDate = x.CreatedAt,
+                                            CreatedDate = x.CreatedAt.ToLocalTime(),
                                             DeliveryAddress = x.DeliveryAddress,
                                             OrderStatus = x.OrderStatus.ToString(),
                                             OrderNumber = x.OrderTrackingId,

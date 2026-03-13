@@ -27,6 +27,10 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.Property(x => x.CreatedAt)
+            .IsRequired()
+            .HasDefaultValueSql("GETUTCDATE()");
+
         builder.Property(x => x.NormalizedName)
             .IsRequired()
             .HasComputedColumnSql("UPPER([Name])")

@@ -5,6 +5,7 @@ using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Feedback;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
+using System.Data.Common;
 
 namespace ProductManagementSystem.Api.Services;
 
@@ -34,6 +35,12 @@ public class FeedbackService : IFeedbackService
             {
                 User? userPerformingAction = await _repositoryContext.Users.FirstOrDefaultAsync(x => x.Id == createFeedbackDto.UserId.Value);
 
+                if(userPerformingAction is null)
+                {
+                    Log.ForContext(_className, "FeedbackService").ForContext(_methodName, "CreateFeedbackAsync").Warning("User with Id {0} not found while creating feedback", createFeedbackDto.UserId.Value);
+                    return GenericResponse<FeedbackDto>.Failure(null, $"User with Id {createFeedbackDto.UserId.Value} not found while creating feedback", System.Net.HttpStatusCode.NotFound);
+                }
+
                 feedbackToInsert.Name = userPerformingAction.FirstName + " " + userPerformingAction.LastName;
                 feedbackToInsert.UserId = userPerformingAction.Id;
                 feedbackToInsert.UserEmail = userPerformingAction.UserEmailAddress;
@@ -60,10 +67,15 @@ public class FeedbackService : IFeedbackService
                 Name = feedbackToInsert.Name,
                 Message = feedbackToInsert.Message,
                 EmailAddress = feedbackToInsert.UserEmail,
-                CreatedAt = feedbackToInsert.CreatedAt
+                CreatedAt = feedbackToInsert.CreatedAt.ToLocalTime()
             }, "Feedback created successfully", System.Net.HttpStatusCode.OK);
 
 
+        }
+        catch(DbException ex)
+        {
+            Log.ForContext(_className, "FeedbackService").ForContext(_methodName, "CreateFeedbackAsync").Error(ex, "A database error occurred while creating feedback - {0}", createFeedbackDto);
+            return GenericResponse<FeedbackDto>.Failure(null, "A database error occurred while creating feedback", System.Net.HttpStatusCode.InternalServerError, ex.Message);
         }
         catch (Exception ex)
         {
@@ -81,7 +93,7 @@ public class FeedbackService : IFeedbackService
 
             List<FeedbackDto> feedbacks = await _repositoryContext.Feedbacks.AsNoTracking().Select(x => new FeedbackDto()
             {
-                CreatedAt = x.CreatedAt,
+                CreatedAt = x.CreatedAt.ToLocalTime(),
                 EmailAddress= x.UserEmail,
                 Message = x.Message,
                 Name = x.Name
@@ -93,6 +105,11 @@ public class FeedbackService : IFeedbackService
             return feedbacks.Any() ?
                 GenericResponse<IEnumerable<FeedbackDto>>.Success(feedbacks, "Feedbacks retrieved successfully.", System.Net.HttpStatusCode.OK) :
                 GenericResponse<IEnumerable<FeedbackDto>>.Failure(null, "No Feedbacks to retrieve.", System.Net.HttpStatusCode.NotFound);
+        }
+        catch(DbException ex)
+        {
+            Log.ForContext(_className, "FeedbackService").ForContext(_methodName, "GetAllFeedbacksAsync").Error(ex, "A database error occurred while retrieving feedbacks");
+            return GenericResponse<IEnumerable<FeedbackDto>>.Failure(null, "A database error occurred while retrieving feedbacks", System.Net.HttpStatusCode.InternalServerError, ex.Message);
         }
         catch (Exception ex)
         {
