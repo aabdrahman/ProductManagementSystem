@@ -80,6 +80,7 @@ builder.Services.AddScoped<IOrderLineItemService, OrderLineItemService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 

@@ -16,14 +16,19 @@
         {
             <EditForm Model="_loginUserModel" OnValidSubmit="LoginUser">
 
+                <DataAnnotationsValidator />
+
                 <div class="form-group">
                     <label>Email</label>
                     <InputText @bind-Value="_loginUserModel.Email" />
+                    <ValidationMessage For="(() => _loginUserModel.Email)" />
+
                 </div>
 
                 <div class="form-group">
                     <label>Password</label>
                     <InputText type="password" @bind-Value="_loginUserModel.Password" />
+                    <ValidationMessage For="(() => _loginUserModel.Password)" />
                 </div>
 
                 <button class="auth-btn">Login</button>
@@ -44,12 +49,12 @@
 
 @code {
 
-    private LoginUserModel _loginUserModel;
+    private LoginUserDto _loginUserModel;
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(200);
-        _loginUserModel = new LoginUserModel();
+        _loginUserModel = new LoginUserDto();
     }
 
     private async Task LoginUser()
@@ -59,12 +64,3 @@
 
 }
 
-
-@code{
-
-    class LoginUserModel
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-}

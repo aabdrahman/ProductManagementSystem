@@ -51,7 +51,7 @@ public class UserService : IUserService
 
             User userToInsert = new User()
             {
-                UserEmailAddress = createUser.UserEmailAddress,
+                UserEmailAddress = createUser.UserEmailAddress.ToUpper(),
                 PhoneNumber = createUser.PhoneNumber,
                 Address = createUser.Address,
                 FirstName = createUser.FirstName,
@@ -260,7 +260,7 @@ public class UserService : IUserService
 
             }
 
-            userToUpdate.UserEmailAddress = updateUser.UserEmailAddress;
+            userToUpdate.UserEmailAddress = updateUser.UserEmailAddress.ToUpper();
             userToUpdate.Address = updateUser.Address;
             userToUpdate.PhoneNumber = updateUser.PhoneNumber;
             userToUpdate.FirstName = updateUser.FirstName;

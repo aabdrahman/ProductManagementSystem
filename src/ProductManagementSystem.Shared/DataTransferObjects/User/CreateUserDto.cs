@@ -27,6 +27,8 @@ public record class CreateUserDto
     public int RoleId { get; set; }
 
     [Required(ErrorMessage = "Password is a required field.")]
+    [MinLength(8, ErrorMessage = "Password cannot be less than 8 characters.")]
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$", ErrorMessage = "Password must be at least 8 characters and include uppercase, lowercase, a number, and a symbol.")]
     public string Password { get; set; }
 
     [Required(ErrorMessage = "Confirm Password is required.")]
