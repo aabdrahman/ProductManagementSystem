@@ -17,7 +17,7 @@ public class LocalStorageUtility : ILocalStorageUtility
     {
         try
         {
-            var result = await _protectedLocalStorage.GetAsync<T>(key);
+            var result = await _protectedLocalStorage.GetAsync<T>(key.ToUpper());
 
             return result.Value;
         }
@@ -36,7 +36,7 @@ public class LocalStorageUtility : ILocalStorageUtility
                 return false;
             }
 
-            await _protectedLocalStorage.SetAsync(key, item);
+            await _protectedLocalStorage.SetAsync(key.ToUpper(), item);
 
             return true;
         }
@@ -55,7 +55,7 @@ public class LocalStorageUtility : ILocalStorageUtility
     {
         try
         {
-            await _protectedLocalStorage.DeleteAsync(key);
+            await _protectedLocalStorage.DeleteAsync(key.ToUpper());
 
             return true;
         }

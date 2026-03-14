@@ -30,6 +30,7 @@ builder.Services.AddScoped<DeleteOrderHandler>();
 builder.Services.AddScoped<AddFeedbackHandler>();
 builder.Services.AddScoped<GetRoleHandler>();
 builder.Services.AddScoped<RegisterUserHandler>();
+builder.Services.AddScoped<LoginHandler>();
 
 builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
 
