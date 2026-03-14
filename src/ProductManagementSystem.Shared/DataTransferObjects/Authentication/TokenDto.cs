@@ -1,4 +1,4 @@
-﻿namespace ProductManagementSystem.Shared.DataTransferObjects;
+﻿namespace ProductManagementSystem.Shared.DataTransferObjects.Authentication;
 
 public record class TokenDto
 {

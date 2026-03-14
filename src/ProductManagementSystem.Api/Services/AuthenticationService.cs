@@ -6,7 +6,7 @@ using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api.Entities.Models;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Api.Utilities.Contracts;
-using ProductManagementSystem.Shared.DataTransferObjects;
+using ProductManagementSystem.Shared.DataTransferObjects.Authentication;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;

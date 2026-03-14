@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ProductManagementSystem.Shared.DataTransferObjects;
+namespace ProductManagementSystem.Shared.DataTransferObjects.Authentication;
 
 public record class ChangePasswordDto
 {

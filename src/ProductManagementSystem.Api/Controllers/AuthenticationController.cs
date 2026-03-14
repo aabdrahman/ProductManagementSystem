@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProductManagementSystem.Api.Services.Contracts;
-using ProductManagementSystem.Shared.DataTransferObjects;
+using ProductManagementSystem.Shared.DataTransferObjects.Authentication;
 using Serilog;
 using System.Net;
 

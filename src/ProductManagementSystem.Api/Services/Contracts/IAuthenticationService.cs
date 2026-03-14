@@ -1,4 +1,4 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects;
+﻿using ProductManagementSystem.Shared.DataTransferObjects.Authentication;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 
 namespace ProductManagementSystem.Api.Services.Contracts;
