@@ -7,24 +7,43 @@ using ProductManagementSystem.Shared.DataTransferObjects.Role;
 using Serilog;
 using System.Data.Common;
 using System.Net;
+using System.Security.Claims;
 
 namespace ProductManagementSystem.Api.Services;
 
 public class RoleService : IRoleService
 {
     private readonly RepositoryContext _repositoryContext;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
-    public RoleService(RepositoryContext repositoryContext)
+    public RoleService(RepositoryContext repositoryContext, IHttpContextAccessor httpContextAccessor)
     {
         _repositoryContext = repositoryContext;
+        _httpContextAccessor = httpContextAccessor;
     }
     public async Task<GenericResponse<RoleDto>> CreateRoleAsync(string roleName)
     {
         try
         {
             Log.ForContext(_className, "RoleService").ForContext(_methodName, "CreateRoleAsync").Information("Creating Role - {0}", roleName);
+
+            string loggedInUserId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+            if(!int.TryParse(loggedInUserId, out int userId) || loggedInUserId == "0")
+            {
+                Log.ForContext(_className, "RoleService").ForContext(_methodName, "CreateRoleAsync").Information("User details could not be fetched. Invalid User Id - {0}", loggedInUserId);
+                return GenericResponse<RoleDto>.Failure(null, "Role Creation Failed.", HttpStatusCode.Unauthorized);
+            }
+
+            bool isUserExists = await _repositoryContext.Users.AnyAsync(x => x.Id == userId);
+
+            if (!isUserExists)
+            {
+                Log.ForContext(_className, "RoleService").ForContext(_methodName, "CreateRoleAsync").Information("User with Id - {0} does not exist", userId);
+                return GenericResponse<RoleDto>.Failure(null, $"User with Id does not exist. Invalid logged in user.", HttpStatusCode.Conflict);
+            }
 
             bool isExistsName = await _repositoryContext.Roles.AnyAsync(x => x.NormalizedName.Equals(roleName.ToUpper()));
 
@@ -38,6 +57,7 @@ public class RoleService : IRoleService
             {
                 Name = roleName,
                 CreatedAt = DateTime.UtcNow,
+                UserId = userId
             };
 
             await _repositoryContext.Roles.AddAsync(roleToInsert);
