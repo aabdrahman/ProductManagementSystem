@@ -1,0 +1,160 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+@inject AuthenticationStateProvider authenticationStateProvider
+
+
+<div class="admin-wrapper">
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar @(isSidebarCollapsed ? "collapsed" : "")">
+
+        <div class="sidebar-header">
+            <h3>ManageX</h3>
+
+            <button class="collapse-btn" @onclick="ToggleSidebar">
+                ☰
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="/admin/orders" class="nav-item">
+                <span class="nav-icon">📦</span>
+                <span class="nav-text">Orders</span>
+            </a>
+
+            <a href="/admin/products" class="nav-item">
+                <span class="nav-icon">🛒</span>
+                <span class="nav-text">Products</span>
+            </a>
+
+            <a href="/admin/productcategory" class="nav-item">
+                <span class="nav-icon">🏷️</span>
+                <span class="nav-text">Product Category</span>
+            </a>
+
+            <a href="/admin/analytics" class="nav-item">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Analytics</span>
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <div class="admin-main">
+
+        <!-- HEADER -->
+        <header class="admin-header">
+
+            <div class="header-left">
+                <h2>@PageTitle</h2>
+            </div>
+
+            <div class="header-right">
+
+                <div class="user-menu">
+
+                    <button @onclick="ShowProfile" class="admin-user-wrapper">
+                        <div class="admin-user">
+                            <div class="avatar">
+                                @_avatar
+                            </div>
+
+                            <div class="user-info">
+                                <span class="user-name">@_userName</span>
+                                <span class="user-role">@_userRole</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    @if (_showUserProfile)
+                    {
+                        <div class="user-dropdown">
+
+                            <a href="/profile">Profile</a>
+
+                            @* <button class="logout-btn" @onclick="HandleLogout">
+                                Logout
+                            </button> *@
+
+                        </div>
+                    }
+
+                </div>
+
+
+                @* <button @onclick="ShowProfile" class="admin-user-wrapper">
+                    <div class="admin-user">
+                        <div class="avatar">
+                            @_avatar
+                        </div>
+
+                        <div class="user-info">
+                            <span class="user-name">@_userName</span>
+                            <span class="user-role">@_userRole</span>
+                        </div>
+                    </div>
+                </button> *@
+
+                <button @onclick="HandleLogout" class="logout-btn-admin">
+                    Logout
+                </button>
+
+            </div>
+
+        </header>
+
+        <!-- BODY -->
+        <main class="admin-content">
+            @Body
+        </main>
+
+    </div>
+
+</div>
+
+@code {
+
+    private bool isSidebarCollapsed = false;
+
+    private bool _showUserProfile;
+
+    private string PageTitle = "Dashboard";
+    private string _userName;
+    private string _userRole;
+    private string _avatar;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        _userName = user.Identity?.Name ?? "Administrator User";
+        _userRole = user.FindFirst(x => x.Type.EndsWith("/role"))?.Value ?? "Administrator";
+
+        _avatar = _userName[0].ToString();
+    }
+
+    void ToggleSidebar()
+    {
+        isSidebarCollapsed = !isSidebarCollapsed;
+    }
+
+    void HandleLogout()
+    {
+        navigationManager.NavigateTo("/logout");
+    }
+
+    void ShowProfile()
+    {
+        _showUserProfile = !_showUserProfile;
+    }
+
+}

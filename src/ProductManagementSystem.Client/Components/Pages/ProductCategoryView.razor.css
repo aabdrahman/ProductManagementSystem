@@ -97,3 +97,20 @@
     background: #fee2e2;
     color: #991b1b;
 }
+
+.no-products {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-products p {
+    font-size: 1.25rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+    line-height: 1.8;
+    font-style: italic;
+}

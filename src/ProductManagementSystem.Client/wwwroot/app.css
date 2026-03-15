@@ -209,6 +209,44 @@ textarea::placeholder {
 
 /*MANAGEMENT SIDE*/
 
+.order-management {
+    padding: 4rem 2rem;
+    background: var(--BG-COLOR-SECONDARY);
+}
+
+.order-management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-direction: column;
+}
+
+.order-management-header p {
+    font-size: 1.25rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+.no-orders {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-orders p {
+    font-size: 1.25rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 400;
+    line-height: 1.8;
+    font-style: italic;
+}
+
 .management-header {
     display: flex;
     justify-content: space-between;

@@ -20,6 +20,8 @@
             <a href="#about-us">About Us</a>
             <a href="#reviews">Reviews</a>
             <a href="/contact-us">Contact</a>
+            <a href="/admin/orders">Manage Orders</a>
+            <a href="/admin/products">Manage Products</a>
 
             <AuthorizeView Roles="ADMIN">
                 <a href="/orders">Manage Orders</a>
@@ -144,7 +146,7 @@
 
         if (_isLoggedIn)
         {
-            _username = user.Identity.Name ?? "";
+            _username = user?.Identity?.Name ?? "";
         }
 
         _cartCount = savedOrders?.Count() ?? 0;

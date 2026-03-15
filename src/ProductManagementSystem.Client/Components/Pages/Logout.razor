@@ -1,0 +1,36 @@
+﻿
+@page "/logout"
+
+@layout ProductManagementSystem.Client.Components.Layout.CustomLayout
+
+@inject LogoutHandler logoutHandler
+
+@if (_isLoading)
+{
+    <p>
+        Losding.......
+    </p>
+}
+
+@code {
+
+    private bool _isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(500);
+
+        var isLogout = await logoutHandler.Handle();
+
+        if (isLogout)
+        {
+            navigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            navigationManager.NavigateTo("/login");
+        }
+    }
+}

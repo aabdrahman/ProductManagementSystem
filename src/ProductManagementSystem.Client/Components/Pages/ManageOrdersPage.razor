@@ -1,13 +1,15 @@
 ﻿
-@page "/orders"
+@page "/admin/orders"
 
 @rendermode InteractiveServer
 
 @inject GetOrdersHandler getOrdersHandler
 
-<section>
+@layout ProductManagementSystem.Client.Components.Layout.AdminLayout
 
-    <div class="management-header">
+<section class="order-management">
+
+    <div class="order-management-header">
         <h2>Order Management</h2>
 
         <p>Track, manage, and process customer orders.</p>
