@@ -29,7 +29,7 @@ public class LoginHandler
 
             if (responseBody.IsSuccessStatus)
             {
-                bool isStorageMaintained = await _localStorageUtility.PersistToStorageAsync(responseBody.Data, "tokenDetails");
+                bool isStorageMaintained = await _localStorageUtility.PersistToStorageAsync<TokenDto>(responseBody.Data, "tokenDetails");
 
                 return isStorageMaintained ? (responseBody.IsSuccessStatus, $"{responseBody.ResponseMessage}.{"Session Activated"}") : (isStorageMaintained, $"{responseBody.ResponseMessage}{"Session activation failed."}");
             }

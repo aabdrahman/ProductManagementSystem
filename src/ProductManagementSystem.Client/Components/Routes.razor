@@ -1,6 +1,24 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using ProductManagementSystem.Client.Components.Pages
+
+<Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+
+        <AuthorizeRouteView Resource="routeData" RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+
+            <Authorizing>
+                <p class="session-state">
+                    Determining session state.......
+                </p>
+            </Authorizing>
+
+            <NotAuthorized>
+                <UnAuthorized />
+            </NotAuthorized>
+
+        </AuthorizeRouteView>
+
+      @*   <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" /> *@
     </Found>
 </Router>

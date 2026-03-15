@@ -1,13 +1,59 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using ProductManagementSystem.Client.AuthProviderUtility;
 using ProductManagementSystem.Client.Components;
 using ProductManagementSystem.Client.Handlers;
 using ProductManagementSystem.Client.Utilities;
 using ProductManagementSystem.Client.Utilities.Contracts;
 using System.Net;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+
+builder.Services.AddAuthentication(opts =>
+{
+    opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+}).AddJwtBearer("Bearer", opts =>
+{
+    var tokenParameter = new TokenValidationParameters()
+    {
+        ValidateAudience = true,
+        ValidateIssuer = true,
+        ValidateIssuerSigningKey = true,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero,
+
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("PmsSECRET") ?? "Test")),
+        ValidIssuer = "TaskManagementAPI",
+        ValidAudiences = "https://localhost:7082;http://localhost:5246".Split(";", StringSplitOptions.TrimEntries)
+    };
+
+    opts.TokenValidationParameters = tokenParameter;
+
+    //opts.Events = new JwtBearerEvents
+    //{
+    //    OnChallenge = context =>
+    //    {
+    //        context.HandleResponse();
+    //        return Task.CompletedTask;
+    //    }
+    //};
+});
+
+builder.Services.AddAuthorizationCore();
+
+builder.Services.AddCascadingAuthenticationState();
+
+builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
+
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, MiddlewareAuthenticationResultHandler>();
 
 builder.Services.AddScoped<GetReviewsHandler>();
 builder.Services.AddScoped<GetProductsHandler>();
@@ -51,7 +97,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+//app.UseStatusCodePagesWithRedirects("/StatusCode/{0}");
+
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.UseStaticFiles();
 app.UseAntiforgery();

@@ -1,0 +1,68 @@
+﻿@page "/StatusCode/401"
+
+@layout ProductManagementSystem.Client.Components.Layout.CustomLayout
+
+@rendermode InteractiveServer
+
+<Popup @ref="popup" Title="@_title" ShowCloseButton="@false">
+
+    <Body>
+
+        <div class="auth-popup">
+
+            <h3>Login Required</h3>
+
+            <p>
+                You must login to continue using this feature.
+            </p>
+
+            <div class="popup-actions">
+
+                <button class="btn-login" @onclick="GoToLogin">
+                    Login
+                </button>
+
+                @* <button class="btn-close" @onclick="Close">
+                    Cancel
+                </button> *@
+
+            </div>
+
+        </div>
+
+    </Body>
+
+</Popup>
+
+@code {
+
+    private Popup popup;
+    private string _title;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        _title = "Unauthorized Access";
+
+        popup.OpenModal();
+    }
+
+    protected async override void OnAfterRender(bool firstRender)
+    {
+        await Task.Delay(500);
+        _title = "Unauthorized Access";
+
+        popup.OpenModal();
+    }
+
+    void Close()
+    {
+        popup.CloseModal();
+    }
+
+    void GoToLogin()
+    {
+        navigationManager.NavigateTo("/login");
+        popup.CloseModal();
+    }
+}
