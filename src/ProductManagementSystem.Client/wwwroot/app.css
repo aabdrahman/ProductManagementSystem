@@ -233,10 +233,9 @@ textarea::placeholder {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 80vh;
-    background: VAR(--BG-COLOR-SECONDARY);
+    min-height: 100vh;
+    background: var(--BG-COLOR-SECONDARY);
     padding: 2rem 4%;
-    margin: 0 auto;
 }
 
 .auth-card {
