@@ -46,8 +46,30 @@
 
 /* COLLAPSED NAV */
 
-.admin-sidebar.collapsed span {
+.admin-sidebar.collapsed .nav-text {
     display: none;
+    align-items: center;
+}
+
+.admin-sidebar.collapsed .nav-icon {
+    display: flex;
+    align-items: center;
+}
+
+.admin-sidebar.collapsed .nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-sidebar.collapsed .sidebar-header > h3 {
+    display: none;
+}
+
+.admin-sidebar.collapsed .sidebar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* MAIN */
@@ -118,10 +140,12 @@
 .logout-btn-admin {
     background: #ef4444;
     border: none;
-    color: white;
+    color: var(--FONT-COLOR-BASIC);
     padding: 0.4rem 0.8rem;
     border-radius: 5px;
     cursor: pointer;
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 600;
 }
 
 /* CONTENT */

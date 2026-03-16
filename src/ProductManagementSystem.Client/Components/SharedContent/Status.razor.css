@@ -1,20 +1,19 @@
-﻿
-
-.status {
-    display: inline-flex;
+﻿.status {
+    display: flex;
     justify-content: center;
     align-items: center;
     padding: 0.25rem 0.5rem;
-    margin: 10px 0px 10px 0px;
+    margin: 10px 0;
     border-radius: 0.25rem;
     font-size: 1.275rem;
     font-weight: 800;
-    color: var(--FONT-COLOR-BASIC);
-    width: 100%;
-    font-family: var(--FONT-STYLE-BODY);
-    text-align: center;
     font-style: italic;
-    text-wrap: wrap;
+    color: var(--FONT-COLOR-BASIC);
+    font-family: var(--FONT-STYLE-BODY);
+    width: 100%;
+    text-align: center;
+    overflow-wrap: break-word;
+    animation: ShowDetails 0.5s ease-in-out;
 }
 
 .failure {
@@ -22,6 +21,22 @@
 }
 
 .success {
-
     background-color: #0A4D1B;
+}
+
+@keyframes ShowDetails {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.96);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: translateY(5px) scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }

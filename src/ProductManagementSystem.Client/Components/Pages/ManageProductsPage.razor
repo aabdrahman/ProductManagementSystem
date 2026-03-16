@@ -28,7 +28,10 @@
         {
             <div class="no-products">
                 <h3>No products available</h3>
-                <p>Start by adding your first product.</p>
+                <p>
+                    Start by adding your first product.
+                    @_responseMessage
+                </p>
             </div>
         }
         else if(_products is not null && _products.Any())
@@ -93,7 +96,7 @@
         await Task.Delay(500);
 
         var response = await getProductsHandler.Handle();
-        _products = response.products; 
+        _products = response.products; _responseMessage = response.message;
 
         _isLoading = false;
     }
