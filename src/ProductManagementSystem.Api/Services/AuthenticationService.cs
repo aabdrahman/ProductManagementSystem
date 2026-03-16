@@ -38,9 +38,43 @@ public class AuthenticationService : IAuthenticationService
         _jwtSettingConfig = jwtSettingsOptionsMonitor.CurrentValue;
         _httpContextAccessor = httpContextAccessor;
     }
-    public Task<GenericResponse<string>> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
+    public async Task<GenericResponse<string>> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ChangePasswordAsync").Information("Change User Password request - {0}", changePasswordDto);
+
+            User? userToChangePassword = await _repositoryContext.Users.IgnoreQueryFilters().SingleOrDefaultAsync(x => x.UserEmailAddress == changePasswordDto.Email.ToUpper());
+
+            if(userToChangePassword is null)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ChangePasswordAsync").Information("User Change Password Failed. User with Email does not exist - {0}", changePasswordDto.Email);
+                return GenericResponse<string>.Failure("Operation Failed.", "User with Email does not exist", HttpStatusCode.NotFound);
+            }
+
+            bool isSamePassword = _passwordHasher.ValidatePassword(userToChangePassword.PasswordHash, changePasswordDto.NewPassword);
+
+            if (isSamePassword)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ChangePasswordAsync").Information("Change Password Failed. User provided same old password as new password - {0}", changePasswordDto);
+                return GenericResponse<string>.Failure("Operation Failed.", "Password Change Failed. Password previously used.", HttpStatusCode.BadRequest);
+            }
+
+            userToChangePassword.PasswordHash = _passwordHasher.HashPassword(changePasswordDto.NewPassword);
+            userToChangePassword.IsActive = true;
+
+            await _repositoryContext.SaveChangesAsync();
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ChangePasswordAsync").Information("User Password and Reactivation successful.");
+
+            return GenericResponse<string>.Success("Operation Successful.", "Password Updated Successfully.", HttpStatusCode.OK);
+
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ChangePasswordAsync").Error(ex, "Password Chnage Failed. An Error Occurred Changing User Password.");
+            return GenericResponse<string>.Failure("Operation Failed.", "An Error Occurred changing user password.", HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
     }
 
     public async Task<GenericResponse<TokenDto>> LoginAsync(LoginUserDto loginUser)
@@ -99,9 +133,69 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
-    public Task<GenericResponse<TokenDto>> RefreshTokenAsync(TokenDto tokenDto)
+    public async Task<GenericResponse<TokenDto>> RefreshTokenAsync(TokenDto tokenDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("Refresh Token request - {0}", tokenDto.Token);
+
+            var tokenPrincipals = GetPrincipalFromToken(tokenDto.Token);
+
+            if(tokenPrincipals is null)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("Token Principal could not be fetched from the token");
+                return GenericResponse<TokenDto>.Failure(null, "Invalid Token provided.", HttpStatusCode.BadRequest);
+            }
+
+            string? userEmail = tokenPrincipals.FindFirst(x => x.Type.EndsWith("emailaddress"))?.Value;
+
+            if(userEmail is null)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("User Email could not be fetched from the token principal");
+                return GenericResponse<TokenDto>.Failure(null, "Invalid Token provided.", HttpStatusCode.BadRequest);
+            }
+
+            User? userWithToken = await _repositoryContext.Users.Include(x => x.AssignedRole).SingleOrDefaultAsync(x => x.UserEmailAddress == userEmail.ToUpper());
+
+            if(userWithToken is null)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("Invalid User Email. User with Email could not be fetched - {0}", userEmail);
+                return GenericResponse<TokenDto>.Failure(null, "Invalid Credentials.", HttpStatusCode.NotFound);
+            }
+
+            if(!userWithToken.RefreshToken.Equals(tokenDto.RefreshToken) || DateTime.UtcNow.ToLocalTime() > userWithToken.RefreshTokenExpiryTime)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("User Refresh Token already expired or invalid refresh token provided - {0}", tokenDto.RefreshToken);
+                return GenericResponse<TokenDto>.Failure(null, "Invalid Credentials.", HttpStatusCode.NotFound);
+            }
+
+            userWithToken.RefreshToken = GenerateRefreshToken();
+
+            await _repositoryContext.SaveChangesAsync();
+
+            loggedInUser = userWithToken;
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("User refresh token generated and token pending geenration.");
+
+            string token = GenerateToken();
+
+            TokenDto tokenDetails = new TokenDto()
+            {
+                RefreshToken = userWithToken.RefreshToken,
+                Token = token,
+                TokenExpirationTime = userWithToken.RefreshTokenExpiryTime
+            };
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("Token refreshed and new access token geenrated successfully - {0}", tokenDetails);
+
+            return GenericResponse<TokenDto>.Success(tokenDetails, "Token refreshed successfully.", HttpStatusCode.OK);
+
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Error(ex, "An Error Occurred Refreshing Token.");
+            return GenericResponse<TokenDto>.Failure(null, "An Error Occurred refreshing token details.", HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
     }
 
     private List<Claim> GetClaims()
@@ -168,5 +262,38 @@ public class AuthenticationService : IAuthenticationService
         var token = new JwtSecurityTokenHandler().WriteToken(options);
 
         return token;
+    }
+
+    private ClaimsPrincipal? GetPrincipalFromToken(string token)
+    {
+        string secretKey = Environment.GetEnvironmentVariable("PmsSECRET") ?? throw new ArgumentNullException("Cannot proceed as secret key could not be fetched.");
+
+        TokenValidationParameters tokenValidationParamter = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+
+            ValidAudiences = _jwtSettingConfig.ValidAudience?.Split(";", StringSplitOptions.RemoveEmptyEntries) ?? [],
+            ValidIssuer = _jwtSettingConfig.ValidIssuer,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+        };
+
+        SecurityToken securityToken;
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParamter, out securityToken);
+
+        var jwtSecurityToken = securityToken as JwtSecurityToken;
+
+        if(jwtSecurityToken is null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.CurrentCultureIgnoreCase))
+        {
+            return null;    
+        }
+
+        return principal;
     }
 }

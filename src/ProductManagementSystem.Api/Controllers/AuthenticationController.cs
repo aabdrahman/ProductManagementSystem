@@ -36,4 +36,36 @@ public class AuthenticationController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken([FromBody] TokenDto tokenDto)
+    {
+        try
+        {
+            var result = await _authenticationService.RefreshTokenAsync(tokenDto);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "RefreshToken").Error(ex, "Error Invoking Ednpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+    {
+        try
+        {
+            var result = await _authenticationService.ChangePasswordAsync(changePasswordDto);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "ChangePassword").Error(ex, "Error Invoking Ednpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
 }
