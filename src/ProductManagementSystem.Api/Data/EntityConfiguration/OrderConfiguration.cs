@@ -12,7 +12,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasIndex(x => x.Id);
 
-        //builder.HasIndex(x => x.ProductId);
+        builder.HasIndex(x => x.IsActive);
 
         builder.HasIndex(x => x.OrderStatus);
 

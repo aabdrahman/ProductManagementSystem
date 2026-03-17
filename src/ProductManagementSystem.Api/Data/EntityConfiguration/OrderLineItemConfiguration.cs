@@ -16,6 +16,8 @@ public class OrderLineItemConfiguration : IEntityTypeConfiguration<OrderLineItem
 
         builder.HasIndex(x => x.ProductId);
 
+        builder.HasIndex(x => x.IsActive);
+
         builder.ToTable(table => table.HasCheckConstraint("CK_OrderLineItem_QuantityOrdered", "[QuantityOrdered] > 0"));
 
         builder.Property(x => x.IsActive)

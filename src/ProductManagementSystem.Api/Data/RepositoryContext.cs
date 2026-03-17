@@ -18,6 +18,7 @@ public class RepositoryContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Feedback> Feedbacks { get; set; }
+    public DbSet<UserOtpVerification> UserOtpVerifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
