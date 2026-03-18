@@ -8,4 +8,6 @@ public interface IAuthenticationService
     Task<GenericResponse<TokenDto>> LoginAsync(LoginUserDto loginUser);
     Task<GenericResponse<TokenDto>> RefreshTokenAsync(TokenDto tokenDto);
     Task<GenericResponse<string>> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
+    Task<GenericResponse<string>> SendOtpAsync(SendOtpRequestDto sendOtpRequest);
+    Task<GenericResponse<string>> ValidateOtpAsync(ValidateOtpRequestDto validateOtpRequest);
 }

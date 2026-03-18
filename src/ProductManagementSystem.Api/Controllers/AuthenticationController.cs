@@ -68,4 +68,36 @@ public class AuthenticationController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
+
+    [HttpPost("send-otp")]
+    public async Task<IActionResult> SendOtp([FromBody] SendOtpRequestDto sendOtpRequest)
+    {
+        try
+        {
+            var result = await _authenticationService.SendOtpAsync(sendOtpRequest);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "SendOtp").Error(ex, "Error Invoking Ednpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpPost("validate-otp")]
+    public async Task<IActionResult> ValidateOtp([FromBody] ValidateOtpRequestDto validateOtpRequest)
+    {
+        try
+        {
+            var result = await _authenticationService.ValidateOtpAsync(validateOtpRequest);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "ValidateOtp").Error(ex, "Error Invoking Ednpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
 }

@@ -25,6 +25,38 @@ public class UserService : IUserService
         _repositoryContext = repositoryContext;
         _passwordHasher = passwordHasher;
     }
+
+    public async Task<GenericResponse<string>> ConfirmUserAsync(UpdateUserConfimationStatusDto updateUserConfimationStatus)
+    {
+        try
+        {
+            Log.ForContext(_className, nameof(UserService)).ForContext(_methodName, nameof(ConfirmUserAsync)).Information("Update User Confirmation Status - {0}", updateUserConfimationStatus);
+
+            User? userToConfirm = await _repositoryContext.Users.FirstOrDefaultAsync(x => x.UserEmailAddress == updateUserConfimationStatus.UserEmailAddress.ToUpper() && x.Id == updateUserConfimationStatus.Id);
+
+            if(userToConfirm is null)
+            {
+                Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(ConfirmUserAsync)).Information("Update User Confirmation Status Failed. User with Details not found - {0}", updateUserConfimationStatus);
+                return GenericResponse<string>.Failure("Operation Failed.", "User with details does not exist.", HttpStatusCode.NotFound);
+            }
+
+            userToConfirm.ConfirmedAt = DateTime.UtcNow.ToLocalTime();
+            userToConfirm.IsUserConfirmed = true;
+
+            await _repositoryContext.SaveChangesAsync();
+
+            Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(ConfirmUserAsync)).Information("User Details confirmed successfully.");
+
+            return GenericResponse<string>.Success("Operation Successful.", "User details successfully updated.", HttpStatusCode.OK);
+
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(ConfirmUserAsync)).Error(ex, "An Error Occurred Confirming User details.");
+            return GenericResponse<string>.Failure("Operation Failed.", "An Error Occurred confirming` user details.", HttpStatusCode.InternalServerError, new { Message = ex.Message  });
+        }
+    }
+
     public async Task<GenericResponse<UserDto>> CreateAsync(CreateUserDto createUser)
     {
         try

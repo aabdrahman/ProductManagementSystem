@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.User;
 using Serilog;
 using System.Net;
-using System.Runtime.CompilerServices;
 
 namespace ProductManagementSystem.Api.Controllers;
 
@@ -98,6 +96,22 @@ public class UserController : ControllerBase
         catch (Exception ex)
         {
             Log.ForContext(_className, "UserController").ForContext(_methodName, "Update").Error(ex, "Error Invoking Ednpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpPatch("confirm-user-profile")]
+    public async Task<IActionResult> ConfirmUserProfile([FromBody] UpdateUserConfimationStatusDto updateUserConfimationStatus)
+    {
+        try
+        {
+            var result = await _userService.ConfirmUserAsync(updateUserConfimationStatus);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, nameof(AuthenticationController)).ForContext(_methodName, nameof(ConfirmUserProfile)).Error(ex, "Error Invoking Ednpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }

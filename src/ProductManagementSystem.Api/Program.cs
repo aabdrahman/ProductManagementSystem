@@ -83,8 +83,11 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
+builder.Services.AddSingleton<IOtpOperation, OtpOperation>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 builder.Services.Configure<JwtSettingConfig>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<OtpSettingsConfig>(builder.Configuration.GetSection("OtpSettings"));
 
 builder.Services.AddAuthentication(opts =>
 {

@@ -10,4 +10,5 @@ public interface IUserService
     Task<GenericResponse<UserDto>> UpdateAsync(UpdateUserDto updateUser);
     Task<GenericResponse<UserDto>> GetUserByIdAsync(int Id);
     Task<GenericResponse<IEnumerable<UserDto>>> GetAllAsync();
+    Task<GenericResponse<string>> ConfirmUserAsync(UpdateUserConfimationStatusDto updateUserConfimationStatus);
 }

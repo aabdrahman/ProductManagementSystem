@@ -24,19 +24,29 @@ public class AuthenticationService : IAuthenticationService
     private readonly IConfiguration _configuration;
     private readonly JwtSettingConfig _jwtSettingConfig;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private ILogger<AuthenticationService> _logger;
+    private readonly IOtpOperation _otpOperation;
+    private readonly IEmailService _emailService;
+    private readonly OtpSettingsConfig _otpSettingsConfig;
 
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
     private User? loggedInUser;
 
-    public AuthenticationService(RepositoryContext repositoryContext, IPasswordHasher passwordHasher, IConfiguration configuration, IOptionsMonitor<JwtSettingConfig> jwtSettingsOptionsMonitor, IHttpContextAccessor httpContextAccessor)
+    public AuthenticationService(RepositoryContext repositoryContext, IPasswordHasher passwordHasher, IConfiguration configuration, 
+                                IOptionsMonitor<JwtSettingConfig> jwtSettingsOptionsMonitor, IHttpContextAccessor httpContextAccessor, 
+                                ILogger<AuthenticationService> logger, IOtpOperation otpOperation, IEmailService emailService, IOptionsMonitor<OtpSettingsConfig> otpSettingsConfigOptionsMonitor)
     {
         _repositoryContext = repositoryContext;
         _passwordHasher = passwordHasher;
         _configuration = configuration;
         _jwtSettingConfig = jwtSettingsOptionsMonitor.CurrentValue;
         _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
+        _otpOperation = otpOperation;
+        _emailService = emailService;
+        _otpSettingsConfig = otpSettingsConfigOptionsMonitor.CurrentValue;
     }
     public async Task<GenericResponse<string>> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
     {
@@ -195,6 +205,115 @@ public class AuthenticationService : IAuthenticationService
         {
             Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Error(ex, "An Error Occurred Refreshing Token.");
             return GenericResponse<TokenDto>.Failure(null, "An Error Occurred refreshing token details.", HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+    }
+
+    public async Task<GenericResponse<string>> SendOtpAsync(SendOtpRequestDto sendOtpRequest)
+    {
+        try
+        {
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Information("Generate and send OTP request - {0}", sendOtpRequest);
+
+            var userExists = await _repositoryContext.Users.IgnoreQueryFilters().AnyAsync(x => x.UserEmailAddress == sendOtpRequest.UserEmailAddress.ToUpper() && x.Id == sendOtpRequest.UserId);
+
+            if(!userExists)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Information("OTP Generation Failed. User with email does not exist - {0}", sendOtpRequest.UserEmailAddress);
+                return GenericResponse<string>.Failure("Operation Failed.", "User with email does not exist.", HttpStatusCode.NotFound);
+            }
+
+            string generatedOTP = _otpOperation.GenerateOtp();
+
+            if(!string.IsNullOrEmpty(generatedOTP))
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Information("OTP generation Failed. Generated OTP is empty - {0}", generatedOTP);
+                return GenericResponse<string>.Failure("Operation Failed.", "OPT could not be generated.", HttpStatusCode.BadRequest);
+            }
+
+            UserOtpVerification userOtpVerificationToInsert = new UserOtpVerification()
+            {
+                UserEmail = sendOtpRequest.UserEmailAddress,
+                GeneratedOTP = _passwordHasher.HashPassword(generatedOTP)
+            };
+
+            bool isEmailSent = await _emailService.SendEmailAsync(generatedOTP);
+
+            if(!isEmailSent)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Information("Email could not be sent to user.");
+                return GenericResponse<string>.Failure("Operation Failed.", "OTP send failed. Kindly retry again.", HttpStatusCode.BadRequest);
+            }
+
+            await _repositoryContext.AddAsync(userOtpVerificationToInsert);
+
+            try
+            {
+                await _repositoryContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                bool revokeEmail = await  _emailService.RevokeEmailAsync(generatedOTP);
+
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Error(ex, "An Error occurred inserting otp record to database. Revoke Email sent result - {0}", revokeEmail);
+
+                return GenericResponse<string>.Failure("Operation Failed.", "An Error Occurred sending OTP. Kindly retry.", HttpStatusCode.InternalServerError);
+            }
+
+
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Information("OTP Generated and sent successfully - {0}", userOtpVerificationToInsert);
+
+            return GenericResponse<string>.Success("Operation Successful.", "OTP generated and sent successfully.", HttpStatusCode.OK);
+
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Error(ex, "An Error Occurred generating and sending OTP to user.");
+            return GenericResponse<string>.Failure("Operation Failed.", "An Error Occurred generating and sending OTP to user.", HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+    }
+
+    public async Task<GenericResponse<string>> ValidateOtpAsync(ValidateOtpRequestDto validateOtpRequest)
+    {
+        try
+        {
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("Validate OTP request - {0}", validateOtpRequest);
+
+            UserOtpVerification? userOtp = await _repositoryContext.UserOtpVerifications.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(x => x.UserEmail == validateOtpRequest.UserEmailAddress.ToUpper());
+
+            if(userOtp is null)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("OTP Validation Failed. No OTP exists for provided user - {0}", validateOtpRequest);
+                return GenericResponse<string>.Failure("Operation Failed.", "OTP Verification Failed. Kindly use the resend option.", HttpStatusCode.NotFound);
+            }
+
+
+            if(userOtp.CreatedAt >= DateTime.UtcNow.ToLocalTime().AddMinutes(_otpSettingsConfig.ExpiresAfterMinutes))
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("OTP Validation Failed. Existing OTP already expired. Expires At: {0}", userOtp.CreatedAt.AddMinutes(0 - _otpSettingsConfig.ExpiresAfterMinutes));
+                return GenericResponse<string>.Failure("Operation Failed.", "OTP Verification Failed. OTP already expired.", HttpStatusCode.BadRequest);
+            }
+
+            bool isValidOTP = _passwordHasher.ValidatePassword(userOtp.GeneratedOTP, validateOtpRequest.OTP);
+
+            if (!isValidOTP)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("OTP Validation Failed. Invalid OTP provided.");
+                return GenericResponse<string>.Failure("Operation Failed.", "OTP Verification Failed. Invalid OTP provided.", HttpStatusCode.BadRequest);
+            }
+
+            _repositoryContext.UserOtpVerifications.Remove(userOtp);
+
+            await _repositoryContext.SaveChangesAsync();
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("OTP Validated Successfully. Record removed.");
+
+            return GenericResponse<string>.Success("Operation Failed.", "OTP Verification Successful.", HttpStatusCode.OK);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Error(ex, "An Error Occurred Validating OTP.");
+            return GenericResponse<string>.Failure("Operation Failed.", "An Error Occurred Validating OTP.", HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
     }
 
