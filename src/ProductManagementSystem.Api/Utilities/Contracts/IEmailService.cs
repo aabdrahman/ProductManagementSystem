@@ -1,7 +1,10 @@
-﻿namespace ProductManagementSystem.Api.Utilities.Contracts;
+﻿using ProductManagementSystem.Shared.DataTransferObjects.MailOperation;
+
+namespace ProductManagementSystem.Api.Utilities.Contracts;
 
 public interface IEmailService
 {
-    Task<bool> SendEmailAsync(string email);
-    Task<bool> RevokeEmailAsync(string email);
+    Task<bool> SendEmailAsync(EmailSenderDto emailToSend);
+    Task<bool> RevokeEmailAsync(EmailSenderDto emailToRevoke);
+    Task<ProcessedMailResultDto> ProcessQueuedEmails();
 }

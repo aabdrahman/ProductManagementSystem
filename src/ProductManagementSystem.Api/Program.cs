@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +89,9 @@ builder.Services.AddSingleton<IEmailService, EmailService>();
 
 builder.Services.Configure<JwtSettingConfig>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<OtpSettingsConfig>(builder.Configuration.GetSection("OtpSettings"));
+builder.Services.Configure<EmailSettingsConfig>(builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.AddFluentEmail(builder.Configuration.GetSection("EmailSettings")["DefaultFrom"]).AddSmtpSender(host: builder.Configuration.GetSection("EmailSettings")["Host"], port: builder.Configuration.GetSection("EmailSettings").GetValue<int>("Port")).AddRazorRenderer();
 
 builder.Services.AddAuthentication(opts =>
 {
@@ -131,6 +135,12 @@ app.UseSwaggerUI(opts =>
 {
     opts.RoutePrefix = string.Empty;
     opts.SwaggerEndpoint("/swagger/v1/swagger.json", "Product Management System");
+});
+
+app.UseStaticFiles(new StaticFileOptions()
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles")),
+    RequestPath = "/StaticFiles"
 });
 
 app.UseExceptionHandler(opts =>

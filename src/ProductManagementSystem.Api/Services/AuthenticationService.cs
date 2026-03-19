@@ -4,9 +4,11 @@ using Microsoft.IdentityModel.Tokens;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api.Entities.Models;
+using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Authentication;
+using ProductManagementSystem.Shared.DataTransferObjects.MailOperation;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
@@ -236,14 +238,6 @@ public class AuthenticationService : IAuthenticationService
                 GeneratedOTP = _passwordHasher.HashPassword(generatedOTP)
             };
 
-            bool isEmailSent = await _emailService.SendEmailAsync(generatedOTP);
-
-            if(!isEmailSent)
-            {
-                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Information("Email could not be sent to user.");
-                return GenericResponse<string>.Failure("Operation Failed.", "OTP send failed. Kindly retry again.", HttpStatusCode.BadRequest);
-            }
-
             await _repositoryContext.AddAsync(userOtpVerificationToInsert);
 
             try
@@ -252,14 +246,32 @@ public class AuthenticationService : IAuthenticationService
             }
             catch (DbUpdateException ex)
             {
-                bool revokeEmail = await  _emailService.RevokeEmailAsync(generatedOTP);
 
-                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Error(ex, "An Error occurred inserting otp record to database. Revoke Email sent result - {0}", revokeEmail);
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Error(ex, "An Error occurred inserting otp record to database. Revoke Email sent result.");
 
                 return GenericResponse<string>.Failure("Operation Failed.", "An Error Occurred sending OTP. Kindly retry.", HttpStatusCode.InternalServerError);
             }
 
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
 
+            parameters.Add("OTP_CODE", generatedOTP);
+            parameters.Add("UserEmail", sendOtpRequest.UserEmailAddress);
+
+            string mailContent = EmailContentHelper.GetMailContent("SendOtpTemplate.html", parameters);
+
+            if(!string.IsNullOrEmpty(mailContent))
+            {
+                EmailSenderDto emailDetails = new EmailSenderDto(Subject: "Account Profile Verification", Content: mailContent, [sendOtpRequest.UserEmailAddress.ToUpper()], isHtml: true);
+
+                bool isEmailSent = await _emailService.SendEmailAsync(emailDetails);
+
+                if (!isEmailSent)
+                {
+                    Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Information("Email could not be sent to user.");
+                    return GenericResponse<string>.Failure("Operation Failed.", "OTP send failed. Kindly retry again.", HttpStatusCode.BadRequest);
+                }
+
+            }
 
             Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Information("OTP Generated and sent successfully - {0}", userOtpVerificationToInsert);
 
