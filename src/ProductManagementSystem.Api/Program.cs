@@ -156,6 +156,8 @@ app.UseHttpsRedirection();
 
 await app.MigrateDatabase();
 
+await app.MigrateAndSeedAsync(builder.Configuration);
+
 app.MapWeatherEndpoints();
 
 app.MapControllers();
