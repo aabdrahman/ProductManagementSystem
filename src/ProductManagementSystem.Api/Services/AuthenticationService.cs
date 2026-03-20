@@ -123,8 +123,12 @@ public class AuthenticationService : IAuthenticationService
 
             string token = GenerateToken();
 
+            DateTime loginTimestamp = DateTime.UtcNow;
+
             loggedInUser.RefreshToken = GenerateRefreshToken();
             loggedInUser.RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(_jwtSettingConfig.SessionTimeoutAfterMinutes);
+            loggedInUser.LastLoginDate = loginTimestamp;
+            loggedInUser.LastAuthenticatedDate = loginTimestamp;
 
             await _repositoryContext.SaveChangesAsync();
 
@@ -182,6 +186,7 @@ public class AuthenticationService : IAuthenticationService
             }
 
             userWithToken.RefreshToken = GenerateRefreshToken();
+            userWithToken.LastAuthenticatedDate = DateTime.UtcNow;
 
             await _repositoryContext.SaveChangesAsync();
 

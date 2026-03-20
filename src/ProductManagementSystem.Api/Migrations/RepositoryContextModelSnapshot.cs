@@ -61,7 +61,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Feedbacks");
+                    b.ToTable("Feedbacks", (string)null);
                 });
 
             modelBuilder.Entity("ProductManagementSystem.Api.Entities.Models.Order", b =>
@@ -127,7 +127,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders", t =>
+                    b.ToTable("Orders", null, t =>
                         {
                             t.HasCheckConstraint("CK_OrderStatus", "[OrderStatus] IN ('Pending', 'Processing', 'Delivered', 'Cancelled')");
                         });
@@ -165,7 +165,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderLineItems", t =>
+                    b.ToTable("OrderLineItems", null, t =>
                         {
                             t.HasCheckConstraint("CK_OrderLineItem_QuantityOrdered", "[QuantityOrdered] > 0");
                         });
@@ -222,7 +222,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("ProductCategoryId");
 
-                    b.ToTable("Products", t =>
+                    b.ToTable("Products", null, t =>
                         {
                             t.HasCheckConstraint("CK_Product_Current_Count", "[CurrentCount] >= 0");
                         });
@@ -255,7 +255,7 @@ namespace ProductManagementSystem.Api.Migrations
                     b.HasIndex("NormalizedName")
                         .IsUnique();
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("ProductManagementSystem.Api.Entities.Models.Review", b =>
@@ -294,7 +294,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("ReviewerName");
 
-                    b.ToTable("Reviews", t =>
+                    b.ToTable("Reviews", null, t =>
                         {
                             t.HasCheckConstraint("CK_Review_Rating", "[Rating] BETWEEN 1 AND 5");
                         });
@@ -347,7 +347,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("ProductManagementSystem.Api.Entities.Models.User", b =>
@@ -434,7 +434,7 @@ namespace ProductManagementSystem.Api.Migrations
                     b.HasIndex("UserEmailAddress")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("ProductManagementSystem.Api.Entities.Models.UserOtpVerification", b =>
@@ -463,7 +463,7 @@ namespace ProductManagementSystem.Api.Migrations
 
                     b.HasIndex("UserEmail");
 
-                    b.ToTable("UserOtpVerifications");
+                    b.ToTable("UserOtpVerifications", (string)null);
                 });
 
             modelBuilder.Entity("ProductManagementSystem.Api.Entities.Models.Feedback", b =>
