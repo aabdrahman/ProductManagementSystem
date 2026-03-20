@@ -231,7 +231,7 @@ public class AuthenticationService : IAuthenticationService
 
             string generatedOTP = _otpOperation.GenerateOtp();
 
-            if(!string.IsNullOrEmpty(generatedOTP))
+            if(string.IsNullOrEmpty(generatedOTP))
             {
                 Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "SendOtpAsync").Information("OTP generation Failed. Generated OTP is empty - {0}", generatedOTP);
                 return GenericResponse<string>.Failure("Operation Failed.", "OPT could not be generated.", HttpStatusCode.BadRequest);

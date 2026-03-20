@@ -6,5 +6,5 @@ public interface IEmailService
 {
     Task<bool> SendEmailAsync(EmailSenderDto emailToSend);
     Task<bool> RevokeEmailAsync(EmailSenderDto emailToRevoke);
-    Task<ProcessedMailResultDto> ProcessQueuedEmails();
+    Task<ProcessedMailResultDto> ProcessQueuedEmails(bool processAll = false);
 }

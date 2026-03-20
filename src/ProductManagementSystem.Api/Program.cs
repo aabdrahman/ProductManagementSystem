@@ -14,6 +14,7 @@ using System.Text;
 using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api;
 using Microsoft.Extensions.FileProviders;
+using ProductManagementSystem.Api.BackgroundWorker;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,6 +83,7 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IBackgroundOperationService, BackgroundOperationService>();
 
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IOtpOperation, OtpOperation>();
@@ -90,6 +92,8 @@ builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.Configure<JwtSettingConfig>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<OtpSettingsConfig>(builder.Configuration.GetSection("OtpSettings"));
 builder.Services.Configure<EmailSettingsConfig>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.Configure<EmailSettingsWorkerConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:EmailSettings"));
+builder.Services.Configure<RemoveExpiredOtpBackgroundConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:RemoveExpiredOTP"));
 
 builder.Services.AddFluentEmail(builder.Configuration.GetSection("EmailSettings")["DefaultFrom"]).AddSmtpSender(host: builder.Configuration.GetSection("EmailSettings")["Host"], port: builder.Configuration.GetSection("EmailSettings").GetValue<int>("Port")).AddRazorRenderer();
 
@@ -125,6 +129,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddControllers();
+
+builder.Services.AddHostedService<EmailProcessingBackgroundService>();
+builder.Services.AddHostedService<RemoveExpiredOtpBackgroundService>();
 
 var app = builder.Build();
 
