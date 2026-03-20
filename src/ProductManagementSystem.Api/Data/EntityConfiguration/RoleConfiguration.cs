@@ -36,9 +36,12 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             .HasComputedColumnSql("UPPER([Name])")
             .HasMaxLength(100);
 
+        builder.Property(x => x.UserId)
+            .IsRequired(false);
+
         builder.HasMany(x => x.Users)
             .WithOne(x => x.AssignedRole)
-            .HasForeignKey(x => x.RoleId)
+            .HasForeignKey(x => x.RoleId).IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

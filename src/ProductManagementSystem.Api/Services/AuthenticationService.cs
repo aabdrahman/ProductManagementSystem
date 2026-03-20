@@ -113,7 +113,7 @@ public class AuthenticationService : IAuthenticationService
 
             bool isPasswordCorrect = _passwordHasher.ValidatePassword(userToAuthenticate.PasswordHash, loginUser.Password);
 
-            if (isPasswordCorrect)
+            if (!isPasswordCorrect)
             {
                 Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("Login Failed. Invalid Password provided by user - {0}", loginUser);
                 return GenericResponse<TokenDto>.Failure(null, "Invalid Credentials", HttpStatusCode.BadRequest);

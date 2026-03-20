@@ -19,8 +19,9 @@ public static class RepositoryContextSeedDatabase
             Log.ForContext(_className, nameof(RepositoryContextSeedDatabase)).ForContext(_methodName, nameof(SeedDatabaseAsync)).Information("Begin Default Database Seeding.......");
 
             string systemDefaultEmail = configuration.GetSection("DefaultUserDetails")["Email"] ?? throw new ArgumentNullException("Error Occurred. System Default email is not yet defined.");
+            string systemDefaultUserName = configuration.GetSection("DefaultUserDetails")["Name"] ?? "System";
 
-            if(string.IsNullOrEmpty(systemDefaultEmail) || !ValidEmailHelper.IsValidEmailUsingRegex(systemDefaultEmail))
+            if (string.IsNullOrEmpty(systemDefaultEmail) || !ValidEmailHelper.IsValidEmailUsingRegex(systemDefaultEmail))
             {
                 Log.ForContext(_className, nameof(RepositoryContextSeedDatabase)).ForContext(_methodName, nameof(SeedDatabaseAsync)).Warning("System Default Email from settings is empty or provided email is invalid format...");
                 throw new ArgumentException("System Default Email from settings is empty or has an invalid format.", nameof(systemDefaultEmail));
@@ -46,8 +47,8 @@ public static class RepositoryContextSeedDatabase
                     UserEmailAddress = systemDefaultEmail.ToUpper(),
                     PasswordHash = passwordHasher.HashPassword(systemUserDefaultPassword),
                     Address = "",
-                    FirstName = "System",
-                    LastName = "System",
+                    FirstName = systemDefaultUserName,
+                    LastName = systemDefaultUserName,
                     IsActive = true,
                     IsUserConfirmed = true,
                     ConfirmedAt = DateTime.UtcNow,
@@ -59,7 +60,7 @@ public static class RepositoryContextSeedDatabase
                     Log.ForContext(_className, nameof(RepositoryContextSeedDatabase)).ForContext(_methodName, nameof(SeedDatabaseAsync)).Information("Seeding a default system role.....");
                     existingSystemRole = new Role()
                     {
-                        CreatedByUser = existingSytemUser,
+                        //CreatedByUser = existingSytemUser, --DISABLED TO PREVENT CIRCULAR DEPENDENCY AFTER SETTING TO OPTIONAL
                         Name = "System",
                         NormalizedName = "SYSTEM",
                         IsActive = true,
@@ -82,6 +83,10 @@ public static class RepositoryContextSeedDatabase
                     Log.ForContext(_className, nameof(RepositoryContextSeedDatabase)).ForContext(_methodName, nameof(SeedDatabaseAsync)).Error(ex, "A database Error Occurred seeding system default to database.");
                     return;
                 }
+            }
+            else
+            {
+                Log.ForContext(_className, nameof(RepositoryContextSeedDatabase)).ForContext(_methodName, nameof(SeedDatabaseAsync)).Information("System user already seeded.");
             }
         }
 		catch (Exception ex)

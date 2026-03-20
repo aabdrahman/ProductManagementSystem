@@ -10,8 +10,8 @@ public class Role
     public bool IsActive { get; set; } = true;
 
     //RELATIONSHIP
-    public int UserId { get; set; }
-    public User CreatedByUser { get; set; }
+    public int? UserId { get; set; }
+    public User? CreatedByUser { get; set; }
     //ROLE
     public ICollection<User> Users { get; set; } = [];
 }
