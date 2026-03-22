@@ -83,7 +83,7 @@
                     {
                         <div class="user-dropdown">
 
-                            <a href="/profile">Profile</a>
+                            <a href="@(string.Concat("/profile/", _loggedInUserId))">Profile</a>
 
                             @* <button class="logout-btn" @onclick="HandleLogout">
                                 Logout
@@ -135,6 +135,7 @@
     private string _userName;
     private string _userRole;
     private string _avatar;
+    private string _loggedInUserId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -145,6 +146,7 @@
 
         _userName = user.Identity?.Name ?? "Administrator User";
         _userRole = user.FindFirst(x => x.Type.EndsWith("/role"))?.Value ?? "Administrator";
+        _loggedInUserId = user.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value ?? "0";
 
         _avatar = _userName[0].ToString();
     }

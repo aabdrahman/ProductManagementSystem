@@ -13,9 +13,16 @@
 
 .order-header {
     display: flex;
+    justify-content: flex-start;
+    margin-bottom: 1.5rem;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+.order-header-sub {
+    display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
 }
 
 .order-header h2 {

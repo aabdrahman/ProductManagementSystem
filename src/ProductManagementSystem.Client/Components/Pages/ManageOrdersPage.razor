@@ -1,5 +1,8 @@
 ﻿
 @page "/admin/orders"
+@page "/orders"
+
+@attribute [Authorize]
 
 @rendermode InteractiveServer
 
@@ -69,7 +72,11 @@
     {
         _isLoading = true;
 
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
         await Task.Delay(250);
+
         var result = await getOrdersHandler.Handle();
         _orders = result.orders;_responseMessage = result.responseMessage;
 

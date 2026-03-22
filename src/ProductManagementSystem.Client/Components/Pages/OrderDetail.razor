@@ -23,16 +23,20 @@ else
             <!-- Order Header -->
             <div class="order-header">
 
-                <div>
-                    <h2>Order #@_orderDetails.OrderNumber</h2>
+                <h2>Order #@_orderDetails.OrderNumber</h2>
+                    
+
+                <div class="order-header-sub">
                     <span class="order-date">
                         @_orderDetails.CreatedDate.ToString("dd MMMM yyyy")
                     </span>
+
+                    
+                    <span class="order-status @_orderDetails.OrderStatus.ToLower()">
+                        @_orderDetails.OrderStatus
+                    </span>
                 </div>
 
-                <span class="order-status @_orderDetails.OrderStatus.ToLower()">
-                    @_orderDetails.OrderStatus
-                </span>
 
             </div>
 

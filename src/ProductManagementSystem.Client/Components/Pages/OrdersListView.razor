@@ -41,15 +41,22 @@
 
                             @if (order.OrderStatus.ToString().Equals(OrderStatus.Pending.ToString(), StringComparison.CurrentCultureIgnoreCase) || order.OrderStatus.ToString().Equals(OrderStatus.Processing.ToString(), StringComparison.CurrentCultureIgnoreCase))
                             {
-                                <button class="btn complete"
-                                        @onclick="() => OnHandleUpdateStatus(order)">
-                                    Update Status
-                                </button>
+                                <AuthorizeView>
+                                    @if (context.User.IsInRole("ADMIN") || context.User.IsInRole("SYSTEM"))
+                                    {
+                                        <button class="btn complete"
+                                                @onclick="() => OnHandleUpdateStatus(order)">
+                                            Update Status
+                                        </button>
+                                    }
+                                    
+                                    <button class="btn cancel"
+                                            @onclick="() => OnHandleCancelOrder(order)">
+                                        Cancel
+                                    </button>
 
-                                <button class="btn cancel"
-                                        @onclick="() => OnHandleCancelOrder(order)">
-                                    Cancel
-                                </button>
+                                </AuthorizeView>
+                                
                             }
 
 
