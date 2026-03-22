@@ -1,12 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using ProductManagementSystem.Api.Data;
+using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api.Entities.Models;
+using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Api.Services.Contracts;
+using ProductManagementSystem.Api.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.MailOperation;
 using ProductManagementSystem.Shared.DataTransferObjects.Order;
 using ProductManagementSystem.Shared.DataTransferObjects.OrderLineItem;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
 using System.Data.Common;
+using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Api.Services;
@@ -14,10 +20,16 @@ namespace ProductManagementSystem.Api.Services;
 public class OrderService : IOrderService
 {
     private readonly RepositoryContext _repositoryContext;
+    private readonly IEmailVerificationLinkFactory _emailVerificationLinkFactory;
+    private readonly IEmailService _emailService;
+    private readonly UserOrderVerificationConfig _userOtpVerificationConfig;
 
-    public OrderService(RepositoryContext repositoryContext)
+    public OrderService(RepositoryContext repositoryContext, IEmailVerificationLinkFactory emailVerificationLinkFactory, IEmailService emailService, IOptionsMonitor<UserOrderVerificationConfig> optionsMonitor)
     {
         _repositoryContext = repositoryContext;
+        _emailVerificationLinkFactory = emailVerificationLinkFactory;
+        _emailService = emailService;
+        _userOtpVerificationConfig = optionsMonitor.CurrentValue;
     }
 
     private string _methodName = "MethodName";
@@ -113,12 +125,41 @@ public class OrderService : IOrderService
             }).ToList();
 
             orderToInsert.OrderLineItems = orderLineItems;
+            orderToInsert.UserOrderVerificationTokens.Add(new UserOrderVerificationToken()
+            {
+                VerificationToken = GetOrderVerificationToken()
+            });
 
             //Add the order to the database and update the product count for the ordered product
             await _repositoryContext.Orders.AddAsync(orderToInsert);
             //_repositoryContext.Products.Update(productToOrder);
 
             await _repositoryContext.SaveChangesAsync();
+
+            try
+            {
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("Getting and sending email for order verification....");
+                string verificationLink = _emailVerificationLinkFactory.GetEmailVerificationLink(orderToInsert.UserOrderVerificationTokens.First());
+
+                Dictionary<string, string> emailContentParameters = new Dictionary<string, string>();
+                emailContentParameters.Add("VERIFICATION_URL", verificationLink);
+                emailContentParameters.Add("ORDER_NUMBER", orderToInsert.OrderTrackingId);
+                emailContentParameters.Add("VERIFICATION_EXPIRE", _userOtpVerificationConfig.ExpiresAfterInMinutes > 60 ? $"{(_userOtpVerificationConfig.ExpiresAfterInMinutes / 60)} hour(s) {_userOtpVerificationConfig.ExpiresAfterInMinutes % 60} minutes" : 
+                                                                $"{_userOtpVerificationConfig.ExpiresAfterInMinutes.ToString()}");
+
+                string emailContent = EmailContentHelper.GetMailContent("ConfirmOrder.html", emailContentParameters);
+
+                EmailSenderDto verificationEmail = new EmailSenderDto(Subject: "Order Confirmation Notification", Content: emailContent, Recipients: [orderToInsert.CreatedBy], isHtml: true);
+
+                bool isEmailQueued = await _emailService.SendEmailAsync(verificationEmail);
+
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("Order Verification Link generated Successfully. Queue Notification Status - {0}", isEmailQueued);
+
+            }
+            catch (Exception ex)
+            {
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Error(ex, "An Error Occurred Generating and sending order verification link.");
+            }
 
             OrderDto orderCreated = new OrderDto()
             {
@@ -551,5 +592,17 @@ public class OrderService : IOrderService
     {
         string dateToString = DateTime.Now.ToString("yyyyddMMHHmmssfff");
         return $"O-{dateToString}-{Random.Shared.Next(1000, 9999)}";
+    }
+
+    private string GetOrderVerificationToken()
+    {
+        byte[] randBytes = new byte[64];
+
+        using(var randGen = RandomNumberGenerator.Create())
+        {
+            randGen.GetBytes(randBytes);
+        }
+
+        return Convert.ToHexString(randBytes);
     }
 }

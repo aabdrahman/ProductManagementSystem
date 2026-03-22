@@ -18,7 +18,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.HasIndex(x => x.OrderTrackingId);
 
-        builder.ToTable(table => table.HasCheckConstraint("CK_OrderStatus", "[OrderStatus] IN ('Pending', 'Processing', 'Delivered', 'Cancelled')"));
+        builder.ToTable(table => table.HasCheckConstraint("CK_OrderStatus", "[OrderStatus] IN ('Pending', 'Processing', 'Confirmed', 'Delivered', 'Cancelled')"));
 
         builder.HasIndex(x => x.CreatedAt);
 

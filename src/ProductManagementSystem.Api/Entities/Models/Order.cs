@@ -1,6 +1,4 @@
 ﻿using ProductManagementSystem.Api.Entities.StaticValues;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Net.Mail;
 
 namespace ProductManagementSystem.Api.Entities.Models;
 
@@ -9,7 +7,6 @@ public class Order
     public int Id { get; set; }
     public DateTime CreatedAt { get; set; }
     public string CreatedBy { get; set; }
-    //public int OrderCount { get; set; }
     public DateTime? DeliveryDate { get; set; }
     public OrderStatus OrderStatus { get; set; }
     public bool IsActive { get; set; }
@@ -24,6 +21,9 @@ public class Order
 
     //Order Line Items
     public ICollection<OrderLineItem> OrderLineItems { get; set; } = [];
+
+    //User Order Verification
+    public ICollection<UserOrderVerificationToken> UserOrderVerificationTokens { get; set; } = [];
 
     //User Created By
     public int? UserId { get; set; }

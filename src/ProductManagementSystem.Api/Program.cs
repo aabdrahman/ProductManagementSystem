@@ -84,16 +84,19 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IBackgroundOperationService, BackgroundOperationService>();
+builder.Services.AddScoped<IUserOrderVerificationService, UserOrderVerificationService>();
 
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IOtpOperation, OtpOperation>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
+builder.Services.AddSingleton<IEmailVerificationLinkFactory, EmailVerificationLinkFactory>();
 
 builder.Services.Configure<JwtSettingConfig>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<OtpSettingsConfig>(builder.Configuration.GetSection("OtpSettings"));
 builder.Services.Configure<EmailSettingsConfig>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.Configure<EmailSettingsWorkerConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:EmailSettings"));
 builder.Services.Configure<RemoveExpiredOtpBackgroundConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:RemoveExpiredOTP"));
+builder.Services.Configure<UserOrderVerificationConfig>(builder.Configuration.GetSection("UserTokenVerification"));
 
 builder.Services.AddFluentEmail(builder.Configuration.GetSection("EmailSettings")["DefaultFrom"]).AddSmtpSender(host: builder.Configuration.GetSection("EmailSettings")["Host"], port: builder.Configuration.GetSection("EmailSettings").GetValue<int>("Port")).AddRazorRenderer();
 

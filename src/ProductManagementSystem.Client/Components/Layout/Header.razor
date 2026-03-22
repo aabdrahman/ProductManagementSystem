@@ -147,11 +147,12 @@
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        _isLoggedIn = user is null;
+        _isLoggedIn = user.Claims.Any();
 
         if (_isLoggedIn)
         {
-            _username = user?.Identity?.Name ?? "";
+            string nameOfUser = user?.Identity?.Name ?? "";
+            _username = nameOfUser.Split(" ")[0];
         }
 
         _cartCount = savedOrders?.Count() ?? 0;
