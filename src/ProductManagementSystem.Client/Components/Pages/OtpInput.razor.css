@@ -11,8 +11,10 @@
 
 .otp-instruction {
     font-size: 0.9rem;
-    color: #586069;
+    color: var(--FONT-COLOR-SECONDARY);
     margin-bottom: 10px;
+    font-weight: 600;
+    font-family: var(--FONT-STYLE-BODY-TITLE);
 }
 
 .otp-input-group {
@@ -71,9 +73,17 @@
     background: transparent;
     border: none;
     color: #0366d6;
-    font-size: 0.85rem;
+    font-size: 1rem;
     cursor: pointer;
-    text-decoration: underline;
+    text-decoration: none;
+
+}
+
+.btn-verify span {
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 600;
+    color:var(--FONT-COLOR-BASIC);
+    font-size: 1rem;
 }
 
 .btn-resend:disabled {

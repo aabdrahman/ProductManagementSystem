@@ -10,11 +10,21 @@
 
 /* HEADER */
 
+.user-header-main{
+    display: flex;
+}
+
 .user-header {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
+    justify-content: space-between;
+}
+
+.user-basic p{
+    font-family: var(--FONT-STYLE-BODY);
+    text-transform: lowercase;
 }
 
 .avatar {
@@ -41,10 +51,33 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.95rem;
+    padding: 2px;
+    border-bottom: 2px solid var(--FONT-COLOR-BASIC);
+}
+
+.user-row span {
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+}
+
+.user-row.address-details{
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
 }
 
 .label {
-    color: #6b7280;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 600;
+}
+
+.address {
+    display: block;
+    width: 100%;
+    font-family: var(--FONT-STYLE-BODY);
+    font-style: italic;
+    text-wrap: auto;
 }
 
 /* BADGES */
@@ -54,6 +87,7 @@
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: 600;
+    font-family: var(--FONT-STYLE-BODY);
 }
 
 .status-badge.active {
@@ -81,6 +115,7 @@
     color: #3730a3;
     padding: 3px 8px;
     border-radius: 6px;
+    font-family: var(--FONT-STYLE-BODY);
 }
 
 /* ACTION */
@@ -88,6 +123,7 @@
 .user-actions {
     margin-top: 1.5rem;
     text-align: center;
+    width: 100%;
 }
 
 .verify-btn {
@@ -110,14 +146,16 @@
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
+    text-align: right;
+    font-family: var(--FONT-STYLE-BODY-TITLE);
 }
 
-    .status-pill.active {
-        background: #e6ffed;
-        color: #22863a;
-    }
+.status-pill.active {
+    background: #e6ffed;
+    color: #22863a;
+}
 
-    .status-pill.inactive {
-        background: #ffeef0;
-        color: #cb2431;
-    }
+.status-pill.inactive {
+    background: #ffeef0;
+    color: #cb2431;
+}

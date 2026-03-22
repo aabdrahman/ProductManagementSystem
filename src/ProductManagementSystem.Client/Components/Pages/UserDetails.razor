@@ -10,19 +10,18 @@
 
         <!-- HEADER -->
         <div class="user-header">
-
-            <div>
-                <div class="status-pill @(_user.ActiveStatus ? "active" : "inactive")">
-                    @(_user.ActiveStatus ? "Active" : "Inactive")
-                </div>
-                <div class="avatar">
-                    @GetInitials(_user.FullName)
-                </div>
+                
+            <div class="avatar">
+                @GetInitials(_user.FullName)
             </div>
 
             <div class="user-basic">
                 <h3>@_user.FullName</h3>
                 <p>@_user.Email</p>
+            </div>
+
+            <div class="status-pill @(_user.ActiveStatus ? "active" : "inactive")">
+                @(_user.ActiveStatus ? "Active" : "Inactive")
             </div>
 
         </div>
@@ -32,7 +31,7 @@
 
             <div class="user-row">
                 <span class="label">Phone</span>
-                <span>@_user.PhoneNumber</span>
+                <span>@(string.IsNullOrEmpty(_user.PhoneNumber) ? "N/A" : _user.PhoneNumber)</span>
             </div>
 
             <div class="user-row">
@@ -40,9 +39,9 @@
                 <span class="role-badge">@_user.AssignedRole</span>
             </div>
 
-            <div class="user-row">
+            <div class="user-row address-details">
                 <span class="label">Address</span>
-                <span>@_user.Address</span>
+                <span class="address">@(string.IsNullOrEmpty(_user.Address) ? "N/A" : _user.Address)</span>
             </div>
 
             <div class="user-row">
@@ -70,8 +69,8 @@
         @if (!_user.ConfirmationStatus)
         {
             <div class="user-actions">
-                <button class="verify-btn" disabled="@(_isSendingOtp || _isOtpSentSuccessful)" @onclick="VerifyAccount">
-                    @(_isSendingOtp ? "Sending OTP...." : "Generate Otp")
+                <button class="btn verify-btn" disabled="@(_isSendingOtp || _isOtpSentSuccessful)" @onclick="VerifyAccount">
+                    @(_isSendingOtp ? "Sending OTP...." : "Generate OTP")
                 </button>
             </div>
         }
@@ -94,12 +93,6 @@ else
         </span>
     }
 }
-
-@* <Popup @ref="popup" Title="@_title" ShowCloseButton="@false">
-    <Body>
-        <OtpInput UserToVerify="_user" />
-    </Body>
-</Popup> *@
 
 @code {
 
@@ -135,7 +128,6 @@ else
 
             var result = await getUserDetailsHandler.Handle(UserId);
             _isSuccessfulFetched = result.isSuccessful; _user = result.userDetails;
-            _user.ConfirmationStatus = false;
         }
     }
 
@@ -155,8 +147,6 @@ else
         if (_isOtpSentSuccessful)
         {
             _isSendingOtp = false;
-
-            //await Task.Delay(1000);
 
             _title = "User Profile Verification";
             popup.OpenModal();
@@ -179,7 +169,6 @@ else
             {
                 var result = await getUserDetailsHandler.Handle(UserId);
                 _isSuccessfulFetched = result.isSuccessful; _user = result.userDetails;
-                _user.ConfirmationStatus = false;
             }
         }
 

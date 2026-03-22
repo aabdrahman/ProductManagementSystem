@@ -35,7 +35,7 @@
             <button class="btn-verify" @onclick="VerifyCode" disabled="@(IsIncomplete || isBusy)">
                 @if (isBusy)
                 {
-                    <span class="spinner"></span>
+                    <span class="spinner">Validating OTP.....</span>
                 }
                 else
                 {

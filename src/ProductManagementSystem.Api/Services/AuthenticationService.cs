@@ -314,9 +314,9 @@ public class AuthenticationService : IAuthenticationService
             }
 
 
-            if(userOtp.CreatedAt <= DateTime.UtcNow.ToLocalTime().AddMinutes(_otpSettingsConfig.ExpiresAfterMinutes))
+            if(userOtp.CreatedAt <= DateTime.UtcNow.AddMinutes(0 - _otpSettingsConfig.ExpiresAfterMinutes))
             {
-                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("OTP Validation Failed. Existing OTP already expired. Expires At: {0}", userOtp.CreatedAt.AddMinutes(0 - _otpSettingsConfig.ExpiresAfterMinutes));
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("OTP Validation Failed. Existing OTP already expired. Expires At: {0}", userOtp.CreatedAt.AddMinutes(_otpSettingsConfig.ExpiresAfterMinutes));
                 return GenericResponse<string>.Failure("Operation Failed.", "OTP Verification Failed. OTP already expired.", HttpStatusCode.BadRequest);
             }
 
