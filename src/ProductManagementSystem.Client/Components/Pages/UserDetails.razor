@@ -1,0 +1,188 @@
+﻿
+@page "/user-details/{UserId:int}"
+
+@inject GetUserDetailsHandler getUserDetailsHandler
+@inject SendVerificationOtpHandler sendVerificationOtpHandler
+
+@if(_user is not null)
+{
+    <div class="user-card">
+
+        <!-- HEADER -->
+        <div class="user-header">
+
+            <div>
+                <div class="status-pill @(_user.ActiveStatus ? "active" : "inactive")">
+                    @(_user.ActiveStatus ? "Active" : "Inactive")
+                </div>
+                <div class="avatar">
+                    @GetInitials(_user.FullName)
+                </div>
+            </div>
+
+            <div class="user-basic">
+                <h3>@_user.FullName</h3>
+                <p>@_user.Email</p>
+            </div>
+
+        </div>
+
+        <!-- BODY -->
+        <div class="user-body">
+
+            <div class="user-row">
+                <span class="label">Phone</span>
+                <span>@_user.PhoneNumber</span>
+            </div>
+
+            <div class="user-row">
+                <span class="label">Role</span>
+                <span class="role-badge">@_user.AssignedRole</span>
+            </div>
+
+            <div class="user-row">
+                <span class="label">Address</span>
+                <span>@_user.Address</span>
+            </div>
+
+            <div class="user-row">
+                <span class="label">Status</span>
+                <span class="status-badge @(_user.ActiveStatus ? "active" : "inactive")">
+                    @(_user.ActiveStatus ? "Active" : "Inactive")
+                </span>
+            </div>
+
+            <div class="user-row">
+                <span class="label">Verification</span>
+                <span class="status-badge @(_user.ConfirmationStatus ? "verified" : "unverified")">
+                    @(_user.ConfirmationStatus ? "Verified" : "Not Verified")
+                </span>
+            </div>
+
+        </div>
+
+        @if(_responseMessage is not null)
+        {
+            <Status SuccessStatus="@_isOtpSentSuccessful" StatusMessage="@_responseMessage" />
+        }
+
+        <!-- ACTION -->
+        @if (!_user.ConfirmationStatus)
+        {
+            <div class="user-actions">
+                <button class="verify-btn" disabled="@(_isSendingOtp || _isOtpSentSuccessful)" @onclick="VerifyAccount">
+                    @(_isSendingOtp ? "Sending OTP...." : "Generate Otp")
+                </button>
+            </div>
+        }
+
+    </div>
+
+    <Popup @ref="popup" Title="@_title" ShowCloseButton="@false">
+        <Body>
+            <OtpInput UserToVerify="_user" HandleClose="OnHandleClose" />
+        </Body>
+    </Popup>
+
+}
+else
+{
+    if (!_isSuccessfulFetched)
+    {
+        <span class="validation-message">
+            User details could not be fetched.
+        </span>
+    }
+}
+
+@* <Popup @ref="popup" Title="@_title" ShowCloseButton="@false">
+    <Body>
+        <OtpInput UserToVerify="_user" />
+    </Body>
+</Popup> *@
+
+@code {
+
+    private UserDto? _user;
+    private bool _isSuccessfulFetched;
+
+    private Popup popup;
+    private string _title;
+
+    private bool _isOtpSentSuccessful;
+    private bool _isSendingOtp = false;
+    private string _responseMessage;
+
+    [Parameter, EditorRequired]
+    // [SupplyParameterFromQuery]
+    public int UserId { get; set; }
+
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return string.Join("", parts.Select(p => p[0])).ToUpper();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(UserId != default)
+        {
+            _responseMessage = null;
+            _isOtpSentSuccessful = default;
+            _isSendingOtp = false;
+
+            var result = await getUserDetailsHandler.Handle(UserId);
+            _isSuccessfulFetched = result.isSuccessful; _user = result.userDetails;
+            _user.ConfirmationStatus = false;
+        }
+    }
+
+    private async Task VerifyAccount()
+    {
+        _isSendingOtp = true; _responseMessage = null;
+
+        // await Task.Delay(3000);
+
+        // _isOtpSentSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isOtpSentSuccessful ? "OTP sent successfully." : "OTP sent failed.";
+
+        var result = await sendVerificationOtpHandler.Handle(new SendOtpRequestDto(){ UserEmailAddress = _user.Email, UserId = _user.Id });
+        _isOtpSentSuccessful = result.isSuccessful; _responseMessage = result.responseMessage;
+
+
+        if (_isOtpSentSuccessful)
+        {
+            _isSendingOtp = false;
+
+            //await Task.Delay(1000);
+
+            _title = "User Profile Verification";
+            popup.OpenModal();
+            StateHasChanged();
+
+        }
+
+        _isSendingOtp = false;
+    }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+        _title = "";
+        _responseMessage = null;
+        _isOtpSentSuccessful = default;
+
+        if (refreshDecision)
+        {
+            if (UserId != default)
+            {
+                var result = await getUserDetailsHandler.Handle(UserId);
+                _isSuccessfulFetched = result.isSuccessful; _user = result.userDetails;
+                _user.ConfirmationStatus = false;
+            }
+        }
+
+        popup.CloseModal();
+    }
+}

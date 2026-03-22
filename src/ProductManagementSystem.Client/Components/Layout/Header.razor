@@ -57,7 +57,7 @@
                     {
                         <div class="user-dropdown">
 
-                            <a href="/profile">Profile</a>
+                            <a href="@(string.Concat("/user-details/", _loggedInUserId.ToString()))">Profile</a>
 
                             <a href="/orders">My Orders</a>
 
@@ -107,6 +107,7 @@
 
     private int _cartCount = 0;
     private bool _isLoggedIn = false;
+    private int _loggedInUserId = 0;
 
     private string _username = "Abdrahman";
 
@@ -153,11 +154,20 @@
         {
             string nameOfUser = user?.Identity?.Name ?? "";
             _username = nameOfUser.Split(" ")[0];
+
+            string userId = user?.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value ?? "0";
+
+            _loggedInUserId = int.Parse(userId);
         }
 
         _cartCount = savedOrders?.Count() ?? 0;
 
         StateHasChanged();
+    }
+
+    private void NavigateToProfile()
+    {
+        navigationManager.NavigateTo($"/user-details/", forceLoad: true);
     }
 
     void IDisposable.Dispose()

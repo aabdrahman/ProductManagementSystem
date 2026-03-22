@@ -1,0 +1,123 @@
+﻿
+.user-card {
+    max-width: 500px;
+    margin: auto;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+/* HEADER */
+
+.user-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    background: #2563eb;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* BODY */
+
+.user-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.user-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+}
+
+.label {
+    color: #6b7280;
+}
+
+/* BADGES */
+
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.verified {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.unverified {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.role-badge {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+/* ACTION */
+
+.user-actions {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.verify-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.verify-btn:hover {
+    background: #1d4ed8;
+}
+
+/* Status Pills */
+.status-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+    .status-pill.active {
+        background: #e6ffed;
+        color: #22863a;
+    }
+
+    .status-pill.inactive {
+        background: #ffeef0;
+        color: #cb2431;
+    }

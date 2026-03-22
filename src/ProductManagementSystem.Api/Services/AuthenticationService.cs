@@ -303,7 +303,9 @@ public class AuthenticationService : IAuthenticationService
         {
             Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("Validate OTP request - {0}", validateOtpRequest);
 
-            UserOtpVerification? userOtp = await _repositoryContext.UserOtpVerifications.OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(x => x.UserEmail == validateOtpRequest.UserEmailAddress.ToUpper());
+            UserOtpVerification? userOtp = await _repositoryContext.UserOtpVerifications
+                                                                            .OrderByDescending(x => x.CreatedAt)
+                                                                            .FirstOrDefaultAsync(x => x.UserEmail == validateOtpRequest.UserEmailAddress.ToUpper());
 
             if(userOtp is null)
             {
@@ -312,19 +314,24 @@ public class AuthenticationService : IAuthenticationService
             }
 
 
-            if(userOtp.CreatedAt >= DateTime.UtcNow.ToLocalTime().AddMinutes(_otpSettingsConfig.ExpiresAfterMinutes))
+            if(userOtp.CreatedAt <= DateTime.UtcNow.ToLocalTime().AddMinutes(_otpSettingsConfig.ExpiresAfterMinutes))
             {
                 Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("OTP Validation Failed. Existing OTP already expired. Expires At: {0}", userOtp.CreatedAt.AddMinutes(0 - _otpSettingsConfig.ExpiresAfterMinutes));
                 return GenericResponse<string>.Failure("Operation Failed.", "OTP Verification Failed. OTP already expired.", HttpStatusCode.BadRequest);
             }
 
-            bool isValidOTP = _passwordHasher.ValidatePassword(userOtp.GeneratedOTP, validateOtpRequest.OTP);
+            bool isValidOTP = _passwordHasher.ValidatePassword(userOtp.GeneratedOTP, validateOtpRequest.OTP); 
 
             if (!isValidOTP)
             {
                 Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("OTP Validation Failed. Invalid OTP provided.");
                 return GenericResponse<string>.Failure("Operation Failed.", "OTP Verification Failed. Invalid OTP provided.", HttpStatusCode.BadRequest);
             }
+
+            int affectedRows = await _repositoryContext.Users.Where(x => x.UserEmailAddress == userOtp.UserEmail.ToUpper())
+                                                            .ExecuteUpdateAsync(x => x.SetProperty(x => x.ConfirmedAt, DateTime.UtcNow).SetProperty(x => x.IsUserConfirmed, true));
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("User marked as confirmed successfully. Query returns - {0}", affectedRows);
 
             _repositoryContext.UserOtpVerifications.Remove(userOtp);
 

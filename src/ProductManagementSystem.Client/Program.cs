@@ -79,6 +79,8 @@ builder.Services.AddScoped<RegisterUserHandler>();
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<LogoutHandler>();
 builder.Services.AddScoped<GetUserDetailsHandler>();
+builder.Services.AddScoped<SendVerificationOtpHandler>();
+builder.Services.AddScoped<VerifyOtpHandler>();
 
 builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
 

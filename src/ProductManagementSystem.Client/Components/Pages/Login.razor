@@ -91,7 +91,7 @@
             _ = Task.Run(async () =>
             {
                 await Task.Delay(2500);
-                navigationManager.NavigateTo("/");
+                navigationManager.NavigateTo("/", forceLoad: true);
             });
         }
 

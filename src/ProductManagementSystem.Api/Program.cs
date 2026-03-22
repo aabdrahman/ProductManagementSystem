@@ -96,6 +96,7 @@ builder.Services.Configure<OtpSettingsConfig>(builder.Configuration.GetSection("
 builder.Services.Configure<EmailSettingsConfig>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.Configure<EmailSettingsWorkerConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:EmailSettings"));
 builder.Services.Configure<RemoveExpiredOtpBackgroundConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:RemoveExpiredOTP"));
+builder.Services.Configure<RemoveExpiredVerificationTokenBackgroundConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:RemoveExpiredVerificationToken"));
 builder.Services.Configure<UserOrderVerificationConfig>(builder.Configuration.GetSection("UserTokenVerification"));
 
 builder.Services.AddFluentEmail(builder.Configuration.GetSection("EmailSettings")["DefaultFrom"]).AddSmtpSender(host: builder.Configuration.GetSection("EmailSettings")["Host"], port: builder.Configuration.GetSection("EmailSettings").GetValue<int>("Port")).AddRazorRenderer();
@@ -135,6 +136,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddHostedService<EmailProcessingBackgroundService>();
 builder.Services.AddHostedService<RemoveExpiredOtpBackgroundService>();
+builder.Services.AddHostedService<RemoveExpiredVerificationTokenBackgroundService>();
 
 var app = builder.Build();
 
