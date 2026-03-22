@@ -7,7 +7,7 @@
     
     <div class="form-group">
         <label>First Name</label>
-        <input type="text" value="@_firstName" @onchange="OnChangeFirstName" />
+        <input type="text" value="@_firstName" readonly="@ReadOnly" @onchange="OnChangeFirstName" />
         @if (string.IsNullOrEmpty(_firstName))
         {
             <span class="validation-message">First Name is required.</span>
@@ -16,7 +16,7 @@
 
     <div class="form-group">
         <label>Last Name</label>
-        <input type="text" value="@_lastName" @onchange="OnChangeLastName" />
+        <input type="text" value="@_lastName" readonly="@ReadOnly" @onchange="OnChangeLastName" />
         @if(string.IsNullOrEmpty(_lastName))
         {
             <span class="validation-message">Last Name is required.</span>
@@ -31,22 +31,25 @@
     private string _firstName = string.Empty;
     private string _lastName = string.Empty;
 
-    // protected override void OnParametersSet()
-    // {
-    //     if(!string.IsNullOrEmpty(CurrentValue))
-    //     {
-    //         var arrStr = CurrentValue.Split(" ");
-    //         _firstName = arrStr[0];
-    //         _lastName = arrStr[1];
-    //         SetCurrentValue();
-    //     }
-    //     else
-    //     {
-    //         _firstName = string.Empty;
-    //         _lastName = string.Empty;
-    //         SetCurrentValue();
-    //     }
-    // }
+    [Parameter]
+    public bool ReadOnly { get; set; } = false;
+
+        protected override void OnParametersSet()
+    {
+        if(!string.IsNullOrEmpty(CurrentValue))
+        {
+            var arrStr = CurrentValue.Split(" ");
+            _firstName = arrStr[0];
+            _lastName = arrStr[1];
+            SetCurrentValue();
+        }
+        else
+        {
+            _firstName = string.Empty;
+            _lastName = string.Empty;
+            SetCurrentValue();
+        }
+    }
 
     private void OnChangeFirstName(ChangeEventArgs args)
     {

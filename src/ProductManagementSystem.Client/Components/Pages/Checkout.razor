@@ -6,6 +6,8 @@
 
 @inject GetMultipleProductsHandler getMultipleProductsHandler
 @inject AddOrderHandler addOrderHandler
+@inject GetUserDetailsHandler getUserDetailsHandler
+
 
 <section class="checkout-page">
     <div class="checkout-header">
@@ -76,22 +78,21 @@
                         <div class="form-group">
                             @* <label>Full Name</label> *@
 
-                            <FullName @bind-Value="_createOrderModel.FullName" />
+                            <FullName @bind-Value="_createOrderModel.FullName" ReadOnly="@_isValidUserDetails" />
 
-                          @*   <InputText @bind-Value="_createOrderModel.FullName" /> *@
-                            <ValidationMessage For="(() => _createOrderModel.FullName)" />
+                            <ValidationMessage For="(() => _createOrderModel.FullName)"  />
                         </div>
 
                         <div class="form-group">
                             <label>Email</label>
-                            <InputText @bind-Value="_createOrderModel.CreatedBy" />
-                            <ValidationMessage For="(() => _createOrderModel.CreatedBy)" />
+                            <InputText @bind-Value="_createOrderModel.CreatedBy" readonly="@true" />
+                            <ValidationMessage For="(() => _createOrderModel.CreatedBy)"  />
                         </div>
 
                         <div class="form-group">
                             <label>Phone Number</label>
                             <InputText @bind-Value="_createOrderModel.PhoneNumber" />
-                            <ValidationMessage For="(() => _createOrderModel.PhoneNumber)" />
+                            <ValidationMessage For="(() => _createOrderModel.PhoneNumber)"/>
                         </div>
 
                         <div class="form-group">
@@ -112,9 +113,6 @@
                     Total: <strong>@TotalAmount.ToString("C")</strong>
                 </p>
 
-              @*   <button class="place-order-btn" @onclick="PlaceOrder">
-                    Place Order
-                </button> *@
             </div>
 
         }
@@ -130,13 +128,28 @@
     private bool _isLoading = true;
     private IEnumerable<ProductDto> _products;
 
+    private string _getUserDetailsResponseMessage;
+    private UserDto? _userToCheckout;
+
     private CreateOrderDto _createOrderModel;
     private bool _isPlacingOrder = false;
     private string _responseMessage;
     private bool _isSuccessful;
+    private int _loggedInUserId = 0;
+    private bool _isValidUserDetails = false;
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if(user != null)
+        {
+            string userId = user.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value ?? "0";
+
+            var isValidUser = int.TryParse(userId, out _loggedInUserId);
+        }
+
         await LoadCartAsync();
     }
 
@@ -156,8 +169,24 @@
 
             _products = result.products;
 
+            if(_loggedInUserId > 0)
+            {
+                var getUserResult = await getUserDetailsHandler.Handle(_loggedInUserId);
+
+                _userToCheckout = getUserResult.userDetails;
+            }
+
             _createOrderModel = new CreateOrderDto();
             _createOrderModel.OrderLineItems = _orders;
+
+            if(_userToCheckout is not null)
+            {
+                _isValidUserDetails = true;
+                _createOrderModel.FullName = _userToCheckout.FullName;
+                _createOrderModel.PhoneNumber = _userToCheckout.PhoneNumber;
+                _createOrderModel.DeliveryAddress = _userToCheckout.Address;
+                _createOrderModel.CreatedBy = _userToCheckout.Email;
+            }
         }
 
         _isLoading = false;

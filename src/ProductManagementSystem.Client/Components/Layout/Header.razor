@@ -1,10 +1,12 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
+@using ProductManagementSystem.Client.AuthProviderUtility
 
 @rendermode InteractiveServer
 
 @implements IDisposable
 
 @inject AuthenticationStateProvider authStateProvider
+@inject RequestContext requestContext
 
 <header class="site-header">
     <div class="header-container">
@@ -129,6 +131,11 @@
 
         // _isLoggedIn = true;
         // _showUserMenu = false;
+    }
+
+    protected override void OnInitialized()
+    {
+        requestContext.BaseUri = navigationManager.BaseUri;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -1,5 +1,6 @@
 ﻿@using System.Net.Http
 @using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
@@ -30,3 +31,5 @@
 @inject NavigationManager navigationManager
 @inject ILocalStorageUtility localStorageUtility
 @inject AddFeedbackHandler addFeedbackHandler
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider authStateProvider

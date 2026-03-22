@@ -25,11 +25,11 @@ public class LoginHandler
             string httpResponseContent = await httpResponse.Content.ReadAsStringAsync();
 
             GenericResponse<TokenDto> responseBody = JsonSerializer.Deserialize<GenericResponse<TokenDto>>(httpResponseContent, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true }) ??
-                                                                throw new ArgumentNullException("Respons ecould not be deserialized.");
+                                                                throw new ArgumentNullException("Response could not be deserialized.");
 
             if (responseBody.IsSuccessStatus)
             {
-                bool isStorageMaintained = await _localStorageUtility.PersistToStorageAsync<TokenDto>(responseBody.Data, "tokenDetails");
+                bool isStorageMaintained = await _localStorageUtility.PersistToStorageAsync<TokenDto>(responseBody.Data, "session-token");
 
                 return isStorageMaintained ? (responseBody.IsSuccessStatus, $"{responseBody.ResponseMessage}.{"Session Activated"}") : (isStorageMaintained, $"{responseBody.ResponseMessage}{"Session activation failed."}");
             }

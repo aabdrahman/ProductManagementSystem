@@ -95,7 +95,14 @@ public class AuthenticationService : IAuthenticationService
         {
             Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("Login Request - {0}", loginUser);
 
-            string origin = _httpContextAccessor.HttpContext.Request.Headers["Origin".ToString()].ToString();
+            //string origin = _httpContextAccessor.HttpContext.Request.Headers["Origin".ToString()].ToString();
+
+            string origin = null;
+
+            if(_httpContextAccessor.HttpContext.Request.Headers.TryGetValue("Origin", out var stringOriginValues))
+            {
+                origin = stringOriginValues.FirstOrDefault() ?? "";
+            }
 
             if(!_jwtSettingConfig.ValidAudience.Split(";", StringSplitOptions.TrimEntries).Contains(origin))
             {

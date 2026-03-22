@@ -54,8 +54,6 @@ public class AuthStateProvider : AuthenticationStateProvider
             return _anonymous;
         }
 
-
-
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claimsPrincipal, "jwtAuthType", nameType: ClaimTypes.Name, roleType: ClaimTypes.Role)));
 
     }
