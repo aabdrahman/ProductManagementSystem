@@ -96,6 +96,16 @@
     color: #1e40af;
 }
 
+/*.status-badge.confirmed {
+    background: #dbeafe;
+    color: #1e40af;
+}*/
+
+.status-badge.confirmed {
+    background: #e0f2fe;
+    color: #0369a1; 
+    border: 1px solid #bae6fd; 
+
 .status-badge.delivered {
     background: #dcfce7;
     color: #166534;

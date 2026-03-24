@@ -1,13 +1,12 @@
 ﻿
-@page "/admin/orders"
+
+@page "/orders"
 
 @attribute [Authorize]
 
 @rendermode InteractiveServer
 
-@inject GetOrdersHandler getOrdersHandler
-
-@layout ProductManagementSystem.Client.Components.Layout.AdminLayout
+@inject GetUserOrdersHandler getOrdersHandler
 
 <section class="order-management">
 
@@ -67,6 +66,9 @@
     private IEnumerable<OrderDto> _orders;
     private string _responseMessage;
 
+    private string _userEmailAddress;
+    private int _loggedinUserId = 0;
+
     protected override async Task OnInitializedAsync()
     {
         _isLoading = true;
@@ -74,10 +76,16 @@
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
+        _userEmailAddress = user.FindFirst(x => x.Type.EndsWith("emailaddress"))?.Value ?? "0";
+        var userId = user.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value ?? "0";
+
         await Task.Delay(250);
 
-        var result = await getOrdersHandler.Handle();
-        _orders = result.orders;_responseMessage = result.responseMessage;
+        if(int.TryParse(userId, out _loggedinUserId))
+        {
+            var result = await getOrdersHandler.Handle(_loggedinUserId, _userEmailAddress);
+            _orders = result.orders; _responseMessage = result.message;
+        }
 
         _isLoading = false;
     }
@@ -89,7 +97,6 @@
     private OperationType _operationToPerform;
     private OrderDto _selectedOrder;
     private Popup popup;
-
 
     private async Task OnHandleView(OrderDto selectedOrder)
     {
@@ -121,8 +128,8 @@
 
         if (refreshDecision)
         {
-            var result = await getOrdersHandler.Handle();
-            _orders = result.orders; _responseMessage = result.responseMessage;
+            var result = await getOrdersHandler.Handle(_loggedinUserId, _userEmailAddress);
+            _orders = result.orders; _responseMessage = result.message;
         }
 
         popup.CloseModal();

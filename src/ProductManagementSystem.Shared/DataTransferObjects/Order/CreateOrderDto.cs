@@ -5,9 +5,9 @@ namespace ProductManagementSystem.Shared.DataTransferObjects.Order;
 
 public record class CreateOrderDto : IValidatableObject
 {
-    //[Required(ErrorMessage = "The Quantity To Order is a required field.")]
-    //[Range(1, double.MaxValue, ErrorMessage = "The Quantity To Order cannot be less than 1")]
-    //public int QuantityOrdered { get; set; }
+    [Required(ErrorMessage = "The User Id is a required field.")]
+    [Range(1, double.MaxValue, ErrorMessage = "The User Id cannot be less than 1")]
+    public int UserId { get; set; }
     //[Required(ErrorMessage = "Product is a required field.")]
     //public int ProductId { get; set; }
     [Required(ErrorMessage = "Email is a required field.")]

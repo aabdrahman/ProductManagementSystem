@@ -81,6 +81,7 @@ builder.Services.AddScoped<LogoutHandler>();
 builder.Services.AddScoped<GetUserDetailsHandler>();
 builder.Services.AddScoped<SendVerificationOtpHandler>();
 builder.Services.AddScoped<VerifyOtpHandler>();
+builder.Services.AddScoped<GetUserOrdersHandler>();
 
 builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
 

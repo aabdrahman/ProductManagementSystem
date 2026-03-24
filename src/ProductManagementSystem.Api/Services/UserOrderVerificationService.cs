@@ -46,7 +46,7 @@ public class UserOrderVerificationService : IUserOrderVerificationService
                 return "Invalid Token";
             }
 
-            if(tokenVerificationDetails.CreatedAt >= DateTime.UtcNow.AddMinutes(0 - _userOrderVerificationConfig.ExpiresAfterInMinutes))
+            if(tokenVerificationDetails.CreatedAt <= DateTime.UtcNow.AddMinutes(0 - _userOrderVerificationConfig.ExpiresAfterInMinutes))
             {
                 return "Token already expired";
             }

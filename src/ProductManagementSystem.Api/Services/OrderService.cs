@@ -44,7 +44,16 @@ public class OrderService : IOrderService
     {
         try
         {
-            Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("Create Order - {orderToCreate}", JsonSerializer.Serialize(createOrder));
+            Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("Create Order - {orderToCreate}", createOrder);
+
+            //Validate User with Email Exists
+            User? user = await _repositoryContext.Users.FirstOrDefaultAsync(x => x.Id == createOrder.UserId);
+
+            if(user is null)
+            {
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("User with Id does not exist - {0}", createOrder.UserId);
+                return GenericResponse<OrderDto>.Failure(null, "User with id does not exist", System.Net.HttpStatusCode.NotFound);
+            }
 
             //Validate the product to order exists and the quantity ordered is available in stock before creating the order
 
@@ -56,6 +65,7 @@ public class OrderService : IOrderService
             {
                 var existingProductIds = productsToOrder.Select(x => x.Id);
                 var nonExistingProductIds = productIds.Except(existingProductIds);
+
                 Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("The following product Ids do not exist: {nonExistingProductIds}", JsonSerializer.Serialize(nonExistingProductIds));
                 return GenericResponse<OrderDto>.Failure(null, $"The following product Ids do not exist: {JsonSerializer.Serialize(nonExistingProductIds)}", System.Net.HttpStatusCode.NotFound);
             }
@@ -112,7 +122,8 @@ public class OrderService : IOrderService
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 DeliveryAddress = createOrder.DeliveryAddress,
-                OrderTrackingId = GetOrderTrackingId()
+                OrderTrackingId = GetOrderTrackingId(),
+                UserId = user.Id
             };
 
             //Create order line items from the order line items from request and set to the order line items collection of the order to insert
@@ -166,7 +177,7 @@ public class OrderService : IOrderService
                 CreatedBy = orderToInsert.CreatedBy,
                 Id = orderToInsert.Id,
                 OrderStatus = orderToInsert.OrderStatus.ToString(),
-                CreatedDate = orderToInsert.CreatedAt,
+                CreatedDate = orderToInsert.CreatedAt.ToLocalTime(),
                 LineItemsCount = orderToInsert.OrderLineItems.Count,
                 OrderNumber = orderToInsert.OrderTrackingId
                 //Product = productToOrder.NormalizedName,
@@ -458,7 +469,7 @@ public class OrderService : IOrderService
             {
                 Id = orderToUpdate.Id,
                 //QuantityOrdered = orderToUpdate.OrderCount,
-                CreatedDate = orderToUpdate.CreatedAt.ToLocalTime(),
+                CreatedDate = orderToUpdate.CreatedAt,
                 CreatedBy = orderToUpdate.CreatedBy,
                 //Product = orderToUpdate.OrderedProduct.NormalizedName,
                 OrderStatus = orderToUpdate.OrderStatus.ToString(),
@@ -584,6 +595,42 @@ public class OrderService : IOrderService
         {
             Log.ForContext(_methodName, "GetOrderDetailsAsync").ForContext(_className, "OrderService").Error(ex, "An error occurred fetching order details for order - {Id}", OrderId);
             return GenericResponse<OrderDetailsDto>.Failure(null, "An error occurred fetching order details.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+    }
+
+    public async Task<GenericResponse<IEnumerable<OrderDto>>> GetUserOrdersAsync(int UserId, string UserEmailAddress = null)
+    {
+        try
+        {
+            Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetUserOrdersAsync)).Information("Get User Order. User ID - {0}, User Email Address - {1}", UserId, UserEmailAddress);
+
+            var spoolQuery = _repositoryContext.Orders.Where(x => x.UserId.HasValue && x.UserId.Value == UserId);
+
+            if(!string.IsNullOrEmpty(UserEmailAddress))
+            {
+                spoolQuery = spoolQuery.Where(x => x.CreatedBy ==  UserEmailAddress);
+            }
+
+            var userOrders = await spoolQuery.Select(x => new OrderDto()
+            {
+                Id = x.Id,
+                OrderStatus = x.OrderStatus.ToString(),
+                CreatedBy = x.CreatedBy,
+                CreatedDate = x.CreatedAt,
+                LineItemsCount = x.OrderLineItems.Count,
+                OrderNumber = x.OrderTrackingId
+            }).ToListAsync();
+
+            Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetUserOrdersAsync)).Information("Fetched User Orders - {0}", userOrders);
+
+            return userOrders.Count > 0 ?
+                GenericResponse<IEnumerable<OrderDto>>.Success(userOrders, "User orders fetched successfully.", System.Net.HttpStatusCode.OK) :
+                GenericResponse<IEnumerable<OrderDto>>.Failure(null, "No Order for specified user.", System.Net.HttpStatusCode.NotFound);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetUserOrdersAsync)).Error(ex, "An Error Occurred Fetching User Orders.");
+            return GenericResponse<IEnumerable<OrderDto>>.Failure(null, "An Error Occurred Fetching User Orders.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
     }
 
