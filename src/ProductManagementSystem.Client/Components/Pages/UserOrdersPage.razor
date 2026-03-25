@@ -1,0 +1,149 @@
+﻿@page "/orders"
+
+@inject GetUserOrdersHandler getUserOrdersHandler
+
+@attribute [Authorize]
+
+<PageTitle>User Orders</PageTitle>
+
+<section class="order-management">
+
+    <div class="order-management-header">
+        <h2>Order Management</h2>
+
+        <p>Track, manage, and process customer orders.</p>
+
+        <div></div>
+    </div>
+
+    @if (_isLoading)
+    {
+        <p>
+            Loading User Orders......
+        </p>
+    }
+    else
+    {
+        if (_userOrders.Any())
+        {
+            <OrdersListView Orders="_userOrders" HandleViewOrder="OnHandleView" HandleCancelOrder="OnHandleCancelOrder" />
+        }
+        else
+        {
+            <div class="no-orders">
+                <h3>No orders yet</h3>
+                <p>Orders placed by customers will appear here.</p>
+                @if(_responseMessage is not null)
+                {
+                    <p>
+                        @_responseMessage
+                    </p>
+                }
+            </div>
+        }
+
+        <Popup @ref="popup" Title="@_title" ShowCloseButton="@_showCloseButton">
+
+            <Body>
+                @if(_operationToPerform == OperationType.ViewOrder)
+                {
+                    <OrderDetail OrderToView="_selectedOrder" ShowActionButtons="false" HandleClose="OnHandleClose" />
+                }
+                else if(_operationToPerform == OperationType.CancelOrder)
+                {
+                    <OrderDetail OrderToView="@_selectedOrder" ShowActionButtons="@true" HandleClose="OnHandleClose" />
+                }
+            </Body>
+
+        </Popup>
+    }
+
+</section>
+
+@code {
+
+    private bool _isLoading;
+    private List<OrderDto> _userOrders;
+    private int _loggedInUserId = 0;
+
+    private string _responseMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var userId = user.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value ?? "0";
+        _loggedInUserId = int.Parse(userId);
+
+        if(_loggedInUserId > 0)
+        {
+            var result = await getUserOrdersHandler.Handle(_loggedInUserId);
+            _responseMessage = result.responseMessage;
+            _userOrders = result.userOrders.ToList();
+        }
+
+        _isLoading = false;
+    }
+}
+
+@code{
+
+    private string _title;
+    private bool _showCloseButton = false;
+    private OperationType _operationToPerform = OperationType.None;
+
+    private Popup popup;
+
+    private OrderDto _selectedOrder;
+
+    private async Task OnHandleClose(bool refreshDecision)
+    {
+        _title = "";
+        _operationToPerform = OperationType.None;
+        _showCloseButton = false;
+
+        if (refreshDecision)
+        {
+            if (_loggedInUserId > 0)
+            {
+                var result = await getUserOrdersHandler.Handle(_loggedInUserId);
+                _responseMessage = result.responseMessage;
+                _userOrders = result.userOrders.ToList();
+            }
+        }
+
+        popup.CloseModal();
+    }
+
+    private async Task OnHandleView(OrderDto selectedOrder)
+    {
+        _selectedOrder = selectedOrder;
+        _title = $"Order Details For {_selectedOrder.OrderNumber}";
+        _operationToPerform = OperationType.ViewOrder;
+        _showCloseButton = true;
+
+        popup.OpenModal();
+    }
+
+    private async Task OnHandleCancelOrder(OrderDto selectedOrder)
+    {
+        _selectedOrder = selectedOrder;
+        _title = $"Cancel Order {_selectedOrder.OrderNumber}";
+        _operationToPerform = OperationType.CancelOrder;
+        _showCloseButton = true;
+
+        popup.OpenModal();
+    }
+
+
+
+    enum OperationType
+    {
+        None,
+        ViewOrder,
+        CancelOrder
+    }
+}

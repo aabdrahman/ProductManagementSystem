@@ -39,7 +39,7 @@
                             </button>
                            
 
-                            @if (order.OrderStatus.ToString().Equals(OrderStatus.Pending.ToString(), StringComparison.CurrentCultureIgnoreCase) || order.OrderStatus.ToString().Equals(OrderStatus.Processing.ToString(), StringComparison.CurrentCultureIgnoreCase))
+                            @if (order.OrderStatus.ToString().Equals(OrderStatus.Pending.ToString(), StringComparison.CurrentCultureIgnoreCase) || order.OrderStatus.ToString().Equals(OrderStatus.Confirmed.ToString(), StringComparison.CurrentCultureIgnoreCase) || order.OrderStatus.ToString().Equals(OrderStatus.Processing.ToString(), StringComparison.CurrentCultureIgnoreCase))
                             {
                                 <AuthorizeView>
                                     @if (context.User.IsInRole("ADMIN") || context.User.IsInRole("SYSTEM"))

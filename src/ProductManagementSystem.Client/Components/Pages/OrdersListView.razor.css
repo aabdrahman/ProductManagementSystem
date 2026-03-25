@@ -105,3 +105,20 @@
     background: #fee2e2;
     color: #991b1b;
 }
+
+.status-badge.confirmed {
+    background: #e0f2fe; /* Slightly lighter/cleaner blue */
+    color: #0369a1; /* Deep sky blue */
+    border: 1px solid #bae6fd; /* Optional: adds a "mature" crispness */
+}
+
+.status-badge::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background-color: currentColor; /* Matches the text color automatically */
+    top: 0;
+}
