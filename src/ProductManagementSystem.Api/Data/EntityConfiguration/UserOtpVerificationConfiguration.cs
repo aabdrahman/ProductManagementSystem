@@ -21,6 +21,10 @@ public class UserOtpVerificationConfiguration : IEntityTypeConfiguration<UserOtp
         builder.Property(x => x.CreatedAt)
             .HasDefaultValueSql("GETUTCDATE()");
 
+        builder.HasOne(x => x.UserToConfirmDetails)
+            .WithMany()
+            .HasForeignKey(x => x.UserEmail).HasPrincipalKey(x => x.UserEmailAddress).IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
 
     }
 }
