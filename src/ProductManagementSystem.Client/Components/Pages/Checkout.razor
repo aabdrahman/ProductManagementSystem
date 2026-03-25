@@ -186,6 +186,7 @@
                 _createOrderModel.PhoneNumber = _userToCheckout.PhoneNumber;
                 _createOrderModel.DeliveryAddress = _userToCheckout.Address;
                 _createOrderModel.CreatedBy = _userToCheckout.Email;
+                _createOrderModel.UserId = _loggedInUserId;
             }
         }
 

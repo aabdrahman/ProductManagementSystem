@@ -8,6 +8,7 @@ public record class OrderDetailsDto
     public string OrderStatus { get; set; }
     public DateTime CreatedDate { get; set; }
     public string CreatedBy { get; set; }
+    public string CreatedByUser { get; set; }
     public string DeliveryAddress { get; set; }
     public string OrderNumber { get; set; }
     public bool IsConfirmed { get; set; }
