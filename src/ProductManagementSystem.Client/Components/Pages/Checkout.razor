@@ -9,6 +9,11 @@
 @inject GetUserDetailsHandler getUserDetailsHandler
 
 
+@if (_isPlacingOrder)
+{
+    <Spinner Description="Placing User Order" />
+}
+
 <section class="checkout-page">
     <div class="checkout-header">
         <h2>Checkout</h2>
@@ -17,7 +22,7 @@
 
     @if (_isLoading)
     {
-        <p>Loading cart...</p>
+        <Spinner Description="Fetching Orders" />
     }
     else if (!_orders.Any())
     {

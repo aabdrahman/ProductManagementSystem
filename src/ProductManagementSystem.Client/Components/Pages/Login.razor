@@ -9,6 +9,11 @@
 
 @layout ProductManagementSystem.Client.Components.Layout.CustomLayout
 
+@if(_isProcessing)
+{
+    <Spinner Description="Processing...." />    
+}
+
 <div class="auth-page">
 
     <div class="auth-card">

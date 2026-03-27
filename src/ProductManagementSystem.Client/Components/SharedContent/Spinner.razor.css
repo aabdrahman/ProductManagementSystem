@@ -1,0 +1,55 @@
+﻿
+
+.full-page-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5); /* Frosty transparency */
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(1px); /* Modern frosted-glass effect */
+}
+/* Center the loader in its container */
+.loader-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* The actual spinning element */
+.custom-spinner {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #e1e4e8; /* Muted track color */
+    border-bottom-color: #0366d6; /* Your primary action blue */
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+/* The "Processing" text below the spinner */
+.loading-text {
+    margin-top: 15px;
+    font-family: var(--FONT-STYLE-BODY);
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--FONT-COLOR-SECONDARY);
+    letter-spacing: 0.5px;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
