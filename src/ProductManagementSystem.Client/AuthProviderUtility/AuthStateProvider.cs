@@ -48,7 +48,7 @@ public class AuthStateProvider : AuthenticationStateProvider
         DateTimeOffset expiryTimestamp = DateTimeOffset.FromUnixTimeSeconds(expiryTime);
         Console.WriteLine("Expiry Timestamp - {0}", expiryTimestamp);
 
-        if(DateTimeOffset.UtcNow >= expiryTimestamp)
+        if(DateTimeOffset.UtcNow > expiryTimestamp)
         {
             var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
             NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));

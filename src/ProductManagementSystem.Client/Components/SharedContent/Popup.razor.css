@@ -23,6 +23,7 @@
 
 /* Modal box */
 .app-modal-content {
+    position: relative;
     background: #e6dfdf;
     width: min(92vw, 650px);
     border-radius: 24px;
@@ -30,7 +31,6 @@
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
     animation: modalPop 0.25s ease-out forwards;
     pointer-events: auto; /* Allow inside interaction */
-
 }
 
 /* Animation */

@@ -109,11 +109,15 @@
     }
 }
 
-/* Ensure the button content stays aligned when the spinner is active */
-/*.btn-verify {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 45px;*/ /* Prevents the button from shrinking when text disappears */
-    /*gap: 10px;
-}*/
+/* For WebKit browsers (Chrome, Safari, Edge, Opera) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0; /* Removes the margin in Chrome, Safari, Edge, and Opera */
+}
+
+/* For Mozilla Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield; /* Standard property, but vendor prefixes are still needed for full support */
+}

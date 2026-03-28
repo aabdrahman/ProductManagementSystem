@@ -303,7 +303,7 @@ public class AuthenticationService : IAuthenticationService
         {
             Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("Validate OTP request - {0}", validateOtpRequest);
 
-            UserOtpVerification? userOtp = await _repositoryContext.UserOtpVerifications
+            UserOtpVerification? userOtp = await _repositoryContext.UserOtpVerifications.Include(x => x.UserToConfirmDetails)
                                                                             .OrderByDescending(x => x.CreatedAt)
                                                                             .FirstOrDefaultAsync(x => x.UserEmail == validateOtpRequest.UserEmailAddress.ToUpper());
 
@@ -328,11 +328,13 @@ public class AuthenticationService : IAuthenticationService
                 return GenericResponse<string>.Failure("Operation Failed.", "OTP Verification Failed. Invalid OTP provided.", HttpStatusCode.BadRequest);
             }
 
-            int affectedRows = await _repositoryContext.Users.Where(x => x.UserEmailAddress == userOtp.UserEmail.ToUpper())
-                                                            .ExecuteUpdateAsync(x => x.SetProperty(x => x.ConfirmedAt, DateTime.UtcNow).SetProperty(x => x.IsUserConfirmed, true));
+            //int affectedRows = await _repositoryContext.Users.Where(x => x.UserEmailAddress == userOtp.UserEmail.ToUpper())
+            //                                                .ExecuteUpdateAsync(x => x.SetProperty(x => x.ConfirmedAt, DateTime.UtcNow).SetProperty(x => x.IsUserConfirmed, true));
 
-            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("User marked as confirmed successfully. Query returns - {0}", affectedRows);
+            //Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Information("User marked as confirmed successfully. Query returns - {0}", affectedRows);
 
+            userOtp.UserToConfirmDetails.IsUserConfirmed = true;
+            userOtp.UserToConfirmDetails.ConfirmedAt = DateTime.UtcNow;
             _repositoryContext.UserOtpVerifications.Remove(userOtp);
 
             await _repositoryContext.SaveChangesAsync();

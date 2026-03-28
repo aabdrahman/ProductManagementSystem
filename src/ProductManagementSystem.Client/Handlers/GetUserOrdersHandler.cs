@@ -12,23 +12,22 @@ public class GetUserOrdersHandler
         _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
 
-    public async Task<(IEnumerable<OrderDto> orders, string message)> Handle(int UserId, string EmailAddress = null)
+    public async Task<(IEnumerable<OrderDto> userOrders, string responseMessage)> Handle(int UserId)
     {
         try
         {
-            var httpResponse = await _httpClient.GetAsync($"api/Order/user-orders?UserId={UserId}&UserEmailAddress={EmailAddress}");
+            var httpResponse = await _httpClient.GetAsync($"api/Order/user-orders?UserId={UserId}");
 
-            string responseContent = await httpResponse.Content.ReadAsStringAsync();
+            string httpResponseContent = await httpResponse.Content.ReadAsStringAsync();
 
-            GenericResponse<IEnumerable<OrderDto>> responseBody = JsonSerializer.Deserialize<GenericResponse<IEnumerable<OrderDto>>>(responseContent, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true }) ??
-                                                                                                throw new ArgumentNullException("Response could not be deserialized.");
+            GenericResponse<IEnumerable<OrderDto>> responseBody = JsonSerializer.Deserialize<GenericResponse<IEnumerable<OrderDto>>>(httpResponseContent, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true }) ??
+                                                                            throw new ArgumentNullException("Response could not be deserialized");
 
             return (responseBody.Data ?? [], responseBody.ResponseMessage);
-        }                                                                           
+        }
         catch (Exception ex)
         {
             return ([], ex.Message);
         }
     }
-
 }

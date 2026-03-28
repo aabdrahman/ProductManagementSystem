@@ -83,6 +83,22 @@ public class OrderController : ControllerBase
         }
     }
 
+    [HttpGet("user-orders")]
+    public async Task<IActionResult> GetUserOrders([FromQuery] int UserId)
+    {
+        try
+        {
+            var result = await _orderService.GetUserOrdersAsync(UserId);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetUserOrders").Error(ex, "Error Invoking Ednpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
     [HttpGet("product/{productId:int}")]
     public async Task<IActionResult> GetByProduct(int productId)
     {

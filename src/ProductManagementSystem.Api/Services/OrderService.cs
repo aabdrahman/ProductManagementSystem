@@ -46,13 +46,13 @@ public class OrderService : IOrderService
         {
             Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("Create Order - {orderToCreate}", createOrder);
 
-            //Validate User with Email Exists
-            User? user = await _repositoryContext.Users.FirstOrDefaultAsync(x => x.Id == createOrder.UserId);
+            //Validate user Exists
+            User? createdByUser = await _repositoryContext.Users.FirstOrDefaultAsync(x => x.Id == createOrder.UserId);
 
-            if(user is null)
+            if(createdByUser is null)
             {
                 Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("User with Id does not exist - {0}", createOrder.UserId);
-                return GenericResponse<OrderDto>.Failure(null, "User with id does not exist", System.Net.HttpStatusCode.NotFound);
+                return GenericResponse<OrderDto>.Failure(null, "User with Id does not exist", System.Net.HttpStatusCode.NotFound);
             }
 
             //Validate the product to order exists and the quantity ordered is available in stock before creating the order
@@ -123,7 +123,7 @@ public class OrderService : IOrderService
                 CreatedAt = DateTime.UtcNow,
                 DeliveryAddress = createOrder.DeliveryAddress,
                 OrderTrackingId = GetOrderTrackingId(),
-                UserId = user.Id
+                UserId = createdByUser.Id
             };
 
             //Create order line items from the order line items from request and set to the order line items collection of the order to insert
@@ -566,6 +566,7 @@ public class OrderService : IOrderService
                                             OrderStatus = x.OrderStatus.ToString(),
                                             OrderNumber = x.OrderTrackingId,
                                             IsConfirmed = x.IsConfirmed,
+                                            CreatedByUser = string.Concat(x.CreatedByUser.FirstName, " ", x.CreatedByUser.LastName),
                                             OrderLineItems = x.OrderLineItems.Select(oli => new OrderLineItemDetailsDto()
                                             {
                                                 Id = oli.Id,
@@ -623,9 +624,9 @@ public class OrderService : IOrderService
 
             Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetUserOrdersAsync)).Information("Fetched User Orders - {0}", userOrders);
 
-            return userOrders.Count > 0 ?
-                GenericResponse<IEnumerable<OrderDto>>.Success(userOrders, "User orders fetched successfully.", System.Net.HttpStatusCode.OK) :
-                GenericResponse<IEnumerable<OrderDto>>.Failure(null, "No Order for specified user.", System.Net.HttpStatusCode.NotFound);
+            return userOrders.Any() ?
+                        GenericResponse<IEnumerable<OrderDto>>.Success(userOrders, "User Orders Fetched Successfully.", System.Net.HttpStatusCode.OK) :
+                        GenericResponse<IEnumerable<OrderDto>>.Failure(userOrders, "User does not have any order", System.Net.HttpStatusCode.NotFound);
         }
         catch (Exception ex)
         {
@@ -652,4 +653,6 @@ public class OrderService : IOrderService
 
         return Convert.ToHexString(randBytes);
     }
+
+
 }

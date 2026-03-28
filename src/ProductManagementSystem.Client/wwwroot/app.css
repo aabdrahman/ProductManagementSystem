@@ -230,7 +230,8 @@ textarea::placeholder {
     line-height: 1.8;
 }
 
-.no-orders {
+.no-orders,
+.no-products{
     display: flex;
     flex-direction: column;
     gap: .5rem;
@@ -238,7 +239,8 @@ textarea::placeholder {
     align-items: center;
 }
 
-.no-orders p {
+.no-orders p,
+.no-products p{
     font-size: 1.25rem;
     color: var(--FONT-COLOR-SECONDARY);
     font-family: var(--FONT-STYLE-BODY);

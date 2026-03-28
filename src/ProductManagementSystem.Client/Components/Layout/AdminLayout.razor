@@ -83,7 +83,7 @@
                     {
                         <div class="user-dropdown">
 
-                            <a href="@(string.Concat("/profile/", _loggedInUserId))">Profile</a>
+                            <a href="@(string.Concat("/profile"))">Profile</a>
 
                             @* <button class="logout-btn" @onclick="HandleLogout">
                                 Logout
@@ -153,9 +153,7 @@
 
     void ToggleSidebar()
     {
-        Console.WriteLine($"Toggle Side bar invoking. Collapse Side bar: {isSidebarCollapsed}");
         isSidebarCollapsed = !isSidebarCollapsed;
-        Console.WriteLine($"Toggle Side bar invoked. Collapse Side bar: {isSidebarCollapsed}");
     }
 
     void HandleLogout()
