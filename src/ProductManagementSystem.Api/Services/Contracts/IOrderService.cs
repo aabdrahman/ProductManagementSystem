@@ -9,7 +9,7 @@ public interface IOrderService
     Task<GenericResponse<OrderDto>> GetByIdAsync(int Id);
     Task<GenericResponse<IEnumerable<OrderDto>>> GetByProductIdAsync(int ProductId);
     Task<GenericResponse<IEnumerable<OrderDto>>> GetAllAsync();
-    Task<GenericResponse<IEnumerable<OrderDto>>> GetUserOrdersAsync(int UserId, string UserEmailAddress = null);
+    // Task<GenericResponse<IEnumerable<OrderDto>>> GetUserOrdersAsync(int UserId, string UserEmailAddress = null);
     Task<GenericResponse<string>> DeleteAsync(int Id, bool isSoftDelete = true);
     Task<GenericResponse<string>> CancelOrderAsync(int Id);
     Task<GenericResponse<string>> UpdateOrderStatusAsync(UpdateOrderStatusDto updateOrderStatus);
