@@ -31,7 +31,7 @@ public class OrderController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetAll").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetAll").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -47,7 +47,7 @@ public class OrderController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetById").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetById").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -63,7 +63,7 @@ public class OrderController : ControllerBase
     //     }
     //     catch (Exception ex)
     //     {
-    //         Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetUserOrders").Error(ex, "Error Invoking Ednpoint");
+    //         Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetUserOrders").Error(ex, "Error Invoking Endpoint");
     //         return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
     //     }
     // }
@@ -78,7 +78,7 @@ public class OrderController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetOrderDetails").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetOrderDetails").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -94,7 +94,7 @@ public class OrderController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetUserOrders").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetUserOrders").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -110,7 +110,7 @@ public class OrderController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetByProduct").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetByProduct").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -126,7 +126,7 @@ public class OrderController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "OrderController").ForContext(_methodName, "Delete").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "Delete").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -142,7 +142,7 @@ public class OrderController : ControllerBase
         }
         catch (Exception ex)
         { 
-            Log.ForContext(_className, "OrderController").ForContext(_methodName, "Create").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "Create").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -158,7 +158,7 @@ public class OrderController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "OrderController").ForContext(_methodName, "Update").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "Update").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -174,7 +174,7 @@ public class OrderController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "OrderController").ForContext(_methodName, "UpdateStatus").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "UpdateStatus").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
