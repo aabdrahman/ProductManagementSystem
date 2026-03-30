@@ -83,8 +83,8 @@
 
         if(int.TryParse(userId, out _loggedinUserId))
         {
-            var result = await getOrdersHandler.Handle(_loggedinUserId, _userEmailAddress);
-            _orders = result.orders; _responseMessage = result.message;
+            var result = await getOrdersHandler.Handle(_loggedinUserId);
+            _orders = result.userOrders; _responseMessage = result.responseMessage;
         }
 
         _isLoading = false;
@@ -128,8 +128,8 @@
 
         if (refreshDecision)
         {
-            var result = await getOrdersHandler.Handle(_loggedinUserId, _userEmailAddress);
-            _orders = result.orders; _responseMessage = result.message;
+            var result = await getOrdersHandler.Handle(_loggedinUserId);
+            _orders = result.userOrders; _responseMessage = result.responseMessage;
         }
 
         popup.CloseModal();
