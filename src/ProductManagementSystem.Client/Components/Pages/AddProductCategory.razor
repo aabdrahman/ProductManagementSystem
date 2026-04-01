@@ -9,6 +9,11 @@
         <p>Create a new product category and add it to your inventory.</p>
     </div>
 
+    @if (_isSubmitting)
+    {
+        <Spinner Description="Creating Product Category" />
+    }
+
     @if(_responseMessage is not null)
     {
         <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />

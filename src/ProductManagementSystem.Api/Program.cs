@@ -15,6 +15,8 @@ using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api;
 using Microsoft.Extensions.FileProviders;
 using ProductManagementSystem.Api.BackgroundWorker;
+using StackExchange.Redis;
+using ProductManagementSystem.Api.Controllers.ServiceFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +74,13 @@ builder.Services.AddDbContext<RepositoryContext>(opts =>
             .LogTo(Log.Information, new[] { DbLoggerCategory.Database.Command.Name, DbLoggerCategory.Model.Name }, LogLevel.Information, Microsoft.EntityFrameworkCore.Diagnostics.DbContextLoggerOptions.SingleLine);
 });
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(opts =>
+{
+    var connection = ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("RedisConnection") ?? throw new ArgumentNullException("Redis connection is not set"));
+
+    return connection;
+});
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
@@ -85,6 +94,9 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IBackgroundOperationService, BackgroundOperationService>();
 builder.Services.AddScoped<IUserOrderVerificationService, UserOrderVerificationService>();
+
+builder.Services.AddScoped<IRedisService, RedisService>();
+builder.Services.AddScoped<AuthenticationTokenValidationFilter>();
 
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IOtpOperation, OtpOperation>();
@@ -132,7 +144,10 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(opts =>
+{
+    //opts.Filters.Add<AuthenticationTokenValidationFilter>();
+});
 
 builder.Services.AddHostedService<EmailProcessingBackgroundService>();
 builder.Services.AddHostedService<RemoveExpiredOtpBackgroundService>();

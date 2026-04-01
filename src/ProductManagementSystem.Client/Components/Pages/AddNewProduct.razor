@@ -10,6 +10,11 @@
         <p>Create a new product and add it to your inventory.</p>
     </div>
 
+    @if(_isSubmitting)
+    {
+        <Spinner Description="Creating Product" />        
+    }
+
     @if(_createProductModel is not null)
     {
         <EditForm Model="_createProductModel" OnValidSubmit="AddProduct">

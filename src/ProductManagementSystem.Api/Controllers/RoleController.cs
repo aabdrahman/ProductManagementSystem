@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProductManagementSystem.Api.Controllers.ServiceFilters;
 using ProductManagementSystem.Api.Services.Contracts;
 using Serilog;
 using System.Net;
@@ -9,6 +10,8 @@ namespace ProductManagementSystem.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
+[ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
 public class RoleController : ControllerBase
 {
     private readonly IRoleService _roleService;

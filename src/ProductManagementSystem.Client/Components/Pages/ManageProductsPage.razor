@@ -5,6 +5,7 @@
 @layout ProductManagementSystem.Client.Components.Layout.AdminLayout
 
 @inject GetProductsHandler getProductsHandler
+@inject GetProductCategoryHandler getProductCategoryHandler
 
 @rendermode InteractiveServer
 
@@ -43,7 +44,7 @@
 
 </section>
 
-<ProductCategoryView HandleAddCategory="HandleAddNewProductCategory" HandleDelete="HandleDeleteProductCategory" />
+<ProductCategoryView HandleAddCategory="HandleAddNewProductCategory" HandleDelete="HandleDeleteProductCategory" PerformRefresh="@_performCategoryRefresh" />
 
 <Popup @ref="popup" Title="@_title" ShowCloseButton="false">
     <Body>
@@ -77,6 +78,7 @@
 @code {
     private IEnumerable<ProductDto> _products;
     private bool _isLoading;
+    private bool _performCategoryRefresh = false;
 
     private string _responseMessage;
     private bool _isSuccessful;
@@ -232,8 +234,7 @@
 
         if (refreshDecision)
         {
-            var response = await getProductsHandler.Handle();
-            _products = response.products;
+            _performCategoryRefresh = true;
         }
 
         popup.CloseModal();
@@ -244,8 +245,7 @@
 
         if (refreshDecision)
         {
-            var response = await getProductsHandler.Handle();
-            _products = response.products;
+            _performCategoryRefresh = true;
         }
 
         popup.CloseModal();

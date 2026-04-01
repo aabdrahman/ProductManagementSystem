@@ -6,4 +6,5 @@ public class JwtSettingConfig
     public string ValidIssuer { get; set; }
     public double ExpiresAfterSeconds { get; set; }
     public double SessionTimeoutAfterMinutes { get; set; }
+    public double SessionLockoutAFterAttempt { get; set; }
 }

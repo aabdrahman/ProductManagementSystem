@@ -11,6 +11,7 @@ using ProductManagementSystem.Shared.DataTransferObjects.Authentication;
 using ProductManagementSystem.Shared.DataTransferObjects.MailOperation;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
+using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
@@ -30,15 +31,18 @@ public class AuthenticationService : IAuthenticationService
     private readonly IOtpOperation _otpOperation;
     private readonly IEmailService _emailService;
     private readonly OtpSettingsConfig _otpSettingsConfig;
+    private readonly IRedisService _redisService;
+    private readonly IDatabase _redisDatabase;
 
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
     private User? loggedInUser;
 
-    public AuthenticationService(RepositoryContext repositoryContext, IPasswordHasher passwordHasher, IConfiguration configuration, 
-                                IOptionsMonitor<JwtSettingConfig> jwtSettingsOptionsMonitor, IHttpContextAccessor httpContextAccessor, 
-                                ILogger<AuthenticationService> logger, IOtpOperation otpOperation, IEmailService emailService, IOptionsMonitor<OtpSettingsConfig> otpSettingsConfigOptionsMonitor)
+    public AuthenticationService(RepositoryContext repositoryContext, IPasswordHasher passwordHasher, IConfiguration configuration,
+                                IOptionsMonitor<JwtSettingConfig> jwtSettingsOptionsMonitor, IHttpContextAccessor httpContextAccessor,
+                                ILogger<AuthenticationService> logger, IOtpOperation otpOperation, IEmailService emailService, IOptionsMonitor<OtpSettingsConfig> otpSettingsConfigOptionsMonitor, 
+                                IRedisService redisService, IConnectionMultiplexer connectionMultiplexer)
     {
         _repositoryContext = repositoryContext;
         _passwordHasher = passwordHasher;
@@ -49,6 +53,8 @@ public class AuthenticationService : IAuthenticationService
         _otpOperation = otpOperation;
         _emailService = emailService;
         _otpSettingsConfig = otpSettingsConfigOptionsMonitor.CurrentValue;
+        _redisService = redisService;
+        _redisDatabase = connectionMultiplexer.GetDatabase();
     }
     public async Task<GenericResponse<string>> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
     {
@@ -110,6 +116,14 @@ public class AuthenticationService : IAuthenticationService
                 return GenericResponse<TokenDto>.Failure(null, "Invalid Credentials", HttpStatusCode.BadRequest);
             }
 
+            var isUserLockedOutInCache = await _redisDatabase.HashExistsAsync(RedisCacheHelperClass.LockedOutUsersKey, loginUser.Email.ToUpper());
+
+            if(isUserLockedOutInCache)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("Login Failed. User is currently locked out - {0}", loginUser.Email);
+                return GenericResponse<TokenDto>.Failure(null, "User account locked due to multiple failed login attempts. Kindly reset your password or contact administrator.", HttpStatusCode.BadRequest);
+            }
+
             User? userToAuthenticate = await _repositoryContext.Users.Include(x => x.AssignedRole).SingleOrDefaultAsync(x => x.UserEmailAddress == loginUser.Email.ToUpper());
 
             if(userToAuthenticate is null)
@@ -118,12 +132,36 @@ public class AuthenticationService : IAuthenticationService
                 return GenericResponse<TokenDto>.Failure(null, "Invalid Credentials", HttpStatusCode.BadRequest);
             }
 
+            string userProfileCacheKey = RedisCacheHelperClass.GetUserProfileFailedLoginAttemptCacheKey(userToAuthenticate.Id.ToString());
+
             bool isPasswordCorrect = _passwordHasher.ValidatePassword(userToAuthenticate.PasswordHash, loginUser.Password);
 
             if (!isPasswordCorrect)
             {
-                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("Login Failed. Invalid Password provided by user - {0}", loginUser);
+                var setFailedLoginAttemptCache = await _redisDatabase.StringIncrementAsync(userProfileCacheKey, 1); //Set the current failed login attempt value to increment by 1.
+
+                if(setFailedLoginAttemptCache >= _jwtSettingConfig.SessionLockoutAFterAttempt)
+                {
+                    await _redisDatabase.HashSetAsync(RedisCacheHelperClass.LockedOutUsersKey, new HashEntry[] { new HashEntry(userToAuthenticate.UserEmailAddress, true) }); //Set the user lockout cache in redis with value true.
+
+                    //userToAuthenticate.IsActive = false; //Lock the user account if failed login attempts are more than or equal to the lockout attempt value defined in configuration.
+                    //await _repositoryContext.SaveChangesAsync();
+                    Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("User account locked due to multiple failed login attempts - {0}. Failed login attempts - {1}", userToAuthenticate, setFailedLoginAttemptCache);
+                    return GenericResponse<TokenDto>.Failure(null, "User account locked due to multiple failed login attempts. Kindly reset your password or contact administrator.", HttpStatusCode.BadRequest);
+                }
+
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("Login Failed. Invalid Password provided by user - {0}. Curent Failed login attempts - {1}", loginUser, setFailedLoginAttemptCache);
+
                 return GenericResponse<TokenDto>.Failure(null, "Invalid Credentials", HttpStatusCode.BadRequest);
+            }
+
+            TokenDto? existingTokenDetails = await _redisService.GetItemAsync<TokenDto>(RedisCacheHelperClass.GetUserProfileTokenCacheKey(userToAuthenticate.Id.ToString(), userToAuthenticate.UserEmailAddress));
+
+
+            if(existingTokenDetails is not null && existingTokenDetails.TokenExpirationTime.Value.AddSeconds(10) > DateTime.UtcNow)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("User already has an active session. Active token details - {0}", existingTokenDetails);
+                return GenericResponse<TokenDto>.Success(existingTokenDetails, "User already has an active session.", HttpStatusCode.OK);
             }
 
             loggedInUser = userToAuthenticate;
@@ -139,14 +177,21 @@ public class AuthenticationService : IAuthenticationService
 
             await _repositoryContext.SaveChangesAsync();
 
-            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("User logged in successfully - {0}", loggedInUser);
-
-            return GenericResponse<TokenDto>.Success(new TokenDto()
+            //Set the user profile cache in redis with expiration time same as the session timeout.
+            TokenDto generatedTokenToReturn = new TokenDto()
             {
                 Token = token,
                 RefreshToken = loggedInUser.RefreshToken,
                 TokenExpirationTime = loggedInUser.RefreshTokenExpiryTime
-            }, "User Successfully logged in.", HttpStatusCode.OK);
+            };
+
+            var setTokenForUser = await _redisService.SetItemAsync<TokenDto>(generatedTokenToReturn with { TokenExpirationTime = DateTime.UtcNow.AddSeconds(_jwtSettingConfig.ExpiresAfterSeconds) }, RedisCacheHelperClass.GetUserProfileTokenCacheKey(userToAuthenticate.Id.ToString(), userToAuthenticate.UserEmailAddress), 86400);
+
+            var removeFailedLoginAttemptCache = await _redisDatabase.KeyDeleteAsync(userProfileCacheKey); //Remove the failed login attempt cache as user successfully logged in.
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("User logged in successfully - {0}. Failed login attempts removal - {1}. Set User Token To Cache - {2}", loggedInUser, removeFailedLoginAttemptCache, setTokenForUser);
+
+            return GenericResponse<TokenDto>.Success(generatedTokenToReturn, "User Successfully logged in.", HttpStatusCode.OK);
 
         }
         catch (Exception ex)
@@ -178,6 +223,14 @@ public class AuthenticationService : IAuthenticationService
                 return GenericResponse<TokenDto>.Failure(null, "Invalid Token provided.", HttpStatusCode.BadRequest);
             }
 
+            var isUserLockedOutInCache = await _redisDatabase.HashExistsAsync(RedisCacheHelperClass.LockedOutUsersKey, userEmail.ToUpper());
+
+            if (isUserLockedOutInCache)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("Refresh token Failed. User is currently locked out - {0}", userEmail);
+                return GenericResponse<TokenDto>.Failure(null, "User account locked due to multiple failed login attempts. Kindly reset your password or contact administrator.", HttpStatusCode.BadRequest);
+            }
+
             User? userWithToken = await _repositoryContext.Users.Include(x => x.AssignedRole).SingleOrDefaultAsync(x => x.UserEmailAddress == userEmail.ToUpper());
 
             if(userWithToken is null)
@@ -186,9 +239,23 @@ public class AuthenticationService : IAuthenticationService
                 return GenericResponse<TokenDto>.Failure(null, "Invalid Credentials.", HttpStatusCode.NotFound);
             }
 
-            if(!userWithToken.RefreshToken.Equals(tokenDto.RefreshToken) || DateTime.UtcNow.ToLocalTime() > userWithToken.RefreshTokenExpiryTime)
+            string userProfileFailedLoginAttemptCacheKey = RedisCacheHelperClass.GetUserProfileFailedLoginAttemptCacheKey(userWithToken.Id.ToString());
+
+            if (!userWithToken.RefreshToken.Equals(tokenDto.RefreshToken) || DateTime.UtcNow > userWithToken.RefreshTokenExpiryTime)
             {
-                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("User Refresh Token already expired or invalid refresh token provided - {0}", tokenDto.RefreshToken);
+                var setFailedLoginAttemptCache = await _redisDatabase.StringIncrementAsync(userProfileFailedLoginAttemptCacheKey, 1); //Set the current failed login attempt value to increment by 1.
+
+                if (setFailedLoginAttemptCache >= _jwtSettingConfig.SessionLockoutAFterAttempt)
+                {
+                    await _redisDatabase.HashSetAsync(RedisCacheHelperClass.LockedOutUsersKey, new HashEntry[] { new HashEntry(userWithToken.UserEmailAddress, true) }); //Set the user lockout cache in redis with value true.
+
+                    //userToAuthenticate.IsActive = false; //Lock the user account if failed login attempts are more than or equal to the lockout attempt value defined in configuration.
+                    //await _repositoryContext.SaveChangesAsync();
+                    Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("User account locked due to multiple failed login attempts - {0}. Failed login attempts - {1}", userWithToken, setFailedLoginAttemptCache);
+                    return GenericResponse<TokenDto>.Failure(null, "User account locked due to multiple failed login attempts. Kindly reset your password or contact administrator.", HttpStatusCode.BadRequest);
+                }
+
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("User Refresh Token already expired or invalid refresh token provided - {0}. Set Failed login attempts - {1}", tokenDto.RefreshToken, setFailedLoginAttemptCache);
                 return GenericResponse<TokenDto>.Failure(null, "Invalid Credentials.", HttpStatusCode.NotFound);
             }
 
@@ -199,9 +266,9 @@ public class AuthenticationService : IAuthenticationService
 
             loggedInUser = userWithToken;
 
-            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("User refresh token generated and token pending geenration.");
-
             string token = GenerateToken();
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("User refresh token generated and token pending geenration.");
 
             TokenDto tokenDetails = new TokenDto()
             {
@@ -210,7 +277,9 @@ public class AuthenticationService : IAuthenticationService
                 TokenExpirationTime = userWithToken.RefreshTokenExpiryTime
             };
 
-            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("Token refreshed and new access token geenrated successfully - {0}", tokenDetails);
+            var setTokenForUser = await _redisService.SetItemAsync<TokenDto>(tokenDetails with { TokenExpirationTime = DateTime.UtcNow.AddSeconds(_jwtSettingConfig.ExpiresAfterSeconds) }, RedisCacheHelperClass.GetUserProfileTokenCacheKey(userWithToken.Id.ToString(), userWithToken.UserEmailAddress), 86400);
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("Token refreshed and new access token geenrated successfully - {0}. Set Token to cache - {1}", tokenDetails,setTokenForUser);
 
             return GenericResponse<TokenDto>.Success(tokenDetails, "Token refreshed successfully.", HttpStatusCode.OK);
 
@@ -384,7 +453,7 @@ public class AuthenticationService : IAuthenticationService
             audience: _httpContextAccessor.HttpContext.Request.Headers["Origin"].ToString() ?? "ProjectManagementSystemAPI",
             issuer: _jwtSettingConfig.ValidIssuer,
             claims: claims,
-            expires: DateTime.Now.AddSeconds(_jwtSettingConfig.ExpiresAfterSeconds),
+            expires: DateTime.UtcNow.AddSeconds(_jwtSettingConfig.ExpiresAfterSeconds),
             signingCredentials: credentials 
             
         );

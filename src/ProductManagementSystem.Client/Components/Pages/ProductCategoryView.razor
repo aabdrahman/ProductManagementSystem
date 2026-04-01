@@ -70,6 +70,9 @@
     [Parameter, EditorRequired]
     public EventCallback<ProductCategoryDto> HandleDelete { get; set; }
 
+    [Parameter]
+    public bool PerformRefresh { get; set; } = false;
+
     protected override async Task OnInitializedAsync()
     {
         _isLoading = true;
@@ -80,6 +83,15 @@
         _responseMessage = response.message;
 
         _isLoading = false;
+        PerformRefresh = false;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(PerformRefresh)
+        {
+            await OnInitializedAsync();
+        }
     }
 
 

@@ -29,7 +29,7 @@
 .footer-container li {
     margin-bottom: 0.75rem;
     color: var(--FONT-COLOR-BASIC);
-    font-family: VAR(--FONT-STYLE-BODY);
+    font-family: var(--FONT-STYLE-BODY);
     font-weight: 600;
 }
 

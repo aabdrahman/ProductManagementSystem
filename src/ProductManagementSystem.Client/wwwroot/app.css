@@ -202,7 +202,7 @@ textarea::placeholder {
 }
 
 .add-product-btn:hover {
-    background: VAR(--BG-COLOR-BTN-SUCCESS-HOVER);
+    background: var(--BG-COLOR-BTN-SUCCESS-HOVER);
     transform: translateY(-1px);
 /*    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);*/
 }
