@@ -70,6 +70,12 @@ builder.Services.AddSwaggerGen(opts =>
 });
 
 builder.Services.AddSingleton(Channel.CreateUnbounded<CacheItemProcessor<CacheItem>>());
+builder.Services.AddSingleton(Channel.CreateBounded<SendPriorityMailEvent>(new BoundedChannelOptions(100)
+{
+    SingleReader = true,
+    SingleWriter = false,
+    FullMode = BoundedChannelFullMode.Wait
+}));
 
 builder.Services.AddDbContext<RepositoryContext>(opts =>
 {
@@ -156,7 +162,8 @@ builder.Services.AddControllers(opts =>
 builder.Services.AddHostedService<EmailProcessingBackgroundService>();
 builder.Services.AddHostedService<RemoveExpiredOtpBackgroundService>();
 builder.Services.AddHostedService<RemoveExpiredVerificationTokenBackgroundService>();
-builder.Services.AddHostedService<CacheBackgroundProcessor>();  
+builder.Services.AddHostedService<CacheBackgroundProcessor>();
+builder.Services.AddHostedService<PriorityEmailProcessorBackgroundService>();
 
 var app = builder.Build();
 

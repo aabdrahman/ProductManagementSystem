@@ -2,11 +2,13 @@
 using FluentEmail.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using ProductManagementSystem.Api.Entities.ChannelBrokers;
 using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.MailOperation;
 using Serilog;
 using System.Collections.Concurrent;
+using System.Threading.Channels;
 
 namespace ProductManagementSystem.Api.Utilities;
 
@@ -14,6 +16,7 @@ public class EmailService : IEmailService
 {
     private readonly IFluentEmailFactory _fluentEmailFactory;
     private readonly EmailSettingsConfig _emailSettingsConfig;
+    private readonly Channel<SendPriorityMailEvent> _sendPriorityMailChannel;
 
     private string _methodName = "MethodName";
     private string _className = "ClassName";
@@ -23,10 +26,71 @@ public class EmailService : IEmailService
     private bool _isProcessingQueuedEmail = false;
     private bool _isPerformingOperationOnQueuedItems = false;
 
-    public EmailService(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<EmailSettingsConfig> emailSettingsOptionsMonitor)
+    public EmailService(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<EmailSettingsConfig> emailSettingsOptionsMonitor, Channel<SendPriorityMailEvent> sendPriorityMailChannel)
     {
         _fluentEmailFactory = serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IFluentEmailFactory>();
         _emailSettingsConfig = emailSettingsOptionsMonitor.CurrentValue;
+        _sendPriorityMailChannel = sendPriorityMailChannel;
+    }
+
+    public async Task<ProcessedMailResultDto> ProcessPriorityMails()
+    {
+        try
+        {
+            Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessPriorityMails)).Information("Begin Processing high priority mails...");
+
+            int successCount = 0;
+            int failureCount = 0;
+            int totalProcessed = 0;
+
+            //if(!(_sendPriorityMailChannel.Reader.Count > 0))
+            //{
+            //    Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessPriorityMails)).Information("No priority mail is available to process...");
+            //    return new ProcessedMailResultDto(totalProcessed, successCount, failureCount);
+            //}
+
+            await foreach (var priorityMail in _sendPriorityMailChannel.Reader.ReadAllAsync())
+            {
+                try
+                {
+                    Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessPriorityMails)).Information("Processing high priority mail - {0}", priorityMail);
+
+                    SendResponse sendMailResult = await _fluentEmailFactory.Create()
+                                                    .To(priorityMail.EmailDetails.Recipients.Select(x => new Address(x)))
+                                                    .Subject(priorityMail.EmailDetails.Subject)
+                                                    .Body(priorityMail.EmailDetails.Content, isHtml: priorityMail.EmailDetails.isHtml)
+                                                    .SendAsync();
+                    if(sendMailResult.Successful)
+                    {
+                        successCount++;
+                    }
+                    else
+                    {
+                        failureCount++;
+                        Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessPriorityMails)).Information("High Priority Email processing failed - {0}. Send Mail Response - {1}", priorityMail.EmailDetails, sendMailResult.ErrorMessages);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessPriorityMails)).Error(ex, "High Priority Mail could not be processed. Queuing back to normal mails.");
+
+                    _queuedEmails.Enqueue(priorityMail.EmailDetails);
+
+                    failureCount++;
+                }
+                finally
+                {
+                    totalProcessed++;
+                }
+            }
+
+            return new ProcessedMailResultDto(totalProcessed, successCount, failureCount);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessPriorityMails)).Error(ex, "An Error Occurred while sending queued high priorty mail.");
+            return new ProcessedMailResultDto(0, 0, 0);
+        }
     }
 
     public async Task<ProcessedMailResultDto> ProcessQueuedEmails(bool processAll = false)
@@ -218,18 +282,35 @@ public class EmailService : IEmailService
 
             await Task.Delay(TimeSpan.FromMilliseconds(1));
 
-            if(_isProcessingQueuedEmail || _isPerformingOperationOnQueuedItems)
+            if(emailToSend.priority == EmailPriority.Low || emailToSend.priority == EmailPriority.Medium)
             {
-                _tempQueuedEmails.Enqueue(emailToSend);
-                Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(SendEmailAsync)).Information("Email Temporarily Queued At: {0}. Current Total Queued - {1}", DateTime.UtcNow.ToLocalTime(), _tempQueuedEmails.Count);
+                if (_isProcessingQueuedEmail || _isPerformingOperationOnQueuedItems)
+                {
+                    _tempQueuedEmails.Enqueue(emailToSend);
+                    Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(SendEmailAsync)).Information("Email Temporarily Queued At: {0}. Current Total Queued - {1}", DateTime.UtcNow.ToLocalTime(), _tempQueuedEmails.Count);
+                }
+                else
+                {
+                    _queuedEmails.Enqueue(emailToSend);
+                    Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(SendEmailAsync)).Information("Email Queued At: {0}. Current Total Queued - {1}", DateTime.UtcNow.ToLocalTime(), _queuedEmails.Count);
+                }
+
+                return true;
             }
             else
             {
-                _queuedEmails.Enqueue(emailToSend);
-                Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(SendEmailAsync)).Information("Email Queued At: {0}. Current Total Queued - {1}", DateTime.UtcNow.ToLocalTime(), _queuedEmails.Count);
-            }
+                if(await _sendPriorityMailChannel.Writer.WaitToWriteAsync())
+                {
+                   await  _sendPriorityMailChannel.Writer.WriteAsync(new SendPriorityMailEvent(emailToSend));
+                }
+                else
+                {
+                    _queuedEmails.Enqueue(emailToSend);
+                }
 
-            return true;
+                return true;
+            }
+            
         }
         catch (Exception ex)
         {

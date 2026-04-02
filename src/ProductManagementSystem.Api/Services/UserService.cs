@@ -9,6 +9,8 @@ using Serilog;
 using System.Data.Common;
 using System.Net;
 using ProductManagementSystem.Api.Entities.StaticValues;
+using ProductManagementSystem.Api.Helpers;
+using ProductManagementSystem.Shared.DataTransferObjects.MailOperation;
 
 namespace ProductManagementSystem.Api.Services;
 
@@ -16,14 +18,18 @@ public class UserService : IUserService
 {
     private readonly RepositoryContext _repositoryContext;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IEmailService _emailService;
+    private readonly IOtpOperation _otpOperation;
 
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
-    public UserService(RepositoryContext repositoryContext, IPasswordHasher passwordHasher)
+    public UserService(RepositoryContext repositoryContext, IPasswordHasher passwordHasher, IEmailService emailService, IOtpOperation otpOperation)
     {
         _repositoryContext = repositoryContext;
         _passwordHasher = passwordHasher;
+        _emailService = emailService;
+        _otpOperation = otpOperation;
     }
 
     public async Task<GenericResponse<string>> ConfirmUserAsync(UpdateUserConfimationStatusDto updateUserConfimationStatus)
@@ -94,11 +100,30 @@ public class UserService : IUserService
                 PasswordHash = _passwordHasher.HashPassword(createUser.Password)
             };
 
-            await _repositoryContext.Users.AddAsync(userToInsert);
+            string generatedOtp = _otpOperation.GenerateOtp();
+
+            UserOtpVerification userVerificationDetails = new UserOtpVerification()
+            {
+                UserToConfirmDetails = userToInsert,
+                GeneratedOTP = _passwordHasher.HashPassword(generatedOtp),
+                UserEmail = userToInsert.UserEmailAddress
+            };
+
+            await _repositoryContext.UserOtpVerifications.AddAsync(userVerificationDetails);
 
             await _repositoryContext.SaveChangesAsync();
 
-            Log.ForContext(_className, "UserService").ForContext(_methodName, "CreateAsync").Information("User created successfully - {0}", userToInsert);
+            Dictionary<string, string> emailContentParameters = new Dictionary<string, string>();
+            emailContentParameters.Add("OTP_CODE", generatedOtp);
+            emailContentParameters.Add("UserEmail", userToInsert.UserEmailAddress.ToLower());
+
+            string emailContent = EmailContentHelper.GetMailContent("SendOtpTemplate.html", emailContentParameters);
+
+            EmailSenderDto emailToSend = new EmailSenderDto("Verify your Account", emailContent, [userToInsert.UserEmailAddress.ToLower()], true, EmailPriority.High);
+
+            var queueMailResult = await _emailService.SendEmailAsync(emailToSend);
+
+            Log.ForContext(_className, "UserService").ForContext(_methodName, "CreateAsync").Information("User created successfully - {0}. OTP Send response - {1}", userToInsert, queueMailResult);
 
             UserDto userToReturn = new UserDto()
             {
