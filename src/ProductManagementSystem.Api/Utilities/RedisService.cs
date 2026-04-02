@@ -51,6 +51,28 @@ public class RedisService : IRedisService
         }
     }
 
+    public async Task<bool> RemoveMultiple(params string[] keys)
+    {
+        try
+        {
+            Log.ForContext("ClassName", nameof(RedisService)).ForContext("MethodName", nameof(RemoveMultiple)).Information("Removing Items from redis cache with key - {0}", keys);
+
+            var keysItems = keys.Select(x => new RedisKey(x)).ToArray();
+
+            var result = await _redisDatabase.KeyDeleteAsync(keysItems);
+
+            Log.ForContext("ClassName", nameof(RedisService)).ForContext("MethodName", nameof(RemoveMultiple)).Information("Keys deletion returns - {0}", result);
+
+            return true;
+
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext("ClassName", nameof(RedisService)).ForContext("MethodName", nameof(RemoveMultiple)).Error(ex, "An error occurred deleting keys from redis.");
+            return false;
+        }
+    }
+
     public async Task<bool> SetItemAsync<T>(T data, string key, int timeToExpire = 30)
     {
         try

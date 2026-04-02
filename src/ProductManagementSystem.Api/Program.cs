@@ -17,6 +17,8 @@ using Microsoft.Extensions.FileProviders;
 using ProductManagementSystem.Api.BackgroundWorker;
 using StackExchange.Redis;
 using ProductManagementSystem.Api.Controllers.ServiceFilters;
+using ProductManagementSystem.Api.Entities.ChannelBrokers;
+using System.Threading.Channels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +68,8 @@ builder.Services.AddSwaggerGen(opts =>
     opts.AddSecurityRequirement(securityRequirement);
 
 });
+
+builder.Services.AddSingleton(Channel.CreateUnbounded<CacheItemProcessor<CacheItem>>());
 
 builder.Services.AddDbContext<RepositoryContext>(opts =>
 {
@@ -152,6 +156,7 @@ builder.Services.AddControllers(opts =>
 builder.Services.AddHostedService<EmailProcessingBackgroundService>();
 builder.Services.AddHostedService<RemoveExpiredOtpBackgroundService>();
 builder.Services.AddHostedService<RemoveExpiredVerificationTokenBackgroundService>();
+builder.Services.AddHostedService<CacheBackgroundProcessor>();  
 
 var app = builder.Build();
 
