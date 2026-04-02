@@ -19,6 +19,7 @@ public class User
     public DateTime? LastLoginDate { get; set; }
     public DateTime? LastAuthenticatedDate { get; set; }
     public DateTime? LastUpdatedAt { get; set; }
+    public bool IsProfileLockedOut { get; set; } = false;
 
 
     //RELATIONSHIPS

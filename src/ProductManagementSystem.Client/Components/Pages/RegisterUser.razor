@@ -84,7 +84,7 @@
                             <label>Role To Assign</label>
                             <InputSelect @bind-Value="_registerUserModel.RoleId">
 
-                                <option value="0">Seect Role To Assign</option>
+                                <option value="0">Select Role To Assign</option>
 
                                 @foreach (var role in _roles)
                                 {
@@ -101,7 +101,13 @@
                 }
                 else if (_roles is not null && !_roles.Any() && string.IsNullOrEmpty(_registerUserModel.RoleId.ToString()))
                 {
-                    <p class="validation-message">
+                    <p class="validation-message" style="font-size: 1.25rem">
+                        No Role to assign to user
+                    </p>
+                }
+                else
+                {
+                    <p class="validation-message" style="font-size: 1.25rem">
                         No Role to assign to user
                     </p>
                 }
@@ -159,14 +165,12 @@
         await Task.Delay(200);
 
         var roleResult = await getRoleHandler.Handle();
-        _roles = roleResult.roles.ToList();
+        _roles = roleResult.roles.Where(x => !x.RoleName.Equals("system", StringComparison.OrdinalIgnoreCase)).ToList();
         _getRolesResponsemessage = roleResult.message;
 
         var roleId = _roles.FirstOrDefault(x => x.RoleName.Equals("user", StringComparison.CurrentCultureIgnoreCase))?.RoleId ?? 0;
 
         _isDefaultUser = roleId > 0;
-
-        Console.WriteLine("Is Default User - {0}", _isDefaultUser);
 
         _registerUserModel = new CreateUserDto();
 

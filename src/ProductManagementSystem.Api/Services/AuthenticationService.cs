@@ -144,8 +144,8 @@ public class AuthenticationService : IAuthenticationService
                 {
                     await _redisDatabase.HashSetAsync(RedisCacheHelperClass.LockedOutUsersKey, new HashEntry[] { new HashEntry(userToAuthenticate.UserEmailAddress, true) }); //Set the user lockout cache in redis with value true.
 
-                    //userToAuthenticate.IsActive = false; //Lock the user account if failed login attempts are more than or equal to the lockout attempt value defined in configuration.
-                    //await _repositoryContext.SaveChangesAsync();
+                    userToAuthenticate.IsProfileLockedOut = true; //Lock the user account if failed login attempts are more than or equal to the lockout attempt value defined in configuration.
+                    await _repositoryContext.SaveChangesAsync();
                     Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("User account locked due to multiple failed login attempts - {0}. Failed login attempts - {1}", userToAuthenticate, setFailedLoginAttemptCache);
                     return GenericResponse<TokenDto>.Failure(null, "User account locked due to multiple failed login attempts. Kindly reset your password or contact administrator.", HttpStatusCode.BadRequest);
                 }

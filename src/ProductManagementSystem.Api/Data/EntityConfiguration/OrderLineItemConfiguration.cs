@@ -27,6 +27,10 @@ public class OrderLineItemConfiguration : IEntityTypeConfiguration<OrderLineItem
         builder.Property(x => x.QuantityOrdered)
             .IsRequired();
 
+        builder.Property(x => x.OrderRate)
+            .IsRequired()
+            .HasPrecision(10, 2);
+
         builder.HasQueryFilter(x => x.IsActive);
 
         builder.HasOne(x => x.order)

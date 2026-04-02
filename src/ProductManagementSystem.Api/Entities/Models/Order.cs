@@ -13,6 +13,7 @@ public class Order
     public string OrderTrackingId { get; set; }
     public string DeliveryAddress { get; set; }
     public bool IsConfirmed { get; set; } = false;
+    public bool IsConfirmationNotificationSent { get; set; } = false;
 
     //RELATIONSHIP
     //Product

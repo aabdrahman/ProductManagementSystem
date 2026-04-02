@@ -70,7 +70,7 @@ public class OrderService : IOrderService
                 return GenericResponse<OrderDto>.Failure(null, $"The following product Ids do not exist: {JsonSerializer.Serialize(nonExistingProductIds)}", System.Net.HttpStatusCode.NotFound);
             }
 
-            var joinedOrderItems = createOrder.OrderLineItems.Join(productsToOrder, oli => oli.ProductId, p => p.Id, (oli, p) => new { OrderLineItem = oli, Product = p, StockAvailable = p.CurrentCount >= oli.QuantityOrdered }).ToList();
+            var joinedOrderItems = createOrder.OrderLineItems.Join(productsToOrder, oli => oli.ProductId, p => p.Id, (oli, p) => new { OrderLineItem = oli, Product = p, Rate = oli.QuantityOrdered * p.SellingPrice, StockAvailable = p.CurrentCount >= oli.QuantityOrdered }).ToList();
 
             if(joinedOrderItems.Any(x => !x.StockAvailable))
             {
@@ -115,9 +115,7 @@ public class OrderService : IOrderService
             //Create an instance of the order to insert from the order from request
             Order orderToInsert = new Order()
             {
-                CreatedBy = createOrder.CreatedBy,
-                //OrderCount = createOrder.QuantityOrdered,
-                //OrderedProduct = productToOrder,
+                CreatedBy = $"{createdByUser.FirstName} {createdByUser.LastName}",
                 OrderStatus = Entities.StaticValues.OrderStatus.Pending,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
@@ -127,11 +125,14 @@ public class OrderService : IOrderService
             };
 
             //Create order line items from the order line items from request and set to the order line items collection of the order to insert
-            List<OrderLineItem> orderLineItems = createOrder.OrderLineItems.Select(x => new OrderLineItem()
+
+            List<OrderLineItem> orderLineItems = joinedOrderItems.Select(x => new OrderLineItem()
             {
 
-                ProductId = x.ProductId,
-                QuantityOrdered = x.QuantityOrdered
+                ProductId = x.Product.Id,
+                QuantityOrdered = x.OrderLineItem.QuantityOrdered,
+                OrderRate = x.Rate
+               
 
             }).ToList();
 
@@ -572,7 +573,8 @@ public class OrderService : IOrderService
                                                 Id = oli.Id,
                                                 IsActive = oli.IsActive,
                                                 ProductName = oli.OrderedProduct.NormalizedName,
-                                                OrderCount = oli.QuantityOrdered
+                                                OrderCount = oli.QuantityOrdered,
+                                                Price = oli.OrderRate * oli.QuantityOrdered
                                             }).ToList()
                                         })
                                         .SingleOrDefaultAsync();

@@ -45,17 +45,13 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(x => x.DeliveryDate)
             .IsRequired(false);
 
-        //builder.Property(x => x.OrderCount)
-        //    .IsRequired();
-
-        //builder.HasOne(x => x.OrderedProduct)
-        //    .WithMany(x => x.Orders)
-        //    .HasForeignKey(x => x.ProductId)
-        //    .OnDelete(DeleteBehavior.ClientCascade);
-
         builder.Property(x => x.DeliveryAddress)
             .IsRequired()
             .HasMaxLength(255);
+
+        builder.Property(x => x.IsConfirmationNotificationSent)
+            .IsRequired()
+            .HasDefaultValue(false);
 
         builder.HasQueryFilter(x => x.IsActive);
 

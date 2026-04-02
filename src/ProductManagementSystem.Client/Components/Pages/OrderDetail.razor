@@ -85,9 +85,13 @@ else
                             <span class="product-qty">Quantity: @item.OrderCount</span>
                         </div>
 
-                        <span class="product-status @(item.IsActive ? "active" : "inactive")">
-                            @(item.IsActive ? "Active" : "Removed")
+                        <span class="product-price">
+                            @item.Price.ToString("C")
                         </span>
+
+                        @* <span class="product-status @(item.IsActive ? "active" : "inactive")">
+                            @(item.IsActive ? "Active" : "Removed")
+                        </span> *@
 
                     </div>
                 }

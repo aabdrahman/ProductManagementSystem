@@ -49,6 +49,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasDefaultValue(false);
 
+        builder.Property(x => x.IsProfileLockedOut)
+            .IsRequired()
+            .HasDefaultValue(false);
+
         builder.HasMany(x => x.Orders)
             .WithOne(x => x.CreatedByUser)
             .HasForeignKey(x => x.UserId)

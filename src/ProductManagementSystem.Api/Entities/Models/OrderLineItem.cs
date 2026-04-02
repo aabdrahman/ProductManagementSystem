@@ -5,6 +5,7 @@ public class OrderLineItem
     public int Id { get; set; }
     public bool IsActive { get; set; } = true;
     public int QuantityOrdered { get; set; }
+    public decimal OrderRate { get; set; }
 
     //Relationship
     public int OrderId { get; set; }

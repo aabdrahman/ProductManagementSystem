@@ -6,4 +6,5 @@ public interface IBackgroundOperationService
 {
     Task<GenericResponse<string>> RemoveExpiredOTPAsync();
     Task<GenericResponse<string>> RemoveExpiredVerificationToken();
+    Task<GenericResponse<string>> ProcessOrderConfirmationNotification();
 }

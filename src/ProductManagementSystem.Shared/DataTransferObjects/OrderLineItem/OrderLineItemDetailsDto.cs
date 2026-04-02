@@ -6,4 +6,5 @@ public record class OrderLineItemDetailsDto
     public string ProductName { get; set; }
     public int OrderCount { get; set; }
     public bool IsActive { get; set; }
+    public decimal Price { get; set; }
 }

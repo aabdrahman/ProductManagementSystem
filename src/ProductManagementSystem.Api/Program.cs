@@ -77,6 +77,13 @@ builder.Services.AddSingleton(Channel.CreateBounded<SendPriorityMailEvent>(new B
     FullMode = BoundedChannelFullMode.Wait
 }));
 
+builder.Services.AddSingleton(Channel.CreateBounded<SendConfirmedOrderNotificationEvent>(new BoundedChannelOptions(100)
+{
+    FullMode = BoundedChannelFullMode.Wait,
+    SingleReader = true,
+    SingleWriter = false
+}));
+
 builder.Services.AddDbContext<RepositoryContext>(opts =>
 {
     opts.UseSqlServer(builder.Configuration.GetConnectionString("SqlDbConnection"))
@@ -164,6 +171,7 @@ builder.Services.AddHostedService<RemoveExpiredOtpBackgroundService>();
 builder.Services.AddHostedService<RemoveExpiredVerificationTokenBackgroundService>();
 builder.Services.AddHostedService<CacheBackgroundProcessor>();
 builder.Services.AddHostedService<PriorityEmailProcessorBackgroundService>();
+builder.Services.AddHostedService<SendOrderConfirmationNotificationBackgroundService>();
 
 var app = builder.Build();
 

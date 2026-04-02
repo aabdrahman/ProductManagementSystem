@@ -48,6 +48,7 @@ public class UserService : IUserService
 
             userToConfirm.ConfirmedAt = DateTime.UtcNow.ToLocalTime();
             userToConfirm.IsUserConfirmed = true;
+            userToConfirm.IsProfileLockedOut = false;
 
             await _repositoryContext.SaveChangesAsync();
 
