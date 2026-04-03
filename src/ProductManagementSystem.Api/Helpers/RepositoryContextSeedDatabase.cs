@@ -34,6 +34,8 @@ public static class RepositoryContextSeedDatabase
 
             //Check if any roles exists. This ensure idempotency.
             Role? existingSystemRole = await repositoryContext.Roles.FirstOrDefaultAsync(x => x.NormalizedName == "SYSTEM");
+            Role? existingAdminRole = await repositoryContext.Roles.FirstOrDefaultAsync(x => x.NormalizedName == "ADMIN");
+            Role? existingCustomerRole = await repositoryContext.Roles.FirstOrDefaultAsync(x => x.NormalizedName == "USER");
 
 
             User? existingSytemUser = await repositoryContext.Users.FirstOrDefaultAsync(x => x.UserEmailAddress == systemDefaultEmail.ToUpper());
@@ -72,6 +74,35 @@ public static class RepositoryContextSeedDatabase
 
                 await repositoryContext.AddAsync(existingSytemUser);
                 await repositoryContext.AddAsync(existingSystemRole);
+
+                if(existingAdminRole is null)
+                {
+                    Log.ForContext(_className, nameof(RepositoryContextSeedDatabase)).ForContext(_methodName, nameof(SeedDatabaseAsync)).Information("Seeding a default admin role.....");
+                    existingAdminRole = new Role()
+                    {
+                        Name = "Admin",
+                        NormalizedName = "ADMIN",
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = existingSytemUser.Id
+                    };
+
+                    await repositoryContext.AddAsync(existingAdminRole);
+                }
+
+                if(existingCustomerRole is null)
+                {
+                    Log.ForContext(_className, nameof(RepositoryContextSeedDatabase)).ForContext(_methodName, nameof(SeedDatabaseAsync)).Information("Seeding a default customer role.....");
+                    existingCustomerRole = new Role()
+                    {
+                        Name = "User",
+                        NormalizedName = "USER",
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        UserId = existingSytemUser.Id
+                    };
+                    await repositoryContext.AddAsync(existingCustomerRole);
+                }
 
                 try
                 {
