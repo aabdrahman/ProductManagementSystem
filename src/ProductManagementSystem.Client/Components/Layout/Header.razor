@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using ProductManagementSystem.Client.AuthProviderUtility
 
+
 @rendermode InteractiveServer
 
 @implements IDisposable
@@ -59,7 +60,7 @@
 
                             <a href="@(string.Concat("/user-details"))">Profile</a>
 
-                            <a href="/orders">My Orders</a>
+                            <a href="/user/orders">My Orders</a>
 
                             <button class="logout-btn" @onclick="Logout">
                                 Logout
@@ -123,6 +124,8 @@
         _isLoggedIn = false;
         _showUserMenu = false;
 
+        navigationManager.NavigateTo("/logout");
+
         // Clear token / session here
     }
 
@@ -155,7 +158,7 @@
             string nameOfUser = user?.Identity?.Name ?? "";
             _username = nameOfUser.Split(" ")[0];
 
-            string userId = user?.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value ?? "0";
+            string userId = user?.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value ?? "0";
 
             _loggedInUserId = int.Parse(userId);
         }

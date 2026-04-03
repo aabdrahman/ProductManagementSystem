@@ -8,13 +8,26 @@
 @if (_isLoading)
 {
     <p>
-        Losding.......
+        <Spinner Description="Logging Out" />
     </p>
+}
+else
+{
+    if(_responseMessage is not null)
+    {
+        <Popup Title="Logout Notification" ShowCloseButton="false" ShowFooter="false">
+            <Body>
+                <p class="validation-message">@_responseMessage</p>
+            </Body>
+        </Popup>
+    }
 }
 
 @code {
 
     private bool _isLoading = false;
+    private string _responseMessage;
+    private bool _isSuccessfullyLoggedOut;
 
     protected override async Task OnInitializedAsync()
     {
@@ -22,14 +35,18 @@
 
         await Task.Delay(500);
 
-        var isLogout = await logoutHandler.Handle();
+        var isLogoutResult = await logoutHandler.Handle();
+        _responseMessage = isLogoutResult.responseMessage;
+        _isSuccessfullyLoggedOut = isLogoutResult.isSuccessful;
 
-        if (isLogout)
+        if (isLogoutResult.isSuccessful)
         {
+            await Task.Delay(3000);
             navigationManager.NavigateTo("/login");
         }
         else
         {
+            await Task.Delay(3000);
             navigationManager.NavigateTo("/login");
         }
     }

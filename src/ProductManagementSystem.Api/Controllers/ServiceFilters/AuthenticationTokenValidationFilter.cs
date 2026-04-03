@@ -35,7 +35,7 @@ public class AuthenticationTokenValidationFilter(IRedisService redisService, ICo
 
         int userLockedOutAttempts = await redisService.GetItemAsync<int>(userId.ToUpper());
 
-        if(userLockedOutAttempts > configuration.GetValue<int>("JwtSettings:SessionLockoutAFterAttempt"))
+        if(userLockedOutAttempts >= configuration.GetValue<int>("JwtSettings:SessionLockoutAFterAttempt"))
         {
             context.Result = new UnauthorizedObjectResult(GenericResponse<object>.Failure(null, "User is locked out due to multiple failed login attempts.", System.Net.HttpStatusCode.Unauthorized));
             return;

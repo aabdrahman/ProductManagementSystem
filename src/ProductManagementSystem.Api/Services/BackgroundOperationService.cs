@@ -84,7 +84,7 @@ public class BackgroundOperationService : IBackgroundOperationService
                 var emailContentParameter = new Dictionary<string, string>();
                 emailContentParameter.Add("OrderNumber", orderDetail.OrderNumber);
                 emailContentParameter.Add("UserName", orderDetail.CreatedByUser);
-                emailContentParameter.Add("OrderDate", orderDetail.CreatedDate.ToString("dd MMM YYYY"));
+                emailContentParameter.Add("OrderDate", orderDetail.CreatedDate.ToString("dd MMM yyyy"));
                 emailContentParameter.Add("FullAddress", orderDetail.DeliveryAddress.Replace("\n", "<br/>").Replace("\r\n", "<br/>").Trim());
                 emailContentParameter.Add("Year", DateTime.Now.Year.ToString());
                 emailContentParameter.Add("Fee", (0.00).ToString("C"));

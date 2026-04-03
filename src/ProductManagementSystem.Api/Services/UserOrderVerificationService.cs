@@ -4,7 +4,6 @@ using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api.Entities.Models;
 using ProductManagementSystem.Api.Services.Contracts;
-using ProductManagementSystem.Api.Utilities.Contracts;
 using Serilog;
 
 namespace ProductManagementSystem.Api.Services;
@@ -13,16 +12,14 @@ public class UserOrderVerificationService : IUserOrderVerificationService
 {
     private readonly RepositoryContext _repositoryContext;
     private readonly UserOrderVerificationConfig _userOrderVerificationConfig;
-    private readonly IEmailService _emailService;
 
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
-    public UserOrderVerificationService(RepositoryContext repositoryContext, IOptionsMonitor<UserOrderVerificationConfig> optionsMonitor, IEmailService emailService)
+    public UserOrderVerificationService(RepositoryContext repositoryContext, IOptionsMonitor<UserOrderVerificationConfig> optionsMonitor)
     {
         _repositoryContext = repositoryContext;
         _userOrderVerificationConfig = optionsMonitor.CurrentValue;
-        _emailService = emailService;
     }
 
     public async Task<string> VerifyOrderAsync(string orderVerificationToken)

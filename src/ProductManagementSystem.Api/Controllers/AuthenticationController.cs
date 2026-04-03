@@ -37,6 +37,22 @@ public class AuthenticationController : ControllerBase
         }
     }
 
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout([FromBody] TokenDto tokenDetails)
+    {
+        try
+        {
+            var result = await _authenticationService.LogoutAysnc(tokenDetails);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "Logout").Error(ex, "Error Invoking EndPoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshToken([FromBody] TokenDto tokenDto)
     {

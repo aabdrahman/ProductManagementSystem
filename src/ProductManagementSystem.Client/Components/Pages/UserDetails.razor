@@ -139,7 +139,7 @@ else
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        var userId = user.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value ?? "0";
+        var userId = user.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value ?? "0";
         _loggedInUserId = int.Parse(userId);
 
         if(_loggedInUserId > 0)

@@ -11,4 +11,5 @@ public interface IAuthenticationService
     Task<GenericResponse<string>> SendOtpAsync(SendOtpRequestDto sendOtpRequest);
     Task<GenericResponse<string>> ValidateOtpAsync(ValidateOtpRequestDto validateOtpRequest);
     Task<GenericResponse<string>> UnlockUserAsync(UnlockUserDto unlockUserDetails);
+    Task<GenericResponse<string>> LogoutAysnc(TokenDto tokenDetails);
 }

@@ -101,6 +101,43 @@ public class AuthenticationService : IAuthenticationService
         }
     }
 
+    public async Task<GenericResponse<string>> LogoutAysnc(TokenDto tokenDetails)
+    {
+        try
+        {
+            Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(LogoutAysnc)).Information("Logout User - {0}", tokenDetails);
+
+            var claimsPrincipal = GetPrincipalFromToken(tokenDetails.Token, false);
+
+            if (claimsPrincipal is null)
+            {
+                Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(LogoutAysnc)).Information("Token Principal could not be fetched from the token");
+                return GenericResponse<string>.Failure("Operation Failed.", "Invalid Token provided.", HttpStatusCode.BadRequest);
+            }
+
+            string? userEmail = claimsPrincipal.FindFirst(x => x.Type.EndsWith("emailaddress"))?.Value;
+            string? userId = claimsPrincipal.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value;
+
+            if (userEmail is null || userId is null)
+            {
+                Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(LogoutAysnc)).Information("User Email or Id could not be fetched from the token principal. User Email - {0}, User Id - {1}", userEmail, userId);
+                return GenericResponse<string>.Failure("Operation Failed.", "Invalid Token provided.", HttpStatusCode.BadRequest);
+            }
+
+            var removeFromCache = await _redisService.RemoveItemAsync(RedisCacheHelperClass.GetUserProfileTokenCacheKey(userId, userEmail));
+
+            Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(LogoutAysnc)).Information("Remove Item from cache returns - {0}", removeFromCache);
+
+            return GenericResponse<string>.Failure("Operation Successful", "User logged out successfully.", HttpStatusCode.OK);
+
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(LogoutAysnc)).Error(ex, "An error occurred performing logout operation.");
+            return GenericResponse<string>.Failure("Operation Fialed.", "An Error Occurred", HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+    }
+
     public async Task<GenericResponse<TokenDto>> LoginAsync(LoginUserDto loginUser)
     {
         try
@@ -544,7 +581,7 @@ public class AuthenticationService : IAuthenticationService
         return token;
     }
 
-    private ClaimsPrincipal? GetPrincipalFromToken(string token)
+    private ClaimsPrincipal? GetPrincipalFromToken(string token, bool validateLifetime = true)
     {
         string secretKey = Environment.GetEnvironmentVariable("PmsSECRET") ?? throw new ArgumentNullException("Cannot proceed as secret key could not be fetched.");
 
@@ -553,7 +590,7 @@ public class AuthenticationService : IAuthenticationService
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateIssuerSigningKey = true,
-            ValidateLifetime = true,
+            ValidateLifetime = validateLifetime,
             ClockSkew = TimeSpan.Zero,
 
             ValidAudiences = _jwtSettingConfig.ValidAudience?.Split(";", StringSplitOptions.RemoveEmptyEntries) ?? [],
