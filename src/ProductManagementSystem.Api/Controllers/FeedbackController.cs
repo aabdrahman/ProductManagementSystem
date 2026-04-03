@@ -32,7 +32,7 @@ public class FeedbackController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "FeedbackController").ForContext(_methodName, "GetAll").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "FeedbackController").ForContext(_methodName, "GetAll").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -47,7 +47,7 @@ public class FeedbackController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "FeedbackController").ForContext(_methodName, "CreateFeedback").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "FeedbackController").ForContext(_methodName, "CreateFeedback").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }

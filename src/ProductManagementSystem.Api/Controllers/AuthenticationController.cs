@@ -32,7 +32,7 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "Login").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "Login").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -48,7 +48,7 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "RefreshToken").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "RefreshToken").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -64,7 +64,7 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "ChangePassword").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "ChangePassword").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -80,7 +80,7 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "SendOtp").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "SendOtp").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -96,7 +96,7 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "ValidateOtp").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "ValidateOtp").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -112,7 +112,7 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "UnlockUserProfile").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "UnlockUserProfile").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }

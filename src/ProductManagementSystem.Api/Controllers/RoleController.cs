@@ -34,7 +34,7 @@ public class RoleController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "RoleController").ForContext(_methodName, "GetAll").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "RoleController").ForContext(_methodName, "GetAll").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -52,7 +52,7 @@ public class RoleController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "RoleController").ForContext(_methodName, "Delete").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "RoleController").ForContext(_methodName, "Delete").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -69,7 +69,7 @@ public class RoleController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "RoleController").ForContext(_methodName, "Create").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "RoleController").ForContext(_methodName, "Create").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }

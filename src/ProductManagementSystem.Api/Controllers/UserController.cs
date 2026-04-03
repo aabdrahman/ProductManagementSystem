@@ -31,7 +31,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "UserController").ForContext(_methodName, "GetAll").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "UserController").ForContext(_methodName, "GetAll").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -47,7 +47,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "UserController").ForContext(_methodName, "GetById").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "UserController").ForContext(_methodName, "GetById").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -63,7 +63,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "UserController").ForContext(_methodName, "Delete").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "UserController").ForContext(_methodName, "Delete").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -79,7 +79,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "UserController").ForContext(_methodName, "Register").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "UserController").ForContext(_methodName, "Register").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -95,7 +95,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "UserController").ForContext(_methodName, "Update").Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, "UserController").ForContext(_methodName, "Update").Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
@@ -111,7 +111,7 @@ public class UserController : ControllerBase
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, nameof(AuthenticationController)).ForContext(_methodName, nameof(ConfirmUserProfile)).Error(ex, "Error Invoking Ednpoint");
+            Log.ForContext(_className, nameof(AuthenticationController)).ForContext(_methodName, nameof(ConfirmUserProfile)).Error(ex, "Error Invoking EndPoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
