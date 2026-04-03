@@ -6,11 +6,12 @@ using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Client.Utilities;
 using ProductManagementSystem.Shared.DataTransferObjects.Authentication;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
+using StackExchange.Redis;
 using System.Security.Claims;
 
 namespace ProductManagementSystem.Api.Controllers.ServiceFilters;
 
-public class AuthenticationTokenValidationFilter(IRedisService redisService) : IAsyncAuthorizationFilter
+public class AuthenticationTokenValidationFilter(IRedisService redisService, IConfiguration configuration) : IAsyncAuthorizationFilter
 {
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
@@ -31,6 +32,14 @@ public class AuthenticationTokenValidationFilter(IRedisService redisService) : I
 
         var userId = context.HttpContext.User.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value ?? "";
         var userEmail = context.HttpContext.User.FindFirst(x => x.Type.EndsWith("emailaddress"))?.Value ?? "";
+
+        int userLockedOutAttempts = await redisService.GetItemAsync<int>(userId.ToUpper());
+
+        if(userLockedOutAttempts > configuration.GetValue<int>("JwtSettings:SessionLockoutAFterAttempt"))
+        {
+            context.Result = new UnauthorizedObjectResult(GenericResponse<object>.Failure(null, "User is locked out due to multiple failed login attempts.", System.Net.HttpStatusCode.Unauthorized));
+            return;
+        }
 
         var expectedToken = await redisService.GetItemAsync<TokenDto>(RedisCacheHelperClass.GetUserProfileTokenCacheKey(userId, userEmail));
 

@@ -100,4 +100,20 @@ public class AuthenticationController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }
+
+    [HttpPost("unlock-profile")]
+    public async Task<IActionResult> UnlockUserProfile([FromBody] UnlockUserDto unlockUserProfile)
+    {
+        try
+        {
+            var result = await _authenticationService.UnlockUserAsync(unlockUserProfile);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "UnlockUserProfile").Error(ex, "Error Invoking Ednpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
 }

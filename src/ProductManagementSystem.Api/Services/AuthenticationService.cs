@@ -80,10 +80,16 @@ public class AuthenticationService : IAuthenticationService
 
             userToChangePassword.PasswordHash = _passwordHasher.HashPassword(changePasswordDto.NewPassword);
             userToChangePassword.IsActive = true;
+            userToChangePassword.IsProfileLockedOut = false;
 
             await _repositoryContext.SaveChangesAsync();
 
-            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ChangePasswordAsync").Information("User Password and Reactivation successful.");
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ChangePasswordAsync").Information("User profile successfully updated.");
+
+            var removeLockoutFromCache = await _redisService.RemoveItemAsync(RedisCacheHelperClass.GetUserProfileFailedLoginAttemptCacheKey(userToChangePassword.Id.ToString()));
+            var removeFromHashSet = await _redisDatabase.HashDeleteAsync(RedisCacheHelperClass.LockedOutUsersKey, userToChangePassword.UserEmailAddress);
+
+            Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ChangePasswordAsync").Information("User Password and Reactivation successful. Remove Cache returns - {0}, {1}", removeLockoutFromCache, removeFromHashSet);
 
             return GenericResponse<string>.Success("Operation Successful.", "Password Updated Successfully.", HttpStatusCode.OK);
 
@@ -130,6 +136,12 @@ public class AuthenticationService : IAuthenticationService
             {
                 Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("Loin Failed. User with email does not exist - {0}", loginUser.Email);
                 return GenericResponse<TokenDto>.Failure(null, "Invalid Credentials", HttpStatusCode.BadRequest);
+            }
+
+            if(userToAuthenticate.IsProfileLockedOut)
+            {
+                Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("Login Failed. User account is currently locked out - {0}", loginUser.Email);
+                return GenericResponse<TokenDto>.Failure(null, "User account locked due to multiple failed login attempts. Kindly reset your password or contact administrator.", HttpStatusCode.BadRequest);
             }
 
             string userProfileCacheKey = RedisCacheHelperClass.GetUserProfileFailedLoginAttemptCacheKey(userToAuthenticate.Id.ToString());
@@ -342,7 +354,7 @@ public class AuthenticationService : IAuthenticationService
 
             if(!string.IsNullOrEmpty(mailContent))
             {
-                EmailSenderDto emailDetails = new EmailSenderDto(Subject: "Account Profile Verification", Content: mailContent, [sendOtpRequest.UserEmailAddress.ToUpper()], isHtml: true);
+                EmailSenderDto emailDetails = new EmailSenderDto(Subject: "Account Profile Verification", Content: mailContent, [sendOtpRequest.UserEmailAddress.ToUpper()], isHtml: true, priority: EmailPriority.High);
 
                 bool isEmailSent = await _emailService.SendEmailAsync(emailDetails);
 
@@ -416,6 +428,53 @@ public class AuthenticationService : IAuthenticationService
         {
             Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "ValidateOtpAsync").Error(ex, "An Error Occurred Validating OTP.");
             return GenericResponse<string>.Failure("Operation Failed.", "An Error Occurred Validating OTP.", HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+    }
+
+    public async Task<GenericResponse<string>> UnlockUserAsync(UnlockUserDto unlockUserDetails)
+    {
+        try
+        {
+            Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(UnlockUserAsync)).Information("Unlock User Request For - {0}");
+
+            var userDetailsToUnlock = await _repositoryContext.UserOtpVerifications.Include(x => x.UserToConfirmDetails)
+                                                                            .OrderByDescending(x => x.CreatedAt)
+                                                                            .FirstOrDefaultAsync(x => x.UserEmail == unlockUserDetails.Email.ToUpper());
+
+            if(userDetailsToUnlock == null)
+            {
+                Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(UnlockUserAsync)).Warning("No OTP verification record exists fro provided user.");
+                return GenericResponse<string>.Failure("Operation Failed", "Invalid OTP", HttpStatusCode.BadRequest);
+            }
+
+            if(!_passwordHasher.ValidatePassword(userDetailsToUnlock.GeneratedOTP, unlockUserDetails.OTP))
+            {
+                Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(UnlockUserAsync)).Warning("Invalid OTP provided for user record.");
+                return GenericResponse<string>.Failure("Operation Failed", "Invalid OTP", HttpStatusCode.BadRequest);
+            }
+
+            var removeLockoutFromCache = await _redisService.RemoveItemAsync(RedisCacheHelperClass.GetUserProfileFailedLoginAttemptCacheKey(userDetailsToUnlock.UserToConfirmDetails.Id.ToString()));
+            var removeFromHashSet = await _redisDatabase.HashDeleteAsync(RedisCacheHelperClass.LockedOutUsersKey, userDetailsToUnlock.UserToConfirmDetails.UserEmailAddress);
+
+            if(!removeLockoutFromCache || !removeFromHashSet)
+            {
+                Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(UnlockUserAsync)).Warning("User unlcok details could not be removed from cache - {0}, {1}", removeLockoutFromCache, removeFromHashSet);
+                return GenericResponse<string>.Failure("Operation Failed", "Could not perform operation", HttpStatusCode.Conflict);
+            }
+
+            userDetailsToUnlock.UserToConfirmDetails.IsProfileLockedOut = false;
+            _repositoryContext.UserOtpVerifications.Remove(userDetailsToUnlock);
+
+            await _repositoryContext.SaveChangesAsync();
+
+            Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(UnlockUserAsync)).Information("User profiled unlocked succcessfully - {0}", unlockUserDetails.Email);
+
+            return GenericResponse<string>.Success("Operation Successful", "User profile unlocked successfully.", HttpStatusCode.OK);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, nameof(AuthenticationService)).ForContext(_methodName, nameof(UnlockUserAsync)).Error(ex, "An error occurred unblocking user.");
+            return GenericResponse<string>.Failure("Operation Failed.", "User could not be unlocked. Kindly retry again.", HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
     }
 

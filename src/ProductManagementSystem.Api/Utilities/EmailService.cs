@@ -167,35 +167,49 @@ public class EmailService : IEmailService
 
                     while (totalProcessedRecords < _emailSettingsConfig.TotalBatchSize && _queuedEmails.Count > 0)
                     {
+                        EmailSenderDto fetchedEmail;
                         try
                         {
-                            if (_queuedEmails.TryDequeue(out var fetchedEmail))
+                            if (_queuedEmails.TryDequeue(out fetchedEmail))
                             {
                                 IEnumerable<Address> recipientsAddress = fetchedEmail.Recipients.Select(x => new FluentEmail.Core.Models.Address(x)).ToList();
 
-                                SendResponse result = await _fluentEmailFactory.Create()
+                                try
+                                {
+                                    SendResponse result = await _fluentEmailFactory.Create()
                                                     .Subject(fetchedEmail.Subject)
                                                     .To(mailAddresses: recipientsAddress)
                                                     .Body(fetchedEmail.Content, isHtml: fetchedEmail.isHtml)
                                                     .SendAsync();
 
-                                if (result.Successful)
-                                {
-                                    successCount++;
+                                    if (result.Successful)
+                                    {
+                                        successCount++;
+                                    }
+                                    else
+                                    {
+                                        failureCount++;
+                                    }
+
                                 }
-                                else
+                                catch (Exception ex)
                                 {
+                                    Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessQueuedEmails)).Warning("Queued Email could not be fetched from store. Try Dequeue returns false.");
+                                    _tempQueuedEmails.Enqueue(fetchedEmail);
                                     failureCount++;
                                 }
+                                
                             }
                             else
                             {
                                 Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessQueuedEmails)).Warning("Queued Email could not be fetched from store. Try Dequeue returns false.");
+                                _tempQueuedEmails.Enqueue(fetchedEmail);
                                 failureCount++;
                             }
                         }
                         catch (Exception ex)
                         {
+                            //_tempQueuedEmails.Enqueue(fetchedEmail);
                             Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessQueuedEmails)).Error(ex, "An Error Occurred while sending queued mail.");
                             failureCount++;
                         }

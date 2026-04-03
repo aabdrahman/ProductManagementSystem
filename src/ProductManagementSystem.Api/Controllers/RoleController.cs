@@ -10,8 +10,8 @@ namespace ProductManagementSystem.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
-[ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
+//[Authorize]
+//[ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
 public class RoleController : ControllerBase
 {
     private readonly IRoleService _roleService;
@@ -40,6 +40,8 @@ public class RoleController : ControllerBase
     }
 
     [HttpDelete("{Id:int}")]
+    [Authorize]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Delete(int Id, bool isSoftDelete = true)
     {
         try
