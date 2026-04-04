@@ -7,6 +7,7 @@ public static class RedisCacheHelperClass
     public static string LockedOutUsersKey = "locked-out-users";
     public static string ProductCategoryKey = "product-category";
     public static string ProductCategoryItemKey = "product-category";
+    public static string PasswordResetTokensKey = "password-reset-user-tokens";
     public static string GetCacheKey(string prefix, params object[] parameters)
     {
         return $"{prefix}:{string.Join(":", parameters)}";

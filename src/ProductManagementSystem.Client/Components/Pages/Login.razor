@@ -52,9 +52,28 @@
             </EditForm>
         }
 
-        <div class="auth-footer">
+        @* <div class="auth-footer">
             Don't have an account?
             <a href="/register-user">Register</a>
+        </div> *@
+
+        @* <div class="auth-footer">
+            <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+            <hr class="footer-divider" />
+            <p>
+                Don't have an account?
+                <a href="/register-user" class="register-link">Register</a>
+            </p>
+        </div> *@
+
+        <div class="auth-footer">
+            <div class="auth-footer-row">
+                <span>Don't have an account?</span>
+                <a href="/register-user">Register</a>
+            </div>
+            <div class="auth-footer-row">
+                <a href="/forgot-password" class="forgot-link">Forgot Password?</a>
+            </div>
         </div>
 
     </div>

@@ -85,6 +85,37 @@ public class AuthenticationController : ControllerBase
         }
     }
 
+    [HttpPost("request-password-change-otp")]
+    public async Task<IActionResult> RequestPasswordChangeOtp([FromBody] string emailAddress)
+    {
+        try
+        {
+            var result = await _authenticationService.RequestPasswordChangeOTP(emailAddress);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "RequestPasswordChangeOtp").Error(ex, "Error Invoking EndPoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpPost("validate-password-change-otp")]
+    public async Task<IActionResult> ValidatePasswordChangeOtp([FromBody] ValidateOtpRequestDto validatePasswordChangeOtpRequest)
+    {
+        try
+        {
+            var result = await _authenticationService.ValidateOtpAsync(validatePasswordChangeOtpRequest, false);
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "AuthenticationController").ForContext(_methodName, "ValidatePasswordChangeOtp").Error(ex, "Error Invoking EndPoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
     [HttpPost("send-otp")]
     public async Task<IActionResult> SendOtp([FromBody] SendOtpRequestDto sendOtpRequest)
     {

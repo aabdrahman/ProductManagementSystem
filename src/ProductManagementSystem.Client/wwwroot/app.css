@@ -343,13 +343,17 @@ textarea::placeholder {
 
 /* FOOTER */
 
-.auth-footer {
+/*.auth-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
     margin-top: 1rem;
     font-family: var(--FONT-STYLE-BODY);
     text-align: center;
     font-weight: bold;
     font-size: 1rem;
-}
+}*/
 
 .auth-footer a {
     color: var(--BG-COLOR-BTN-SUCCESS);
@@ -357,3 +361,38 @@ textarea::placeholder {
     text-decoration: none;
 }
 
+
+.auth-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 14px;
+    color: #666;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-family: var(--FONT-STYLE-BODY);
+    text-align: center;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.auth-footer-row {
+    margin-top: 0.4rem;
+    font-family: var(--FONT-STYLE-BODY);
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+    color: var(--FONT-COLOR-LINK-HOVER);
+}
+
+.forgot-link {
+    display: inline-block;
+    margin-top: 0.3rem;
+    font-size: 0.85rem;
+    font-family: var(--FONT-STYLE-BODY);
+}
