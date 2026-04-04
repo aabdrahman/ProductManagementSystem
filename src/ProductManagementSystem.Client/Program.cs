@@ -82,6 +82,9 @@ builder.Services.AddScoped<GetUserDetailsHandler>();
 builder.Services.AddScoped<SendVerificationOtpHandler>();
 builder.Services.AddScoped<VerifyOtpHandler>();
 builder.Services.AddScoped<GetUserOrdersHandler>();
+builder.Services.AddScoped<ValidatePasswordResetOtphandler>();
+builder.Services.AddScoped<RequestPasswordResetOtpHandler>();
+builder.Services.AddScoped<ChangePasswordHandler>();
 
 builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
 

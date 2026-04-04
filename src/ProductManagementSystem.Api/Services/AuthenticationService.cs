@@ -70,7 +70,7 @@ public class AuthenticationService : IAuthenticationService
                 return GenericResponse<string>.Failure("Operation Failed.", "Invalid Request.", HttpStatusCode.BadRequest);
             }
 
-            RedisValue userResetTokenFromCache = await _redisDatabase.HashFieldGetAndDeleteAsync(RedisCacheHelperClass.PasswordResetTokensKey, changePasswordDto.Email);
+            RedisValue userResetTokenFromCache = await _redisDatabase.HashFieldGetAndDeleteAsync(RedisCacheHelperClass.PasswordResetTokensKey, changePasswordDto.Email.ToUpper());
 
             if(!userResetTokenFromCache.HasValue)
             {

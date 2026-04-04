@@ -5,5 +5,5 @@ public interface ILocalStorageUtility
     Task<bool> PersistToStorageAsync<T>(T item, string key);
     Task<T?> GetItemFromStorageAsync<T>(string key);
     Task<bool> RemoveItemFromStorageAsync(string key);
-    Task<bool> RemoveAllItemsFromStorageAsync();
+    Task<bool> RemoveAllItemsFromStorageAsync(params string[] keys);
 }

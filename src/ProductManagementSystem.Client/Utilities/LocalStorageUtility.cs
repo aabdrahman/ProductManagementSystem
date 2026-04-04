@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using ProductManagementSystem.Client.Utilities.Contracts;
-using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Utilities;
 
@@ -46,8 +45,22 @@ public class LocalStorageUtility : ILocalStorageUtility
         }
     }
 
-    public Task<bool> RemoveAllItemsFromStorageAsync()
+    public async Task<bool> RemoveAllItemsFromStorageAsync(params string[] keys)
     {
+        try
+        {
+            foreach (var item in keys)
+            {
+                await _protectedLocalStorage.DeleteAsync(item.ToUpper());
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+
         throw new NotImplementedException();
     }
 
