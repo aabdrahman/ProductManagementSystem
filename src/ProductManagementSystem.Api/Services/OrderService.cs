@@ -23,13 +23,15 @@ public class OrderService : IOrderService
     private readonly IEmailVerificationLinkFactory _emailVerificationLinkFactory;
     private readonly IEmailService _emailService;
     private readonly UserOrderVerificationConfig _userOtpVerificationConfig;
+    private readonly IRedisService _redisService;
 
-    public OrderService(RepositoryContext repositoryContext, IEmailVerificationLinkFactory emailVerificationLinkFactory, IEmailService emailService, IOptionsMonitor<UserOrderVerificationConfig> optionsMonitor)
+    public OrderService(RepositoryContext repositoryContext, IEmailVerificationLinkFactory emailVerificationLinkFactory, IEmailService emailService, IOptionsMonitor<UserOrderVerificationConfig> optionsMonitor, IRedisService redisService)
     {
         _repositoryContext = repositoryContext;
         _emailVerificationLinkFactory = emailVerificationLinkFactory;
         _emailService = emailService;
         _userOtpVerificationConfig = optionsMonitor.CurrentValue;
+        _redisService = redisService;
     }
 
     private string _methodName = "MethodName";
@@ -265,6 +267,14 @@ public class OrderService : IOrderService
         {
             Log.ForContext(_methodName, "GetAllAsync").ForContext(_className, "OrderService").Information("Fetching All Orders......");
 
+            var ordersFromCache = await _redisService.GetItemAsync<List<OrderDto>>(RedisCacheHelperClass.OrdersKey);
+
+            if(ordersFromCache is not null && ordersFromCache.Any())
+            {
+                Log.ForContext(_methodName, "GetAllAsync").ForContext(_className, "OrderService").Information("Orders Fetched from cache - {0}", ordersFromCache);
+                return GenericResponse<IEnumerable<OrderDto>>.Success(ordersFromCache, "Order Fetched Successfully.", System.Net.HttpStatusCode.OK);
+            }
+
             List<OrderDto> orders = await _repositoryContext.Orders
                                         .AsNoTracking()
                                         .Select(x => new OrderDto()
@@ -280,7 +290,9 @@ public class OrderService : IOrderService
                                         })
                                         .ToListAsync();
 
-            Log.ForContext(_methodName, "GetAllAsync").ForContext(_className, "OrderService").Information("Orders Fetched Successfully - {orders}", JsonSerializer.Serialize(orders));
+            var setItemToCache = await _redisService.SetItemAsync<List<OrderDto>>(orders, RedisCacheHelperClass.OrdersKey, 18400);
+
+            Log.ForContext(_methodName, "GetAllAsync").ForContext(_className, "OrderService").Information("Orders Fetched Successfully - {orders}, Set Item to cache - {setToCache}", JsonSerializer.Serialize(orders), setItemToCache);
 
             return GenericResponse<IEnumerable<OrderDto>>.Success(orders, "Order Fetched Successfully.", System.Net.HttpStatusCode.OK);
 
@@ -303,6 +315,14 @@ public class OrderService : IOrderService
         {
             Log.ForContext(_methodName, "GetByIdAsync").ForContext(_className, "OrderService").Information("Fetch Products by Id - {Id}", Id);
 
+            var orderFromCcahe = await _redisService.GetItemAsync<OrderDto>(RedisCacheHelperClass.GetOrderCacheKey(Id));
+
+            if(orderFromCcahe is not null)
+            {
+                Log.ForContext(_methodName, "GetByIdAsync").ForContext(_className, "OrderService").Information("Order retrived from cacahe successfully - {0}", orderFromCcahe);
+                return GenericResponse<OrderDto>.Success(orderFromCcahe, "Order Fetched Successfully.", System.Net.HttpStatusCode.OK);
+            }
+
             OrderDto? order = await _repositoryContext.Orders
                                             .AsNoTracking()
                                             .Select(x => new OrderDto()
@@ -324,7 +344,9 @@ public class OrderService : IOrderService
                 return GenericResponse<OrderDto>.Failure(null, $"No order exists with Id: {Id}", System.Net.HttpStatusCode.NotFound);
             }
 
-            Log.ForContext(_methodName, "GetByIdAsync").ForContext(_className, "OrderService").Information("Order with Id: {Id} Fetched Successully - {order}", Id, JsonSerializer.Serialize(order));
+            var setItemToCache = await _redisService.SetItemAsync<OrderDto>(order, RedisCacheHelperClass.GetOrderCacheKey(Id), 18400);
+
+            Log.ForContext(_methodName, "GetByIdAsync").ForContext(_className, "OrderService").Information("Order with Id: {Id} Fetched Successully - {order}. Set Item to cache - {setCache}", Id, JsonSerializer.Serialize(order), setItemToCache);
             return GenericResponse<OrderDto>.Success(order, "Order Fetched Successfully.", System.Net.HttpStatusCode.OK);
 
         }
@@ -555,6 +577,14 @@ public class OrderService : IOrderService
         {
             Log.ForContext(_methodName, "GetOrderDetailsAsync").ForContext(_className, "OrderService").Information("Fetching Order Details for Order - {Id}", OrderId);
 
+            var orderDetailFromCache = await _redisService.GetItemAsync<OrderDetailsDto>(RedisCacheHelperClass.GetOrderDetailKey(OrderId));
+
+            if(orderDetailFromCache is not null)
+            {
+                Log.ForContext(_methodName, "GetOrderDetailsAsync").ForContext(_className, "OrderService").Information("Order Detail retrieved from cache successfully - {0}", orderDetailFromCache);
+                return GenericResponse<OrderDetailsDto>.Success(orderDetailFromCache, "Order Details Fetched Successfully.", System.Net.HttpStatusCode.OK);
+            }
+
             OrderDetailsDto? orderDetails = await _repositoryContext.Orders
                                         .AsNoTracking()
                                         .Where(x => x.Id == OrderId)
@@ -585,7 +615,9 @@ public class OrderService : IOrderService
                 return GenericResponse<OrderDetailsDto>.Failure(null, $"No Order exists for Id: {OrderId}", System.Net.HttpStatusCode.NotFound);
             }
 
-            Log.ForContext(_methodName, "GetOrderDetailsAsync").ForContext(_className, "OrderService").Information("Order Details Fetched Successfully for Order - {Id}. Details: {orderDetails}", OrderId, JsonSerializer.Serialize(orderDetails));
+            var setItemToCache = await _redisService.SetItemAsync<OrderDetailsDto>(orderDetails, RedisCacheHelperClass.GetOrderDetailKey(OrderId), 18400);
+
+            Log.ForContext(_methodName, "GetOrderDetailsAsync").ForContext(_className, "OrderService").Information("Order Details Fetched Successfully for Order - {Id}. Details: {orderDetails}. Set Item to cache - {setCache}", OrderId, JsonSerializer.Serialize(orderDetails), setItemToCache);
 
             return GenericResponse<OrderDetailsDto>.Success(orderDetails, "Order Details Fetched Successfully.", System.Net.HttpStatusCode.OK);
         }

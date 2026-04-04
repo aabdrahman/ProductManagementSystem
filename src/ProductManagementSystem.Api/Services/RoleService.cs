@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Entities.Models;
+using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Api.Services.Contracts;
+using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using ProductManagementSystem.Shared.DataTransferObjects.Role;
 using Serilog;
@@ -15,13 +17,15 @@ public class RoleService : IRoleService
 {
     private readonly RepositoryContext _repositoryContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IRedisService _redisService;
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
-    public RoleService(RepositoryContext repositoryContext, IHttpContextAccessor httpContextAccessor)
+    public RoleService(RepositoryContext repositoryContext, IHttpContextAccessor httpContextAccessor, IRedisService redisService)
     {
         _repositoryContext = repositoryContext;
         _httpContextAccessor = httpContextAccessor;
+        _redisService = redisService;
     }
     public async Task<GenericResponse<RoleDto>> CreateRoleAsync(string roleName)
     {
@@ -63,6 +67,8 @@ public class RoleService : IRoleService
             await _repositoryContext.Roles.AddAsync(roleToInsert);
 
             await _repositoryContext.SaveChangesAsync();
+
+            var removeItemFromCache = await _redisService.RemoveItemAsync(RedisCacheHelperClass.RolesKey);
 
             RoleDto roleToReturn = new RoleDto() { RoleId = roleToInsert.Id, RoleName = roleToInsert.NormalizedName };
 
@@ -116,7 +122,9 @@ public class RoleService : IRoleService
 
             await _repositoryContext.SaveChangesAsync();
 
-            Log.ForContext(_className, "RoleService").ForContext(_methodName, "DeleteAsync").Information(isSoftDelete ? "Role deactivated successfully - {0}" : "Role deleted successfully - 0}", Id);
+            var removeRoleFromCache = await _redisService.RemoveMultiple(RedisCacheHelperClass.GetRoleCacheKey(Id), RedisCacheHelperClass.RolesKey);
+
+            Log.ForContext(_className, "RoleService").ForContext(_methodName, "DeleteAsync").Information(isSoftDelete ? "Role deactivated successfully - {0} Remove From Cache - {1}" : "Role deleted successfully - {0} Remove From Cache - {1}", Id, removeRoleFromCache);
 
             return GenericResponse<string>.Success("Operation Failed.", isSoftDelete ? "Role deactivated successfully." : "Role deleted successfully.", HttpStatusCode.OK);
 
@@ -139,15 +147,25 @@ public class RoleService : IRoleService
         {
             Log.ForContext(_className, "RoleService").ForContext(_methodName, "GetAllAsync").Information("Fetching All Roles.....");
 
+            var rolesFromCache = await _redisService.GetItemAsync<List<RoleDto>>(RedisCacheHelperClass.RolesKey);
+
+            if(rolesFromCache is not null && rolesFromCache.Any())
+            {
+                Log.ForContext(_className, "RoleService").ForContext(_methodName, "GetAllAsync").Information("Roles Fetched from cache - {0}", rolesFromCache);
+                return GenericResponse<IEnumerable<RoleDto>>.Success(rolesFromCache, "Roles Fetched Successfully.", HttpStatusCode.OK);
+            }
+
             List<RoleDto> roles = await _repositoryContext.Roles.AsNoTracking().Select(x => new RoleDto()
             {
                 RoleId = x.Id,
                 RoleName = x.NormalizedName
             }).ToListAsync();
 
-            Log.ForContext(_className, "RoleService").ForContext(_methodName, "GetAllAsync").Information("Roles successfully fetched - {0}", roles);
+            var setRolesToCache = await _redisService.SetItemAsync<List<RoleDto>>(roles, RedisCacheHelperClass.RolesKey, 18400);
 
-            return GenericResponse<IEnumerable<RoleDto>>.Success(roles, "Roles Fethed Successfully.", HttpStatusCode.OK);
+            Log.ForContext(_className, "RoleService").ForContext(_methodName, "GetAllAsync").Information("Roles successfully fetched - {0}. Set Roles To Cache Returns - {1}", roles, setRolesToCache);
+
+            return GenericResponse<IEnumerable<RoleDto>>.Success(roles, "Roles Fetched Successfully.", HttpStatusCode.OK);
         }
         catch(DbException ex)
         {

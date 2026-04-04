@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Entities.Models;
+using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Api.Services.Contracts;
+using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Product;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
@@ -17,10 +19,12 @@ public sealed class ProductService : IProductService
 
     private readonly RepositoryContext _repositoryContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    public ProductService(RepositoryContext repositoryContext, IHttpContextAccessor httpContextAccessor)
+    private readonly IRedisService _redisService;
+    public ProductService(RepositoryContext repositoryContext, IHttpContextAccessor httpContextAccessor, IRedisService redisService)
     {
         _repositoryContext = repositoryContext;
         _httpContextAccessor = httpContextAccessor;
+        _redisService = redisService;
     }
     public async Task<GenericResponse<ProductDto>> CreateAsync(CreateProductDto productToCreate)
     {
@@ -69,7 +73,9 @@ public sealed class ProductService : IProductService
                 CurrentCount = productToInsert.CurrentCount
             };
 
-            Log.ForContext(_className, "ProductService").ForContext(_methodName, "CreateAsync").Information("Product Creation Successful - {createdProduct}", JsonSerializer.Serialize(createdProduct));
+            var removeFromCache = await _redisService.RemoveItemAsync(RedisCacheHelperClass.ProductsKey);
+
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "CreateAsync").Information("Product Creation Successful - {createdProduct}. Remove Cached Products returns - {1}", JsonSerializer.Serialize(createdProduct), removeFromCache);
 
             return GenericResponse<ProductDto>.Success(createdProduct, "Product Created Successfully.", System.Net.HttpStatusCode.OK);
         }
@@ -121,7 +127,9 @@ public sealed class ProductService : IProductService
 
             await _repositoryContext.SaveChangesAsync();
 
-            Log.ForContext(_className, "ProductService").ForContext(_methodName, "DeleteAsync").Information((isSoftDelete ? $"Product successfully marked as inactive - {Id}" : $"Product with Id sucessfully removed - {Id}"));
+            var removeFromCache = await _redisService.RemoveMultiple(RedisCacheHelperClass.ProductsKey, RedisCacheHelperClass.GetProductCacheKey(Id));
+
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "DeleteAsync").Information((isSoftDelete ? $"Product successfully marked as inactive - {Id}. Remove Item from cache - {removeFromCache}" : $"Product with Id sucessfully removed - {Id}. Remove Item from cache - {removeFromCache}"));
 
             return GenericResponse<string>.Success("", $"{(isSoftDelete ? $"Product successfully deactivated" : $"Product successfully removed.")}", System.Net.HttpStatusCode.OK);
 
@@ -146,6 +154,14 @@ public sealed class ProductService : IProductService
 
             Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetAllAsync").Information("Fetching All Products From {0}.....", ipAddress);
 
+            var productsFromCcahe = await _redisService.GetItemAsync<List<ProductDto>>(RedisCacheHelperClass.ProductsKey);
+
+            if(productsFromCcahe is not null && productsFromCcahe.Any())
+            {
+                Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetAllAsync").Information("Products Fetched from cache - {0}", productsFromCcahe);
+                return GenericResponse<IEnumerable<ProductDto>>.Success(productsFromCcahe, "Products Fetched Successfully.", System.Net.HttpStatusCode.OK);
+            }
+
 
             List<ProductDto> products = await _repositoryContext.Products
                                         .AsNoTracking()
@@ -162,6 +178,11 @@ public sealed class ProductService : IProductService
                                                         CurrentCount = x.CurrentCount
                                                     })
                                         .ToListAsync();
+            if (products.Any())
+            {
+                var setItemToCache = await _redisService.SetItemAsync(products, RedisCacheHelperClass.ProductsKey);
+
+            }
 
             Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetAllAsync").Information("Products Fetched Successfully - {products}", JsonSerializer.Serialize(products));
 
@@ -230,7 +251,15 @@ public sealed class ProductService : IProductService
     {
         try
         {
-            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByCategoryId").Information("Fetching Product with Id - {Id}", Id);
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByIdAsync").Information("Fetching Product with Id - {Id}", Id);
+
+            var productFromCache = await _redisService.GetItemAsync<ProductDto>(RedisCacheHelperClass.GetProductCacheKey(Id));
+
+            if(productFromCache is not null)
+            {
+                Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByIdAsync").Information("Product retrieved from cache successfully - {0}", productFromCache);
+                return GenericResponse<ProductDto>.Success(productFromCache, "Product Fetched Successfully.", System.Net.HttpStatusCode.OK);
+            }
 
             ProductDto? product = await _repositoryContext.Products.Include(x => x.productCategory)
                                         .AsNoTracking()
@@ -249,24 +278,25 @@ public sealed class ProductService : IProductService
 
             if(product is null)
             {
-                Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByCategoryId").Information("Product with specified Id does not exist - {Id}", Id);
+                Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByIdAsync").Information("Product with specified Id does not exist - {Id}", Id);
                 return GenericResponse<ProductDto>.Failure(null, "Product does not exist.", System.Net.HttpStatusCode.NotFound);
             }
 
+            var setItemToCache = await _redisService.SetItemAsync<ProductDto>(product, RedisCacheHelperClass.GetProductCacheKey(Id), 18400);
 
-            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByCategoryId").Information("Product successfully retrived - {product}", product);
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByIdAsync").Information("Product successfully retrived - {product}. Set item to cache - {cacheResponse}", product, setItemToCache);
 
             return GenericResponse<ProductDto>.Success(product, "Product Fetched Successfully.", System.Net.HttpStatusCode.OK);
 
         }
         catch(DbUpdateException ex)
         {
-            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByCategoryId").Error(ex, "Error Retrieving Product from Database.");
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByIdAsync").Error(ex, "Error Retrieving Product from Database.");
             return GenericResponse<ProductDto>.Failure(null, "Error Retrieving Product from Database.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
         catch (Exception ex)
         {
-            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByCategoryId").Error(ex, "Error Occurred Retrieving Product.");
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "GetByIdAsync").Error(ex, "Error Occurred Retrieving Product.");
             return GenericResponse<ProductDto>.Failure(null, "Error Occurred Retrieving Product.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
     }
@@ -355,7 +385,9 @@ public sealed class ProductService : IProductService
 
             await _repositoryContext.SaveChangesAsync();
 
-            Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Product with Id: {0} Stock Updated Successfully. Current Count - {1}", productToUpdateStock.Id, productToUpdateStock.CurrentCount);
+            var removeFromCcahe = await _redisService.RemoveMultiple(RedisCacheHelperClass.ProductsKey, RedisCacheHelperClass.GetProductCacheKey(productStock.Id));
+
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Product with Id: {0} Stock Updated Successfully. Current Count - {1}. Remove From cache returns - {2}", productToUpdateStock.Id, productToUpdateStock.CurrentCount, removeFromCcahe);
 
             return GenericResponse<string>.Success("Operation Successful", $"Product Stock successfully updated. Current Count: {productToUpdateStock.CurrentCount}", System.Net.HttpStatusCode.OK);
 

@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Entities.Models;
+using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Api.Services.Contracts;
+using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Feedback;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
@@ -13,13 +15,15 @@ public class FeedbackService : IFeedbackService
 {
 
     private readonly RepositoryContext _repositoryContext;
+    private readonly IRedisService _redisService;
 
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
-    public FeedbackService(RepositoryContext repositoryContext)
+    public FeedbackService(RepositoryContext repositoryContext, IRedisService redisService)
     {
         _repositoryContext = repositoryContext;
+        _redisService = redisService;
     }
     public async Task<GenericResponse<FeedbackDto>> CreateFeedbackAsync(CreateFeedbackDto createFeedbackDto)
     {
@@ -66,6 +70,8 @@ public class FeedbackService : IFeedbackService
 
             await _repositoryContext.SaveChangesAsync();
 
+            var removeFromCache = await _redisService.RemoveItemAsync(RedisCacheHelperClass.FeedbackKey);
+
             Log.ForContext(_className, "FeedbackService").ForContext(_methodName, "CreateFeedbackAsync").Information("Feedback created successfully - {0}", feedbackToInsert);
 
             return GenericResponse<FeedbackDto>.Success(new FeedbackDto
@@ -96,6 +102,14 @@ public class FeedbackService : IFeedbackService
         try
         {
             Log.ForContext(_className, "FeedbackService").ForContext(_methodName, "GetAllFeedbacksAsync").Information("Get All Feedbacks.....");
+
+            var feedbackItemsFromCache = await _redisService.GetItemAsync<List<FeedbackDto>>(RedisCacheHelperClass.FeedbackKey);
+
+            if(feedbackItemsFromCache is not null && feedbackItemsFromCache.Any())
+            {
+                Log.ForContext(_className, "FeedbackService").ForContext(_methodName, "GetAllFeedbacksAsync").Information("Feedback retrieved from cache - {0}", feedbackItemsFromCache);
+                return GenericResponse<IEnumerable<FeedbackDto>>.Success(feedbackItemsFromCache, "Feedbacks retrieved successfully.", System.Net.HttpStatusCode.OK);
+            }
 
             List<FeedbackDto> feedbacks = await _repositoryContext.Feedbacks.AsNoTracking().Select(x => new FeedbackDto()
             {

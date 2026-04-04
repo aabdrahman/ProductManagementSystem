@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Entities.Models;
+using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Api.Services.Contracts;
+using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using ProductManagementSystem.Shared.DataTransferObjects.Review;
 using Serilog;
@@ -13,12 +15,14 @@ namespace ProductManagementSystem.Api.Services;
 public class ReviewService : IReviewService
 {
     private readonly RepositoryContext _repositoryContext;
+    private readonly IRedisService _redisService;
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
-    public ReviewService(RepositoryContext repositoryContext)
+    public ReviewService(RepositoryContext repositoryContext, IRedisService redisService)
     {
         _repositoryContext = repositoryContext;
+        _redisService = redisService;
     }
 
     public async Task<GenericResponse<ReviewDto>> AddReviewAsync(CreateReviewDto createReview)
@@ -42,9 +46,11 @@ public class ReviewService : IReviewService
 
             await _repositoryContext.SaveChangesAsync();
 
+            var removeFromCache = await _redisService.RemoveItemAsync(RedisCacheHelperClass.ReviewKey);
+
             ReviewDto reviewToReturn = new ReviewDto() { Id = reviewToInsert.Id, ProductName = reviewToInsert.ProductName, Rating = reviewToInsert.Rating, ReviewerName = reviewToInsert .ReviewerName, ReviewText = reviewToInsert.ReviewText };
 
-            Log.ForContext(_className, "ReviewService").ForContext(_methodName, "AddReviewAsync").Information("Review Created Successfully - {0}", JsonSerializer.Serialize(reviewToReturn));
+            Log.ForContext(_className, "ReviewService").ForContext(_methodName, "AddReviewAsync").Information("Review Created Successfully - {0}. Remove Cache returns - {1}", JsonSerializer.Serialize(reviewToReturn), removeFromCache);
 
             return GenericResponse<ReviewDto>.Success(reviewToReturn, "Review Created Successfully.", System.Net.HttpStatusCode.OK);
 
@@ -80,7 +86,9 @@ public class ReviewService : IReviewService
                                         ReviewText = x.ReviewText
                                     }).ToListAsync();
 
-            Log.ForContext(_className, "ReviewService").ForContext(_methodName, "GetReviewsAsync").Information("Fetched Reviews - {0}", JsonSerializer.Serialize(reviews));
+            var setItemToCache = await _redisService.SetItemAsync(reviews, RedisCacheHelperClass.ReviewKey, 18400);
+
+            Log.ForContext(_className, "ReviewService").ForContext(_methodName, "GetReviewsAsync").Information("Fetched Reviews - {0}. Set items to cache - {1}", JsonSerializer.Serialize(reviews), setItemToCache);
 
             return GenericResponse<IEnumerable<ReviewDto>>.Success(reviews, "Reviews Fetched Successfully", System.Net.HttpStatusCode.OK);
         }
