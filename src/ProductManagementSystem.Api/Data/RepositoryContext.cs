@@ -20,6 +20,8 @@ public class RepositoryContext : DbContext
     public DbSet<Feedback> Feedbacks { get; set; }
     public DbSet<UserOtpVerification> UserOtpVerifications { get; set; }
     public DbSet<UserOrderVerificationToken> UserOrderVerificationTokens { get; set; }
+    public DbSet<AboutUsDetail> AboutUsDetails { get; set; }
+    public DbSet<WhyChooseUsDetail> WhyChooseUsDetails { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
