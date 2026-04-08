@@ -1,0 +1,129 @@
+﻿
+@inject IWebHostEnvironment webHostEnvironment
+
+@if (!_isLoading)
+{
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text-wrapper">
+                <span class="eyebrow">New Arrival</span>
+                <h1>Redefine Your <br>Daily Aesthetic</h1>
+                <p>Explore our Spring/Summer collection featuring sustainably sourced fabrics and timeless silhouettes.</p>
+                <div class="cta-group">
+                    <a href="#products" class="btn btn-primary">Shop Now</a>
+                    @* <a href="#products" class="btn btn-secondary">View Lookbook</a> *@
+                </div>
+            </div>
+        </div>
+
+        <section class="hero-carousel">
+            <div class="slides-container" style="transform: translateX(-@(_currentSlide * 100)%);" id="slider">
+
+                @if (_images is not null && _images.Any())
+                {
+                    foreach (var image in _images)
+                    {
+                        <div class="slide">
+                            <img src="@image" alt="Model wearing Spring collection">
+                            <div class="slide-content">
+                                <h1>Our Haven Essentials</h1>
+                                <a href="#products" class="btn">Shop Now</a>
+                            </div>
+                        </div>
+                        
+                    }
+                }
+                else
+                {
+                    <div class="slide">
+                        <img src="Images/Hero-1.jpg" alt="Model wearing Spring collection">
+                        <div class="slide-content">
+                            <h1>Our Haven Essentials</h1>
+                            <a href="#products" class="btn">Shop Now</a>
+                        </div>
+                    </div>
+
+                }
+            </div>
+
+            <button class="nav-btn prev" @onclick="MovePrevious">&#10094;</button>
+            <button class="nav-btn next" @onclick="MoveNext">&#10095;</button>
+        </section>
+
+    </section>
+}
+
+@code {
+
+    private string[] _images;
+    private int _currentSlide = 0;
+    private bool _isLoading = true;
+    private int _loadTime = 5000;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+        var files = webHostEnvironment.WebRootPath;
+
+        var filePath = Path.Combine(files, "Images");
+
+        var images = Directory.GetFiles(filePath, "*.jpg");
+
+        Console.WriteLine($"Found {images.Length} images in {filePath}. Files - {string.Join(" , ", images)}");
+
+        _images = images.Select(img => Path.Combine("Images", Path.GetFileName(img))).ToArray();
+
+        await base.OnInitializedAsync();
+
+        _isLoading = false;
+
+        _ = Task.Run(async () =>
+        {
+            while (true)
+            {
+                await Task.Delay(_loadTime); // Change slide every 5 seconds
+                MoveNext();
+                await InvokeAsync(StateHasChanged); // Refresh UI after changing slide
+            }
+        });
+    }
+
+    private void MoveNext()
+    {
+        if (_images is null || !_images.Any()) return;
+
+        if(_currentSlide < _images.Length - 1)
+        {
+            _currentSlide++;
+        }
+        else
+        {
+            _currentSlide = 0;
+        }
+
+        _loadTime = 5000; // Reset timer on manual navigation
+        Console.WriteLine($"Moved to slide {_currentSlide}");
+    }
+
+    private void MovePrevious()
+    {
+        if (_images is null || !_images.Any()) return;
+
+        if (_currentSlide > 0)
+            _currentSlide--;
+        else
+            _currentSlide = _images.Length - 1; // loop
+
+        Console.WriteLine($"Moved to slide {_currentSlide}");
+        _loadTime = 5000; // Reset timer on manual navigation
+    }
+
+    // private void MovePrevious()
+    // {
+    //     if (_images is null || !_images.Any()) return;
+
+    //     _currentSlide = (_currentSlide - 1 + _images.Length) % _images.Length;
+
+    //     Console.WriteLine($"Moved to slide {_currentSlide}");
+    // }
+}
