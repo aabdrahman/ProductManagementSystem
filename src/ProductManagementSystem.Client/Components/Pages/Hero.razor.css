@@ -12,6 +12,8 @@
     width: 100%;
     margin-bottom: 1.2rem;
     background-color: var(--BG-COLOR-SECONDARY);
+    padding: 2rem 4%;
+    gap: 2.5rem;
 }
 
 /* Text Side */
@@ -20,7 +22,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px;
 }
 
 .hero-text-wrapper {
@@ -30,11 +31,11 @@
 .eyebrow {
     text-transform: uppercase;
     letter-spacing: 2px;
-    font-size: 0.85rem;
-    color: var(--FONT-COLOR-BODY);
+    font-size: 1rem;
+    color: var(--FONT-COLOR-SECONDARY);
     display: block;
     margin-bottom: 1rem;
-    font-family: var(--FONT-STYLE-BODY-TITLE);
+    font-family: "Archivo Black", sans-serif;
     font-weight: 600;
 }
 
@@ -42,6 +43,9 @@ h1 {
     font-size: clamp(2rem, 5vw, 2.75rem); /* Fluid typography */
     line-height: .85;
     margin-bottom: 1.5rem;
+/*    font-family: "Archivo Black", sans-serif;*/
+    font-weight: 400;
+    font-style: normal;
 }
 
 p {
@@ -51,6 +55,9 @@ p {
     margin-bottom: 2rem;
     font-weight: 600;
     font-family: var(--FONT-STYLE-BODY);
+    font-family: "Righteous", sans-serif;
+    font-weight: 400;
+    font-style: normal;
 }
 
 /* Buttons */

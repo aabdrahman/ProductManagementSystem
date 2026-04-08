@@ -69,7 +69,7 @@
 
         var images = Directory.GetFiles(filePath, "*.jpg");
 
-        Console.WriteLine($"Found {images.Length} images in {filePath}. Files - {string.Join(" , ", images)}");
+        // Console.WriteLine($"Found {images.Length} images in {filePath}. Files - {string.Join(" , ", images)}");
 
         _images = images.Select(img => Path.Combine("Images", Path.GetFileName(img))).ToArray();
 
@@ -102,7 +102,7 @@
         }
 
         _loadTime = 5000; // Reset timer on manual navigation
-        Console.WriteLine($"Moved to slide {_currentSlide}");
+        // Console.WriteLine($"Moved to slide {_currentSlide}");
     }
 
     private void MovePrevious()
@@ -114,7 +114,7 @@
         else
             _currentSlide = _images.Length - 1; // loop
 
-        Console.WriteLine($"Moved to slide {_currentSlide}");
+        // Console.WriteLine($"Moved to slide {_currentSlide}");
         _loadTime = 5000; // Reset timer on manual navigation
     }
 
