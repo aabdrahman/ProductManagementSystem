@@ -16,6 +16,9 @@ public static class RedisCacheHelperClass
     public static string ProductBaseKey = "product";
     public static string OrdersKey = "orders";
     public static string OrderBaseKey = "order";
+    public static string AboutUsContentKey = "about-us-content";
+    public static string WhyChooseUsContentKey = "why-choose-us-content";
+
     public static string GetCacheKey(string prefix, params object[] parameters)
     {
         return $"{prefix}:{string.Join(":", parameters)}";

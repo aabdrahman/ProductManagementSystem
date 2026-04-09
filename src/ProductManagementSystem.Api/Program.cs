@@ -111,6 +111,8 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IBackgroundOperationService, BackgroundOperationService>();
 builder.Services.AddScoped<IUserOrderVerificationService, UserOrderVerificationService>();
+builder.Services.AddScoped<IAboutUsService, AboutUsService>();
+builder.Services.AddScoped<IWhyChooseUsService, WhyChooseUsService>();
 
 builder.Services.AddScoped<IRedisService, RedisService>();
 builder.Services.AddScoped<AuthenticationTokenValidationFilter>();
