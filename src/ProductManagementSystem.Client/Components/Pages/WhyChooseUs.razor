@@ -1,49 +1,81 @@
 ﻿
+@inject GetWhyChooseUsHandler getWhyChooseUsHandler
 
-<section id="why-choose-us" class="why-choose-us">
+@if (_isRendered)
+{
+    <section id="why-choose-us" class="why-choose-us">
 
-    <div class="why-choose-header">
-        <h2>Why Choose Us</h2>
-        <p>
-            We don’t just deliver solutions — we create measurable impact, long-term value, and dependable partnerships.
-        </p>
-    </div>
-
-    <div class="why-choose-items">
-
-        <div class="why-choose-item">
-            <h3>Proven Expertise</h3>
+        <div class="why-choose-header">
+            <h2>Why Choose Us</h2>
             <p>
-                Our team brings deep technical knowledge and real-world experience to every project we handle.
+                We don’t just deliver solutions — we create measurable impact, long-term value, and dependable partnerships.
             </p>
         </div>
 
-        <div class="why-choose-item">
-            <h3>Results-Driven Approach</h3>
-            <p>
-                We focus on outcomes that matter — performance, scalability, and measurable business growth.
-            </p>
+        <div class="why-choose-items">
+
+            @if (_whyChooseUsItems is not null && _whyChooseUsItems.Any())
+            {
+                @foreach (var item in _whyChooseUsItems)
+                {
+                    <div class="why-choose-item">
+                        <h3>@item.title</h3>
+                        <p>@item.contentDetails</p>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="why-choose-item">
+                    <h3>Proven Expertise</h3>
+                    <p>
+                        Our team brings deep technical knowledge and real-world experience to every project we handle.
+                    </p>
+                </div>
+
+                <div class="why-choose-item">
+                    <h3>Results-Driven Approach</h3>
+                    <p>
+                        We focus on outcomes that matter — performance, scalability, and measurable business growth.
+                    </p>
+                </div>
+
+                <div class="why-choose-item">
+                    <h3>Client-Centered Partnership</h3>
+                    <p>
+                        We work closely with you to understand your goals and build solutions tailored to your needs.
+                    </p>
+                </div>
+
+                <div class="why-choose-item">
+                    <h3>Reliable & Secure Delivery</h3>
+                    <p>
+                        Security, stability, and long-term sustainability are built into every solution we provide.
+                    </p>
+                </div>
+            }
+
+        
+
         </div>
 
-        <div class="why-choose-item">
-            <h3>Client-Centered Partnership</h3>
-            <p>
-                We work closely with you to understand your goals and build solutions tailored to your needs.
-            </p>
-        </div>
-
-        <div class="why-choose-item">
-            <h3>Reliable & Secure Delivery</h3>
-            <p>
-                Security, stability, and long-term sustainability are built into every solution we provide.
-            </p>
-        </div>
-
-    </div>
-
-</section>
+    </section>
+}
 
 
 @code {
 
+    private List<WhyChooseUsDto> _whyChooseUsItems;
+
+    private bool _isRendered = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(250);
+
+        var result = await getWhyChooseUsHandler.Handle();
+        _whyChooseUsItems = result.contentItems.ToList();
+
+        _isRendered = true;
+    }
 }

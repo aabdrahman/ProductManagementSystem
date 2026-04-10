@@ -1,31 +1,24 @@
-﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
-using ProductManagementSystem.Client.Utilities.Contracts;
-using ProductManagementSystem.Shared.DataTransferObjects.ContentDetails;
+﻿using ProductManagementSystem.Shared.DataTransferObjects.ContentDetails;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class GetWhyChooseUsHandler : HttpClientProvider
+public class GetWhyChooseUsHandler
 {
-    public GetWhyChooseUsHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
+    private readonly HttpClient _httpClient;
+
+    public GetWhyChooseUsHandler(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
+        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Secure-Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
-
-    //private readonly HttpClient _httpClient;
-
-    //public GetWhyChooseUsHandler(IConfiguration configuration, IHttpClientFactory httpClientFactory) : base()
-    //{
-    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Secure-Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
-    //}
 
     public async Task<(string responseMessage, IEnumerable<WhyChooseUsDto> contentItems)> Handle()
     {
         try
         {
-            var httpClient = await base.GetSecuredHttpClient();
 
-            var httpResponse = await httpClient.GetAsync("api/WhyChooseUs");
+            var httpResponse = await _httpClient.GetAsync("api/WhyChooseUs");
 
             string responseContent = await httpResponse.Content.ReadAsStringAsync();
 

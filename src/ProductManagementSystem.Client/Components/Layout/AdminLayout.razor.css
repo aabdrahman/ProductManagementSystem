@@ -96,6 +96,31 @@
     gap: 1.5rem;
 }
 
+.header-left{
+    display: flex;
+    gap: 1rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn{
+    width: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    transition: all 1s ease-in-out;
+    border: none;
+    border-radius: 50%;
+    padding: .5rem;
+}
+
+.nav-btn:hover{
+    background-color: lightgreen;
+    cursor: pointer;
+}
+
 /* USER */
 
 .admin-user {

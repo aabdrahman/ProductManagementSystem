@@ -93,6 +93,9 @@
 
             _ = Task.Run(async () =>
             {
+                await Task.Delay(1500);
+
+                _createContentModel = new();
 
                 // isSubmitting = false; _
                 await Task.Delay(2500);

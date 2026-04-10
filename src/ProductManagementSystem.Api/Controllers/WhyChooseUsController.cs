@@ -23,6 +23,7 @@ public class WhyChooseUsController : ControllerBase
     private string _className = "ClassName";
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll()
     {
         try

@@ -292,7 +292,7 @@ textarea::placeholder {
 
 .management-table th,
 .management-table td {
-    padding: 1rem;
+    padding: 1rem; 
     border-bottom: 1px solid #e5e7eb;
     text-align: left;
     font-family: var(--FONT-STYLE-BODY);
@@ -320,6 +320,25 @@ textarea::placeholder {
     font-family: var(--FONT-STYLE-BODY);
     color: var(--FONT-COLOR-SECONDARY);
     font-weight: 800;
+}
+
+.actions.view {
+    background: #e0e7ff;
+    /*    color: #3730a3;*/
+}
+
+.actions.complete {
+    background: #dcfce7;
+    /*    color: #166534;*/
+}
+
+.actions.cancel {
+    background: #fee2e2;
+    /*    color: #991b1b;*/
+}
+
+.actions.delete {
+    background: #fee2e2;
 }
 
 .auth-page {

@@ -90,6 +90,19 @@ else
 
         _title = "";
         _operationToPerform = default;
+
+
+        if (refreshDecision)
+        {
+            _isRendering = true;
+
+            var result = await getWhyChooseUsHandler.Handle();
+            _fetchedWhyChooseUsDetails = result.contentItems;
+            _getWHyChooseUsResponse = result.responseMessage;
+
+            _isRendering = false;
+        }
+
         popup.CloseModal();
 
         StateHasChanged();
