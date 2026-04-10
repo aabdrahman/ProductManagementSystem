@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using ProductManagementSystem.Client.AuthProviderUtility;
 using ProductManagementSystem.Client.Components;
 using ProductManagementSystem.Client.Handlers;
-using ProductManagementSystem.Client.Handlers.ClientHelper;
 using ProductManagementSystem.Client.Utilities;
 using ProductManagementSystem.Client.Utilities.Contracts;
 using System.Net;
@@ -89,6 +88,8 @@ builder.Services.AddScoped<ChangePasswordHandler>();
 builder.Services.AddScoped<RefreshTokenHandler>();
 builder.Services.AddScoped<GetWhyChooseUsHandler>();
 builder.Services.AddScoped<AddNewWhyChooseUsContentHandler>();
+builder.Services.AddScoped<UpdateWhyChooseUsContentHandler>();
+builder.Services.AddScoped<DeleteWhyChooseUsContentHandler>();
 
 builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
 builder.Services.AddScoped<TokenContainer>();

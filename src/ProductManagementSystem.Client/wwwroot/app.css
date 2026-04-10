@@ -498,4 +498,58 @@ textarea::placeholder {
 }
 
 
+.site-content-page {
+    max-width: 900px;
+    margin: auto;
+    padding: 1rem 1rem;
+}
 
+.site-content-form-header {
+    margin-bottom: 1.2rem;
+    text-align: center;
+}
+
+.site-content-form-header p {
+    font-family: var(--FONT-STYLE-BODY);
+}
+
+.content-details {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    flex-direction: column;
+}
+
+.content-details-item {
+    display: flex;
+    gap: .5rem;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.site-content-delete-actions {
+    display: flex;
+    gap: 1rem;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+.btn.danger {
+    background: #dc2626;
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn.danger:hover {
+    background: #b91c1c;
+}
+
+.btn.danger:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}

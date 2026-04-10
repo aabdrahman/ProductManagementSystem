@@ -26,7 +26,7 @@ else
 
         @if(_fetchedWhyChooseUsDetails is not null)
         {
-            <WhyChooseUsContentDetails WhyChooseUsDetails="_fetchedWhyChooseUsDetails" HandleAddDetails="OnAddNewWhyChooseUs" />
+            <WhyChooseUsContentDetails WhyChooseUsDetails="_fetchedWhyChooseUsDetails" HandleAddDetails="OnAddNewWhyChooseUs" HandleEditDetails="OnEditWhyChoosUsContent" HandleViewDetails="OnViewWhyChooseUsContent" HandleDeleteDetails="OnDeleteWhyChooseUsContent" />
         }
 
     </section>
@@ -36,6 +36,18 @@ else
             @if(_operationToPerform == OperationType.AddWhyChooseUs)
             {
                 <AddWhyChooseUs HandleClose="HandleClose" />
+            }
+            else if(_operationToPerform == OperationType.EditWhyChooseUs)
+            {
+                <EditWhyChooseUs WhyChooseUsContentToEdit="@_selectedWhyChooseUs" HandleClose="HandleClose" />
+            }
+            else if(_operationToPerform == OperationType.ViewWhyChooseUsDetails)
+            {
+                <WhyChooseUsContent WhyChooseUsDetail="_selectedWhyChooseUs" />
+            }
+            else if(_operationToPerform == OperationType.DeleteWhyChooseUsDetails)
+            {
+                <DeleteWhyChooseUsContent WhyChooseUsToDelete="@_selectedWhyChooseUs" HandleClose="HandleClose" />
             }
         </Body>
     </Popup>
@@ -52,6 +64,7 @@ else
     private string _title;
     private bool _showCloseButton = false;
     private Popup popup;
+    private WhyChooseUsDto _selectedWhyChooseUs;
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,6 +98,36 @@ else
         popup.OpenModal();
     }
 
+    private void OnEditWhyChoosUsContent(WhyChooseUsDto selectedWhyChooseUsContent)
+    {
+        _selectedWhyChooseUs = selectedWhyChooseUsContent;
+        _title = "Edit Why Choose Us Content Details";
+        _showCloseButton = false;
+        _operationToPerform = OperationType.EditWhyChooseUs;
+
+        popup.OpenModal();
+    }
+
+    private void OnViewWhyChooseUsContent(WhyChooseUsDto selectedWhyChooseUsContent)
+    {
+        _selectedWhyChooseUs = selectedWhyChooseUsContent;
+        _title = "Content Details";
+        _showCloseButton = true;
+        _operationToPerform = OperationType.ViewWhyChooseUsDetails;
+
+        popup.OpenModal();
+    }
+
+    private void OnDeleteWhyChooseUsContent(WhyChooseUsDto selectedWhyChooseUsContent)
+    {
+        _selectedWhyChooseUs = selectedWhyChooseUsContent;
+        _title = "Delete Content";
+        _showCloseButton = false;
+        _operationToPerform = OperationType.DeleteWhyChooseUsDetails;
+
+        popup.OpenModal();
+    }
+
     private async Task HandleClose(bool refreshDecision)
     {
 
@@ -111,6 +154,9 @@ else
     enum OperationType
     {
         None,
-        AddWhyChooseUs
+        AddWhyChooseUs,
+        EditWhyChooseUs,
+        ViewWhyChooseUsDetails,
+        DeleteWhyChooseUsDetails
     }
 }
