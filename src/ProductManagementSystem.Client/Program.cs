@@ -90,6 +90,10 @@ builder.Services.AddScoped<GetWhyChooseUsHandler>();
 builder.Services.AddScoped<AddNewWhyChooseUsContentHandler>();
 builder.Services.AddScoped<UpdateWhyChooseUsContentHandler>();
 builder.Services.AddScoped<DeleteWhyChooseUsContentHandler>();
+builder.Services.AddScoped<GetAboutUsContentHandler>();
+builder.Services.AddScoped<DeleteAboutUsContentHandler>();
+builder.Services.AddScoped<UpdateAboutUsContentHandler>();
+builder.Services.AddScoped<AddAboutUsContentHandler>();
 
 builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
 builder.Services.AddScoped<TokenContainer>();
