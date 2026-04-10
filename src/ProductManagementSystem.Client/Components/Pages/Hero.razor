@@ -102,7 +102,7 @@
         }
 
         _loadTime = 5000; // Reset timer on manual navigation
-        // Console.WriteLine($"Moved to slide {_currentSlide}");
+
     }
 
     private void MovePrevious()
@@ -114,7 +114,7 @@
         else
             _currentSlide = _images.Length - 1; // loop
 
-        // Console.WriteLine($"Moved to slide {_currentSlide}");
+
         _loadTime = 5000; // Reset timer on manual navigation
     }
 
@@ -124,6 +124,6 @@
 
     //     _currentSlide = (_currentSlide - 1 + _images.Length) % _images.Length;
 
-    //     Console.WriteLine($"Moved to slide {_currentSlide}");
+
     // }
 }

@@ -10,11 +10,13 @@ public class AuthStateProvider : AuthenticationStateProvider
 {
     private readonly ILocalStorageUtility _storageUtility;
     private AuthenticationState _anonymous;
+    private readonly TokenContainer _tokenContainer;
 
-    public AuthStateProvider(ILocalStorageUtility storageUtility)
+    public AuthStateProvider(ILocalStorageUtility storageUtility, TokenContainer tokenContainer)
     {
         _storageUtility = storageUtility;
         _anonymous = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+        _tokenContainer = tokenContainer;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -54,6 +56,8 @@ public class AuthStateProvider : AuthenticationStateProvider
             NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
             return _anonymous;
         }
+
+        _tokenContainer.SetToken(storedToken.Token);
 
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claimsPrincipal, "jwtAuthType", nameType: ClaimTypes.Name, roleType: ClaimTypes.Role)));
 

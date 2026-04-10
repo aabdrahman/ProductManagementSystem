@@ -1,0 +1,121 @@
+﻿
+
+@if (_isLoading)
+{
+    <p>
+        Loading Content
+    </p>
+}
+else
+{
+    <section class="why-choose-us-content-management">
+
+        <div class="management-header">
+            <h3>
+                Manage Why Choose Us Content
+            </h3>
+
+            <p>
+                Manage Why choose us details seen by users
+            </p>
+
+            <button role="button" class="add-content-btn" @onclick="(async() => await HandleAddDetails.InvokeAsync())">
+                ➕ Add New Why Choose Us Content
+            </button>
+
+        </div>
+
+        @if (_whyChooseUsContentDetails.Any())
+        {
+            <div class="management-table-wrapper">
+
+                <table class="management-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Title</th>
+                            <th>Content Details</th>
+                            <th>Actions</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var content in _whyChooseUsContentDetails)
+                        {
+                            <tr>
+
+                                <td >@content.title</td>
+
+                                <td >@content.contentDetails</td>
+
+                                <td class="actions">
+                                    <button class="btn view" @onclick="(async () => await HandleViewDetails.InvokeAsync(content))">View</button>
+                                    <button class="btn edit" @onclick="(async () => await HandleEditDetails.InvokeAsync(content))">Edit</button>
+                                    <button class="btn delete" @onclick="(async () => await HandleDeleteDetails.InvokeAsync(content))">Delete</button>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+        else
+        {
+            <div class="no-contents">
+                <h3>No why choose us content available</h3>
+                <p>
+                    Start by adding your first why choose us content.
+                    @_responseMessage
+                </p>
+            </div>
+        }
+
+
+    </section>
+}
+
+@code {
+
+    private List<WhyChooseUsDto> _whyChooseUsContentDetails;
+    private string _responseMessage;
+    private bool _isLoading = false;
+
+    [Parameter, EditorRequired]
+    public IEnumerable<WhyChooseUsDto> WhyChooseUsDetails { get; set; }
+
+    [Parameter, EditorRequired]
+    public string ResponseMessage { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<WhyChooseUsDto> HandleViewDetails { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<WhyChooseUsDto> HandleEditDetails { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<WhyChooseUsDto> HandleDeleteDetails { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback HandleAddDetails { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+
+        await Task.Delay(250);
+
+        _whyChooseUsContentDetails = WhyChooseUsDetails.ToList();
+        _responseMessage = ResponseMessage;
+
+        _isLoading = false;
+
+    }
+
+}

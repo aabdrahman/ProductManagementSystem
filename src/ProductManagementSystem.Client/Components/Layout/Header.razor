@@ -23,9 +23,9 @@
             <a href="#about-us">About Us</a>
             <a href="#reviews">Reviews</a>
             <a href="/contact-us">Contact</a>
-            <a href="/admin">Admin</a>
+            @* <a href="/admin">Admin</a> *@
 
-            <AuthorizeView Roles="ADMIN">
+            <AuthorizeView Roles="ADMIN,SYSTEM">
                 <a href="/admin">Admin</a>
             </AuthorizeView>
 

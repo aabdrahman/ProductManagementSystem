@@ -183,11 +183,13 @@ form{
     box-sizing: border-box;
 }
 
-.form-group input:invalid {
+.form-group input:invalid,
+.form-group textarea:invalid {
     border-color: #dc3545;
 }
 
-.form-group input:valid {
+.form-group input:valid,
+.form-group textarea:valid {
     border-color: #28a745;
 }
 
@@ -198,7 +200,7 @@ textarea::placeholder {
     font-style: italic;
 }
 
-.add-product-btn {
+.add-product-btn, .add-content-btn {
     display: inline-block;
     padding: 10px 16px;
     background: var(--BG-COLOR-BTN-SUCCESS); 
@@ -211,7 +213,7 @@ textarea::placeholder {
     transition: transform 0.1s ease, background 0.2s ease;
 }
 
-.add-product-btn:hover {
+.add-product-btn:hover, .add-content-btn:hover {
     background: var(--BG-COLOR-BTN-SUCCESS-HOVER);
     transform: translateY(-1px);
 /*    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);*/
@@ -241,7 +243,8 @@ textarea::placeholder {
 }
 
 .no-orders,
-.no-products{
+.no-productsz,
+.no-contents {
     display: flex;
     flex-direction: column;
     gap: .5rem;
@@ -250,7 +253,8 @@ textarea::placeholder {
 }
 
 .no-orders p,
-.no-products p{
+.no-products p,
+.no-contents p{
     font-size: 1.25rem;
     color: var(--FONT-COLOR-SECONDARY);
     font-family: var(--FONT-STYLE-BODY);
@@ -278,6 +282,45 @@ textarea::placeholder {
     overflow-x: auto;
 }
 
+.management-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--BG-COLOR-TERTIARY);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.management-table th,
+.management-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 500;
+}
+
+.management-table th {
+    background: #11912d;
+    font-weight: 600;
+    font-family: var(--FONT-STYLE-BODY-TITLE);
+    padding: 18px;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actions .btn {
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: none;
+    font-family: var(--FONT-STYLE-BODY);
+    color: var(--FONT-COLOR-SECONDARY);
+    font-weight: 800;
+}
 
 .auth-page {
     display: flex;
@@ -406,3 +449,34 @@ textarea::placeholder {
     font-size: 0.85rem;
     font-family: var(--FONT-STYLE-BODY);
 }
+
+
+.add-new-content-page {
+    max-width: 900px;
+    margin: auto;
+    padding: 1rem 1rem;
+}
+
+.form-header {
+    margin-bottom: .5rem;
+}
+
+.form-header p {
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 500;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+
+

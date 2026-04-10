@@ -1,0 +1,103 @@
+﻿@page "/admin/manage-content"
+
+@layout ProductManagementSystem.Client.Components.Layout.AdminLayout
+
+@attribute [Authorize(Roles = "ADMIN,SYSTEM")]
+
+<PageTitle>Manage Site Content - About Us and Why Choose Us</PageTitle>
+
+@if (_isRendering)
+{
+    <Spinner Description="Loading Site Content" />
+}
+else
+{
+    <section class="site-content-management-page">
+
+        <div class="site-content-management-page-header">
+            <h2>
+                Manage Site Content - About Us and Why Choose Us
+            </h2>
+
+            <p>
+                Manage your site content and configure what users see 
+            </p>
+        </div>
+
+        @if(_fetchedWhyChooseUsDetails is not null)
+        {
+            <WhyChooseUsContentDetails WhyChooseUsDetails="_fetchedWhyChooseUsDetails" HandleAddDetails="OnAddNewWhyChooseUs" />
+        }
+
+    </section>
+
+    <Popup Title="@_title" ShowCloseButton="@_showCloseButton" @ref="popup">
+        <Body>
+            @if(_operationToPerform == OperationType.AddWhyChooseUs)
+            {
+                <AddWhyChooseUs HandleClose="HandleClose" />
+            }
+        </Body>
+    </Popup>
+}
+
+
+@code {
+
+    private bool _isRendering = true;
+    private IEnumerable<WhyChooseUsDto> _fetchedWhyChooseUsDetails;
+    private string _getWHyChooseUsResponse;
+
+    private OperationType _operationToPerform;
+    private string _title;
+    private bool _showCloseButton = false;
+    private Popup popup;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isRendering = true;
+
+        await Task.Delay(250);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var result = getWhyChooseUsHandler.Handle();
+
+        await Task.WhenAll(result);
+
+        var getWhyChooseUsResult = result.Result;
+        _fetchedWhyChooseUsDetails = getWhyChooseUsResult.contentItems;
+        _getWHyChooseUsResponse = getWhyChooseUsResult.responseMessage;
+
+        _isRendering = false;
+    }
+}
+
+
+@code{
+
+    private void OnAddNewWhyChooseUs()
+    {
+        _title = "Add New Why Choose Us";
+        _operationToPerform = OperationType.AddWhyChooseUs;
+
+        popup.OpenModal();
+    }
+
+    private async Task HandleClose(bool refreshDecision)
+    {
+
+        _title = "";
+        _operationToPerform = default;
+        popup.CloseModal();
+
+        StateHasChanged();
+    }
+
+    enum OperationType
+    {
+        None,
+        AddWhyChooseUs
+    }
+}

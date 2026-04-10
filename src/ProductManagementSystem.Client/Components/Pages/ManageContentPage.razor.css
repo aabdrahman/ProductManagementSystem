@@ -1,0 +1,23 @@
+﻿
+
+.site-content-management-page {
+    padding: 4rem 2rem;
+    background: var(--BG-COLOR-SECONDARY);
+}
+
+
+.site-content-management-page-header{
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin-bottom: 2rem;
+}
+
+.site-content-management-page-header p {
+
+    font-size: 1.2rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 600;
+    line-height: 1.5;
+}

@@ -1,0 +1,114 @@
+﻿
+@inject AddNewWhyChooseUsContentHandler addNewWhyChooseUsContentHandler
+
+<section class="add-new-content-page">
+    <div class="form-header">
+        <h2>Add New Why Choose Us Content</h2>
+        <p>Add Why Choose Us Content</p>
+    </div>
+
+    @if (_isSubmitting)
+    {
+        <Spinner Description="Adding Content Details" />
+    }
+
+    @if(_createContentModel is not null)
+    {
+        <EditForm Model="_createContentModel" OnValidSubmit="HandleAddContent">
+            <DataAnnotationsValidator />
+
+            @if(_responseMessage is not null)
+            {
+                <Status StatusMessage="@_responseMessage" SuccessStatus="_isSuccessful" />
+            }
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>Title</label>
+                    <InputText @bind-Value="_createContentModel.Title" />
+                    <ValidationMessage For="(() => _createContentModel.Title)" />
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Content Details</label>
+                    <InputTextArea rows="3" @bind-Value="_createContentModel.ContentDetails" />
+                    <ValidationMessage For="(() => _createContentModel.ContentDetails)" />
+
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+
+                <button class="btn submit" disabled="@(_isSubmitting || _isSuccessful)" type="submit">
+                    @(_isSubmitting ? "Adding Content" : "Add Content")
+                </button>
+
+                <button class="btn cancel" type="button" disabled="@_isSubmitting" @onclick="(async () => await HandleClose.InvokeAsync(_isSuccessful))">Cancel</button>
+
+            </div>
+
+        </EditForm>
+    }
+
+</section>
+
+@code {
+
+    private CreateWhyChooseUsDto _createContentModel;
+    private bool _isSubmitting;
+    private bool _isSuccessful;
+    private bool _isLoading;
+    private string _responseMessage;
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(250);
+        _createContentModel = new CreateWhyChooseUsDto();
+    }
+
+    private async Task HandleAddContent()
+    {
+        _isSubmitting = true;_responseMessage = null;
+
+        // await Task.Delay(5000);
+
+        // _isSuccessful = DateTime.Now.Second % 2 == 0;
+        // _responseMessage = _isSuccessful ? "Content Added Successfully" : "Content could not be added";
+
+        var result = await addNewWhyChooseUsContentHandler.Handle(_createContentModel);
+        _responseMessage = result.responseMessage; _isSuccessful = result.isSuccessful;
+        
+        _isSubmitting = false;
+
+        if(_isSuccessful)
+        {
+
+            _ = Task.Run(async () =>
+            {
+
+                // isSubmitting = false; _
+                await Task.Delay(2500);
+
+                await OnHandleClose(true);
+            });
+        }
+
+    }
+
+    private async Task OnHandleClose(bool refreshDecision = false)
+    {
+
+        _responseMessage = null; _createContentModel = null;
+        _isSubmitting = default; _isSuccessful = default;
+
+        await HandleClose.InvokeAsync(refreshDecision);
+    } 
+}

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using ProductManagementSystem.Client.Utilities.Contracts;
+using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Utilities;
 
@@ -17,6 +18,11 @@ public class LocalStorageUtility : ILocalStorageUtility
         try
         {
             var result = await _protectedLocalStorage.GetAsync<T>(key.ToUpper());
+            if(key.Equals("session-token", StringComparison.OrdinalIgnoreCase))
+            {
+  
+            }
+
 
             return result.Value;
         }

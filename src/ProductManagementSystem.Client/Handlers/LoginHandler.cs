@@ -9,11 +9,13 @@ public class LoginHandler
 {
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageUtility _localStorageUtility;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public LoginHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILocalStorageUtility localStorageUtility)
+    public LoginHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILocalStorageUtility localStorageUtility, IHttpContextAccessor httpContextAccessor)
     {
         _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
         _localStorageUtility = localStorageUtility;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<(bool isSuccessful, string message)> Handle(LoginUserDto loginUser)

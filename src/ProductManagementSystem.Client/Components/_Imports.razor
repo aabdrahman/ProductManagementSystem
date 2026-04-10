@@ -28,9 +28,13 @@
 @using ProductManagementSystem.Shared.DataTransferObjects.User
 @using ProductManagementSystem.Shared.DataTransferObjects.Role
 @using ProductManagementSystem.Shared.DataTransferObjects.Authentication
+@using ProductManagementSystem.Shared.DataTransferObjects.ContentDetails
+ProductManagementSystem.Client.Components.Layout
 
 @inject NavigationManager navigationManager
 @inject ILocalStorageUtility localStorageUtility
 @inject AddFeedbackHandler addFeedbackHandler
 @inject IJSRuntime JSRuntime
 @inject AuthenticationStateProvider authStateProvider
+
+@inject GetWhyChooseUsHandler getWhyChooseUsHandler

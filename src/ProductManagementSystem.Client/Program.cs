@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using ProductManagementSystem.Client.AuthProviderUtility;
 using ProductManagementSystem.Client.Components;
 using ProductManagementSystem.Client.Handlers;
+using ProductManagementSystem.Client.Handlers.ClientHelper;
 using ProductManagementSystem.Client.Utilities;
 using ProductManagementSystem.Client.Utilities.Contracts;
 using System.Net;
@@ -85,10 +86,16 @@ builder.Services.AddScoped<GetUserOrdersHandler>();
 builder.Services.AddScoped<ValidatePasswordResetOtphandler>();
 builder.Services.AddScoped<RequestPasswordResetOtpHandler>();
 builder.Services.AddScoped<ChangePasswordHandler>();
+builder.Services.AddScoped<RefreshTokenHandler>();
+builder.Services.AddScoped<GetWhyChooseUsHandler>();
+builder.Services.AddScoped<AddNewWhyChooseUsContentHandler>();
 
 builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
+builder.Services.AddScoped<TokenContainer>();
+//builder.Services.AddScoped<HttpClientProvider>();
 
 builder.Services.AddTransient<OriginHandler>();
+builder.Services.AddTransient<AuthProviderHandler>();
 builder.Services.AddScoped<RequestContext>();
 
 builder.Services.AddHttpContextAccessor();
@@ -100,6 +107,14 @@ builder.Services.AddHttpClient(builder.Configuration.GetValue<string>("ApiClient
     opts.DefaultRequestVersion = HttpVersion.Version11;
 
 }).AddHttpMessageHandler<OriginHandler>();
+
+builder.Services.AddHttpClient(builder.Configuration.GetValue<string>("ApiClient:Secure-Key") ?? throw new ArgumentNullException("The api key name is not provided yet"), opts =>
+{
+    opts.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiClient:BaseUri") ?? throw new ArgumentNullException("The api base uri is not provided yet"));
+    opts.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<double>("ApiClient:TimeoutAfterSeconds"));
+    opts.DefaultRequestVersion = HttpVersion.Version11;
+
+}).AddHttpMessageHandler<AuthProviderHandler>();
 
 var app = builder.Build();
 
