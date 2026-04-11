@@ -55,7 +55,7 @@ public class AboutUsController : ControllerBase
     }
 
     [HttpDelete("{Id:guid}")]
-    public async Task<IActionResult> Delete(Guid Id, bool isSoftDelete = false)
+    public async Task<IActionResult> Delete(Guid Id, bool isSoftDelete = true)
     {
         try
         {
