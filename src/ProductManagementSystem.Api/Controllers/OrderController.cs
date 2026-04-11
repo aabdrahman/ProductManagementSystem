@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Order;
 using Serilog;
@@ -8,6 +9,7 @@ namespace ProductManagementSystem.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = "ADMIN,SYSTEM,USER")]
 public class OrderController : ControllerBase
 {
     private readonly IOrderService _orderService;
@@ -21,6 +23,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "ADMN,SYSTEM")]
     public async Task<IActionResult> GetAll()
     {
         try
@@ -100,6 +103,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpGet("product/{productId:int}")]
+    [Authorize(Roles = "ADMN,SYSTEM")]
     public async Task<IActionResult> GetByProduct(int productId)
     {
         try
@@ -132,6 +136,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "USER")]
     public async Task<IActionResult> Create([FromBody] CreateOrderDto createOrderDto)
     {
         try
@@ -164,6 +169,7 @@ public class OrderController : ControllerBase
     }
 
     [HttpPut("update-status")]
+    [Authorize(Roles = "ADMN,SYSTEM")]
     public async Task<IActionResult> UpdateStatus([FromBody] UpdateOrderStatusDto updateStatus)
     {
         try

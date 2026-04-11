@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using ProductManagementSystem.Api.Controllers.AuthRequirements;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api.Entities.Models;
@@ -12,6 +14,7 @@ using ProductManagementSystem.Shared.DataTransferObjects.OrderLineItem;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
 using System.Data.Common;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Json;
 
@@ -24,14 +27,20 @@ public class OrderService : IOrderService
     private readonly IEmailService _emailService;
     private readonly UserOrderVerificationConfig _userOtpVerificationConfig;
     private readonly IRedisService _redisService;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public OrderService(RepositoryContext repositoryContext, IEmailVerificationLinkFactory emailVerificationLinkFactory, IEmailService emailService, IOptionsMonitor<UserOrderVerificationConfig> optionsMonitor, IRedisService redisService)
+    public OrderService(RepositoryContext repositoryContext, IEmailVerificationLinkFactory emailVerificationLinkFactory,
+                        IEmailService emailService, IOptionsMonitor<UserOrderVerificationConfig> optionsMonitor,
+                        IRedisService redisService, IAuthorizationService authorizationService, IHttpContextAccessor httpContextAccessor)
     {
         _repositoryContext = repositoryContext;
         _emailVerificationLinkFactory = emailVerificationLinkFactory;
         _emailService = emailService;
         _userOtpVerificationConfig = optionsMonitor.CurrentValue;
         _redisService = redisService;
+        _authorizationService = authorizationService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     private string _methodName = "MethodName";
@@ -217,6 +226,16 @@ public class OrderService : IOrderService
             {
                 Log.ForContext(_methodName, "DeleteAsync").ForContext(_className, "OrderService").Information("Order does not exist - {Id}", Id);
                 return GenericResponse<string>.Failure("Operation Failed.", $"Order does not exist for Id: {Id}.", System.Net.HttpStatusCode.NotFound);
+            }
+
+            var isValid = await _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, order, Operations.Delete);
+
+            if (!isValid.Succeeded)
+            {
+                Log.ForContext(_methodName, "DeleteAsync").ForContext(_className, "OrderService").Information("User - {0} is not authenticated to perform action on accesseed resource. Allowed User - {1}", 
+                                                                                                    _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), order.UserId);
+
+                return GenericResponse<string>.Failure("Operation Failed.", "Access denied.", System.Net.HttpStatusCode.Forbidden);
             }
 
             //Loop through the order line items and increase the count of each product in the order line item by the quantity ordered for that product in the order line item
@@ -420,6 +439,15 @@ public class OrderService : IOrderService
                 return GenericResponse<OrderDto>.Failure(null, $"Order with Id: {updateOrder.Id} does not exist.", System.Net.HttpStatusCode.NotFound);
             }
 
+            var isValidRequirement = await _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, orderToUpdate, Operations.Update);
+
+            if (!isValidRequirement.Succeeded)
+            {
+                Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Warning("User - {0} is not auhtorized to perform operation on the resource. Allowed User - {1}", 
+                                                                    _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), orderToUpdate.UserId);
+                return GenericResponse<OrderDto>.Failure(null, "Operation denied.", System.Net.HttpStatusCode.Forbidden);
+            }
+
             if (orderToUpdate.DeliveryDate.HasValue || orderToUpdate.OrderStatus == Entities.StaticValues.OrderStatus.Cancelled)
             {
                 Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Information("Order with Id: {Id} has an invalid status - {status}", updateOrder.Id, orderToUpdate.OrderStatus.ToString());
@@ -529,7 +557,16 @@ public class OrderService : IOrderService
                 return GenericResponse<string>.Failure(null, $"Order with specified Id: {updateOrderStatus.Id} does not exist", System.Net.HttpStatusCode.NotFound);
             }
 
-            if(orderToUpdate.OrderStatus == Entities.StaticValues.OrderStatus.Delivered || orderToUpdate.OrderStatus == Entities.StaticValues.OrderStatus.Cancelled)
+            var isValidRequirement = await _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, orderToUpdate, Operations.Update);
+
+            if (!isValidRequirement.Succeeded)
+            {
+                Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Warning("User - {0} is not auhtorized to perform operation on the resource. Allowed User - {1}",
+                                                                    _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), orderToUpdate.UserId);
+                return GenericResponse<string>.Failure("Operation Failed.", "Operation denied.", System.Net.HttpStatusCode.Forbidden);
+            }
+
+            if (orderToUpdate.OrderStatus == Entities.StaticValues.OrderStatus.Delivered || orderToUpdate.OrderStatus == Entities.StaticValues.OrderStatus.Cancelled)
             {
                 Log.ForContext(_methodName, "UpdateOrderStatusAsync").ForContext(_className, "OrderService").Information("Order is already {orderToUpdateStatus}", orderToUpdate.OrderStatus.ToString());
                 return GenericResponse<string>.Failure("Operation Failed.", $"Order is already: {orderToUpdate.OrderStatus.ToString()}", System.Net.HttpStatusCode.Conflict);
@@ -585,9 +622,17 @@ public class OrderService : IOrderService
                 return GenericResponse<OrderDetailsDto>.Success(orderDetailFromCache, "Order Details Fetched Successfully.", System.Net.HttpStatusCode.OK);
             }
 
-            OrderDetailsDto? orderDetails = await _repositoryContext.Orders
-                                        .AsNoTracking()
-                                        .Where(x => x.Id == OrderId)
+            var userId = _httpContextAccessor.HttpContext?.User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value ?? "0";
+            bool isAdmin = _httpContextAccessor.HttpContext.User.IsInRole("ADMIN") || _httpContextAccessor.HttpContext.User.IsInRole("SYSTEM");
+
+            var operationQuery = _repositoryContext.Orders.AsNoTracking().Where(x => x.Id == OrderId);
+
+            if (!isAdmin)
+            {
+                operationQuery = operationQuery.Where(x => x.UserId == int.Parse(userId));
+            }
+
+            OrderDetailsDto? orderDetails = await operationQuery
                                         .Select(x => new OrderDetailsDto()
                                         {
                                             Id = x.Id,
@@ -669,25 +714,6 @@ public class OrderService : IOrderService
     //     }
     // }
 
-
-    private string GetOrderTrackingId()
-    {
-        string dateToString = DateTime.Now.ToString("yyyyddMMHHmmssfff");
-        return $"O-{dateToString}-{Random.Shared.Next(1000, 9999)}";
-    }
-
-    private string GetOrderVerificationToken()
-    {
-        byte[] randBytes = new byte[64];
-
-        using(var randGen = RandomNumberGenerator.Create())
-        {
-            randGen.GetBytes(randBytes);
-        }
-
-        return Convert.ToHexString(randBytes);
-    }
-
     public async Task<GenericResponse<IEnumerable<OrderDto>>> GetUserOrdersAsync(int UserId)
     {
 
@@ -718,5 +744,24 @@ public class OrderService : IOrderService
             return GenericResponse<IEnumerable<OrderDto>>.Failure(null, "An Error Occurred Fetching User Orders.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
 
+    }
+
+
+    private string GetOrderTrackingId()
+    {
+        string dateToString = DateTime.Now.ToString("yyyyddMMHHmmssfff");
+        return $"O-{dateToString}-{Random.Shared.Next(1000, 9999)}";
+    }
+
+    private string GetOrderVerificationToken()
+    {
+        byte[] randBytes = new byte[64];
+
+        using (var randGen = RandomNumberGenerator.Create())
+        {
+            randGen.GetBytes(randBytes);
+        }
+
+        return Convert.ToHexString(randBytes);
     }
 }

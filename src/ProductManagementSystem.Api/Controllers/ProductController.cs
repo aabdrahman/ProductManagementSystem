@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Product;
 using Serilog;
@@ -8,6 +9,7 @@ namespace ProductManagementSystem.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = "ADMIN,SYSTEM")]
 public class ProductController : ControllerBase
 {
     private string _methodName = "MethodName";
@@ -20,6 +22,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll()
     {
         try
