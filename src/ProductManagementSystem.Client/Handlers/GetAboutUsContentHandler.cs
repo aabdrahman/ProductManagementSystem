@@ -13,7 +13,7 @@ public class GetAboutUsContentHandler
         _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
 
-    public async Task<(bool isSuccessful, IEnumerable<AboutUsDto> contentDetails)> Handle()
+    public async Task<(string responseMessage, IEnumerable<AboutUsDto> contentDetails)> Handle()
     {
         try
         {
@@ -24,12 +24,12 @@ public class GetAboutUsContentHandler
             var responsebody = JsonSerializer.Deserialize<GenericResponse<IEnumerable<AboutUsDto>>>(responseContent, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true })
                                     ?? throw new ArgumentNullException("Respons ecould not be deserialized.");
 
-            return (responsebody.IsSuccessStatus, responsebody?.Data ?? []);
+            return (responsebody.ResponseMessage, responsebody?.Data ?? []);
 
         }
         catch (Exception ex)
         {
-            return (false, []);
+            return (ex.Message, []);
         }
     }
 }

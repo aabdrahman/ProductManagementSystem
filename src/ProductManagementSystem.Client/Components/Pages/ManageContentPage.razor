@@ -26,7 +26,12 @@ else
 
         @if(_fetchedWhyChooseUsDetails is not null)
         {
-            <WhyChooseUsContentDetails WhyChooseUsDetails="_fetchedWhyChooseUsDetails" HandleAddDetails="OnAddNewWhyChooseUs" HandleEditDetails="OnEditWhyChoosUsContent" HandleViewDetails="OnViewWhyChooseUsContent" HandleDeleteDetails="OnDeleteWhyChooseUsContent" />
+            <WhyChooseUsContentDetails WhyChooseUsDetails="_fetchedWhyChooseUsDetails" ResponseMessage="@_getWhyChooseUsResponse" HandleAddDetails="OnAddNewWhyChooseUs" HandleEditDetails="OnEditWhyChoosUsContent" HandleViewDetails="OnViewWhyChooseUsContent" HandleDeleteDetails="OnDeleteWhyChooseUsContent" />
+        }
+
+        @if(_fetchedAboutUsDetails is not null)
+        {
+            <AboutUsContentListView AboutUsItemsDetails="_fetchedAboutUsDetails" ResponseMessage="@_getAboutUsResponse" HandleAddDetails="OnAddNewAboutUs" HandleViewDetails="OnViewAboutUsContent"  HandleDeleteDetails="OnDeleteAboutUsContent" HandleEditDetails="OnEditAbutUsContent"/>
         }
 
     </section>
@@ -49,6 +54,22 @@ else
             {
                 <DeleteWhyChooseUsContent WhyChooseUsToDelete="@_selectedWhyChooseUs" HandleClose="HandleClose" />
             }
+            else if(_operationToPerform == OperationType.AddAboutUs)
+            {
+                <AddAboutUs HandleClose="HandleAboutUsClose" />
+            }
+            else if(_operationToPerform == OperationType.EditAboutUs)
+            {
+                <EditAboutUs AboutUsContentToEdit="@_selectedAboutUsContent" HandleClose="HandleAboutUsClose" />
+            }
+            else if(_operationToPerform == OperationType.ViewAboutUsDetails)
+            {
+                <AboutUsContent AboutUsDetail="@_selectedAboutUsContent" />
+            }
+            else if(_operationToPerform == OperationType.DeleteAboutUsDetails)
+            {
+                <DeleteAboutUsContent AboutUsToDelete="@_selectedAboutUsContent" HandleClose="HandleAboutUsClose"  />
+            }
         </Body>
     </Popup>
 }
@@ -56,35 +77,46 @@ else
 
 @code {
 
-    private bool _isRendering = true;
+    private bool _isRendering;
     private IEnumerable<WhyChooseUsDto> _fetchedWhyChooseUsDetails;
-    private string _getWHyChooseUsResponse;
+    private IEnumerable<AboutUsDto> _fetchedAboutUsDetails;
+    private string _getWhyChooseUsResponse;
+    private string _getAboutUsResponse;
 
     private OperationType _operationToPerform;
     private string _title;
     private bool _showCloseButton = false;
     private Popup popup;
     private WhyChooseUsDto _selectedWhyChooseUs;
+    private AboutUsDto _selectedAboutUsContent;
 
     protected override async Task OnInitializedAsync()
     {
         _isRendering = true;
 
         await Task.Delay(250);
-    }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
         var result = getWhyChooseUsHandler.Handle();
+        var aboutUsContentResult = getAboutUsContentHandler.Handle();
 
-        await Task.WhenAll(result);
+        await Task.WhenAll(result, aboutUsContentResult);
 
         var getWhyChooseUsResult = result.Result;
+        var getAboutUsContentResult = aboutUsContentResult.Result;
+
         _fetchedWhyChooseUsDetails = getWhyChooseUsResult.contentItems;
-        _getWHyChooseUsResponse = getWhyChooseUsResult.responseMessage;
+        _getWhyChooseUsResponse = getWhyChooseUsResult.responseMessage;
+
+        _fetchedAboutUsDetails = getAboutUsContentResult.contentDetails;
+        _getAboutUsResponse = getAboutUsContentResult.responseMessage;
 
         _isRendering = false;
     }
+
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+        
+    // }
 }
 
 
@@ -128,9 +160,30 @@ else
         popup.OpenModal();
     }
 
-    private async Task HandleClose(bool refreshDecision)
+    private async Task HandleClose(bool refreshDecision = false)
     {
 
+        _title = "";
+        _operationToPerform = default;
+
+        if (refreshDecision)
+        {
+            _isRendering = true;
+
+            var result = await getWhyChooseUsHandler.Handle();
+            _fetchedWhyChooseUsDetails = result.contentItems;
+            _getAboutUsResponse = result.responseMessage;
+
+            _isRendering = false;
+        }
+
+        popup.CloseModal();
+
+        // StateHasChanged();
+    }
+
+    private async Task HandleAboutUsClose(bool refreshDecision = false)
+    {
         _title = "";
         _operationToPerform = default;
 
@@ -139,16 +192,54 @@ else
         {
             _isRendering = true;
 
-            var result = await getWhyChooseUsHandler.Handle();
-            _fetchedWhyChooseUsDetails = result.contentItems;
-            _getWHyChooseUsResponse = result.responseMessage;
+            var result = await getAboutUsContentHandler.Handle();
+            _fetchedAboutUsDetails = result.contentDetails.ToList();
+            _getWhyChooseUsResponse = result.responseMessage;
 
             _isRendering = false;
         }
 
         popup.CloseModal();
 
-        StateHasChanged();
+        // StateHasChanged();
+    }
+
+    private void OnAddNewAboutUs()
+    {
+        _title = "Add New Aboute Us";
+        _operationToPerform = OperationType.AddAboutUs;
+
+        popup.OpenModal();
+    }
+
+    private void OnEditAbutUsContent(AboutUsDto selectedAboutUsContent)
+    {
+        _selectedAboutUsContent = selectedAboutUsContent;
+        _title = "Edit About Us Content Details";
+        _showCloseButton = false;
+        _operationToPerform = OperationType.EditAboutUs;
+
+        popup.OpenModal();
+    }
+
+    private void OnViewAboutUsContent(AboutUsDto selectedAboutUsContent)
+    {
+        _selectedAboutUsContent = selectedAboutUsContent;
+        _title = "Content Details";
+        _showCloseButton = true;
+        _operationToPerform = OperationType.ViewAboutUsDetails;
+
+        popup.OpenModal();
+    }
+
+    private void OnDeleteAboutUsContent(AboutUsDto selectedAboutUsContent)
+    {
+        _selectedAboutUsContent = selectedAboutUsContent;
+        _title = "Delete Content";
+        _showCloseButton = false;
+        _operationToPerform = OperationType.DeleteAboutUsDetails;
+
+        popup.OpenModal();
     }
 
     enum OperationType
@@ -157,6 +248,10 @@ else
         AddWhyChooseUs,
         EditWhyChooseUs,
         ViewWhyChooseUsDetails,
-        DeleteWhyChooseUsDetails
+        DeleteWhyChooseUsDetails,
+        AddAboutUs,
+        EditAboutUs,
+        ViewAboutUsDetails,
+        DeleteAboutUsDetails
     }
 }

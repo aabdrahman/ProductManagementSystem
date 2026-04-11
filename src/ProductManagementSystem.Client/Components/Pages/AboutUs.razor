@@ -1,57 +1,98 @@
 ﻿
 
-<section id="about-us" class="about-us">
+@if (!_isLoading)
+{
+    <section id="about-us" class="about-us">
 
-    <div class="about-us-header">
-        <h2>What We Deliver</h2>
-        <p>
-            Practical, scalable, and innovative solutions designed to simplify complexity and drive sustainable growth.
-        </p>
-    </div>
-
-    <div class="about-us-items">
-
-        <div class="about-us-item">
-            <h3 class="about-us-item-title">
-                Seamless Digital Experiences
-            </h3>
-            <p class="about-us-item-desc">
-                We transform complex processes into smooth, intuitive workflows that improve productivity and efficiency.
+        <div class="about-us-header">
+            <h2>What We Deliver</h2>
+            <p>
+                Practical, scalable, and innovative solutions designed to simplify complexity and drive sustainable growth.
             </p>
         </div>
 
-        <div class="about-us-item">
-            <h3 class="about-us-item-title">
-                Smart & Scalable Solutions
-            </h3>
-            <p class="about-us-item-desc">
-                Our systems are built to grow with your business while maintaining performance and reliability.
-            </p>
-        </div>
+        @if(_contentDetails is null || !_contentDetails.Any())
+        {
+            <div class="about-us-items">
 
-        <div class="about-us-item">
-            <h3 class="about-us-item-title">
-                Customer-Driven Innovation
-            </h3>
-            <p class="about-us-item-desc">
-                Every solution we create is centered around real user needs and measurable business impact.
-            </p>
-        </div>
+                <div class="about-us-item">
+                    <h3 class="about-us-item-title">
+                        Seamless Digital Experiences
+                    </h3>
+                    <p class="about-us-item-desc">
+                        We transform complex processes into smooth, intuitive workflows that improve productivity and efficiency.
+                    </p>
+                </div>
 
-        <div class="about-us-item">
-            <h3 class="about-us-item-title">
-                Secure & Reliable Infrastructure
-            </h3>
-            <p class="about-us-item-desc">
-                We prioritize security, stability, and long-term sustainability at every layer of implementation.
-            </p>
-        </div>
+                <div class="about-us-item">
+                    <h3 class="about-us-item-title">
+                        Smart & Scalable Solutions
+                    </h3>
+                    <p class="about-us-item-desc">
+                        Our systems are built to grow with your business while maintaining performance and reliability.
+                    </p>
+                </div>
 
-    </div>
+                <div class="about-us-item">
+                    <h3 class="about-us-item-title">
+                        Customer-Driven Innovation
+                    </h3>
+                    <p class="about-us-item-desc">
+                        Every solution we create is centered around real user needs and measurable business impact.
+                    </p>
+                </div>
 
-</section>
+                <div class="about-us-item">
+                    <h3 class="about-us-item-title">
+                        Secure & Reliable Infrastructure
+                    </h3>
+                    <p class="about-us-item-desc">
+                        We prioritize security, stability, and long-term sustainability at every layer of implementation.
+                    </p>
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <div class="about-us-items"> 
+                @foreach (var item in _contentDetails)
+                {
+                <div class="about-us-item">
+                    <h3 class="about-us-item-title">
+                        @item.title
+                    </h3>
+                    <p class="about-us-item-desc">
+                        @item.contentDetails
+                    </p>
+                </div>
+                }
+            </div>
+
+            
+        }
+
+        
+
+    </section>
+}
 
 
 @code {
 
+    private bool _isLoading = true;
+    private List<AboutUsDto> _contentDetails;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+
+        var result = await getAboutUsContentHandler.Handle();
+
+        _contentDetails = result.contentDetails.ToList();
+
+        await Task.Delay(250);
+
+        _isLoading = false;
+    }
 }

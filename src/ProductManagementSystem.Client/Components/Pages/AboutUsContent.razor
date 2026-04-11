@@ -1,0 +1,42 @@
+﻿
+@if (_aboutUsDetails is not null)
+{
+    <section class="site-content-page ">
+
+        <div class="form-header">
+            <h2>Content Details</h2>
+            <p>
+                Content Details for what users see in the why choose us section in homepage.
+            </p>
+        </div>
+
+        <div class="content-details">
+            <div class="content-details-item">
+                <h4>Title</h4>
+                <p>
+                    @_aboutUsDetails.title
+                </p>
+            </div>
+            <div class="content-details-item">
+                <h4>Content Details</h4>
+                <p>
+                    @_aboutUsDetails.contentDetails
+                </p>
+            </div>
+        </div>
+
+    </section>
+}
+
+@code {
+    private AboutUsDto _aboutUsDetails;
+
+    [Parameter, EditorRequired]
+    public AboutUsDto AboutUsDetail { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(250);
+        _aboutUsDetails = AboutUsDetail;
+    }
+}

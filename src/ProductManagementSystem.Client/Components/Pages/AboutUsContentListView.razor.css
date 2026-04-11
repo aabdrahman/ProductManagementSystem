@@ -1,0 +1,85 @@
+﻿
+
+
+.about-us-content-management {
+    margin-top: 1.5rem;
+}
+
+
+.management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+    .management-header p {
+        font-size: 1.25rem;
+        color: var(--FONT-COLOR-SECONDARY);
+        font-family: var(--FONT-STYLE-BODY);
+        font-weight: 400;
+        line-height: 1.8;
+    }
+
+.management-table-wrapper {
+    overflow-x: auto;
+}
+
+.management-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--BG-COLOR-TERTIARY);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .management-table th,
+    .management-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+        font-family: var(--FONT-STYLE-BODY);
+        font-weight: 500;
+    }
+
+    .management-table th {
+        background: #11912d;
+        font-weight: 600;
+        font-family: var(--FONT-STYLE-BODY-TITLE);
+        padding: 18px;
+    }
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+    .actions .btn {
+        padding: 0.4rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        border: none;
+        font-family: var(--FONT-STYLE-BODY);
+        color: var(--FONT-COLOR-SECONDARY);
+        font-weight: 800;
+    }
+
+.view {
+    background: #e0e7ff;
+    /*    color: #3730a3;*/
+}
+
+.complete {
+    background: #dcfce7;
+    /*    color: #166534;*/
+}
+
+.cancel {
+    background: #fee2e2;
+    /*    color: #991b1b;*/
+}
+
+.delete {
+    background: #fee2e2;
+}

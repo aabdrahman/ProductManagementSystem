@@ -1,0 +1,62 @@
+﻿
+@inject DeleteWhyChooseUsContentHandler deleteWhyChooseUsContentHandler
+
+@if (_aboutUsContentToDelete is not null)
+{
+    <section class="site-content-page">
+
+        @if (_isDeleting)
+        {
+            <Spinner Description="Deleting Content" />
+        }
+
+        <AboutUsContent AboutUsDetail="@_aboutUsContentToDelete" />
+
+        @if(_responseMessage is not null)
+        {
+            <Status  SuccessStatus="@_isSuccessful" StatusMessage="@_responseMessage" />
+        }
+
+        <div class="site-content-delete-actions">
+            <button class="btn danger" @onclick="ConfirmDelete" disabled="@(_isDeleting || _isSuccessful)">
+                @(!_isDeleting ? "Yes, Delete Content" : "Deleting Content...")
+            </button>
+
+            <button class="btn cancel" disabled="@_isDeleting" @onclick="(async () => await HandleClose.InvokeAsync(_isSuccessful))">Cancel</button>
+        </div>
+
+    </section>
+}
+
+
+
+@code {
+
+    private AboutUsDto _aboutUsContentToDelete;
+
+    private bool _isDeleting;
+    private bool _isSuccessful;
+    private string _responseMessage;
+
+
+    [Parameter, EditorRequired]
+    public AboutUsDto AboutUsToDelete { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _aboutUsContentToDelete = AboutUsToDelete;
+    }
+    private async Task ConfirmDelete()
+    {
+        _isDeleting = true;
+
+        var result = await deleteWhyChooseUsContentHandler.Handle(_aboutUsContentToDelete.Id);
+
+        _isSuccessful = result.isSuccessful; _responseMessage = result.responseMessage;
+
+        _isDeleting = false;
+    }
+}
