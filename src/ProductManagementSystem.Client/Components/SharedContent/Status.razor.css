@@ -10,9 +10,10 @@
     font-style: italic;
     color: var(--FONT-COLOR-BASIC);
     font-family: var(--FONT-STYLE-BODY);
-    width: 100%;
+    width:inherit;
     text-align: center;
-    overflow-wrap: break-word;
+    text-wrap: wrap;
+    overflow-wrap:anywhere;
     animation: ShowDetails 0.5s ease-in-out;
 }
 

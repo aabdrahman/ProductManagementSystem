@@ -29,7 +29,9 @@
 @using ProductManagementSystem.Shared.DataTransferObjects.Role
 @using ProductManagementSystem.Shared.DataTransferObjects.Authentication
 @using ProductManagementSystem.Shared.DataTransferObjects.ContentDetails
-ProductManagementSystem.Client.Components.Layout
+@using ProductManagementSystem.Shared.DataTransferObjects.ImageOperation
+
+@using ProductManagementSystem.Client.Components.Layout
 
 @inject NavigationManager navigationManager
 @inject ILocalStorageUtility localStorageUtility
@@ -39,3 +41,4 @@ ProductManagementSystem.Client.Components.Layout
 
 @inject GetWhyChooseUsHandler getWhyChooseUsHandler
 @inject GetAboutUsContentHandler getAboutUsContentHandler
+@inject IWebHostEnvironment webHostEnvironment

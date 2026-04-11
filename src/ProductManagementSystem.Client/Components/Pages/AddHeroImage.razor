@@ -1,0 +1,97 @@
+﻿
+@inject AddHeroImageHandler addHeroImageHandler
+
+<section class="add-image-page">
+
+    @if (_processingImage)
+    {
+         <Spinner Description="Processing Image Data" />
+    }
+
+    @if (_isProcessing)
+    {
+        <Spinner Description="Saving Image Data" />
+    }
+
+    <div class="add-image-card">
+
+        <h1>Add New Image</h1>
+        <p>Upload and manage your hero images</p>
+
+        @if(_responseMessage is not null)
+        {
+            <Status SuccessStatus="@_isSuccessful" StatusMessage="@_responseMessage" />
+        }
+
+        <InputFile OnChange="HandleFileSelected" size="1048576" accept=",.jpeg,.jpg,.png" />
+
+        @if (!string.IsNullOrEmpty(_previewUrl))
+        {
+            <div class="preview-box">
+                <img src="@_previewUrl" />
+            </div>
+        }
+
+        <div class="form-group">
+            <label>Image Title</label>
+            <input @bind="@_title" placeholder="Enter image title..." />
+        </div>
+
+        <div class="form-actions">
+            <button class="btn cancel" @onclick="Cancel">Cancel</button>
+            <button class="btn save" @onclick="SaveFile" disabled="@(!_canSave || _isSuccessful)">
+                Save Image
+            </button>
+        </div>
+
+    </div>
+
+</section>
+
+@code {
+
+    private IBrowserFile _uploadedFile;
+    private string _previewUrl;
+    private bool _canSave => _uploadedFile is not null;
+    private string _title;
+    private bool _isSuccessful = false;
+    private bool _isProcessing;
+    private string _responseMessage;
+
+    private bool _processingImage = false;
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs args)
+    {
+        _processingImage = true;
+
+        _uploadedFile = args.File;
+        var buffer = new byte[_uploadedFile.Size];
+        _title = _uploadedFile.Name;
+
+        await _uploadedFile.OpenReadStream(1024*1024*5).ReadAsync(buffer);
+
+        _previewUrl = $"data:{_uploadedFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
+
+        _processingImage = false;
+    }
+
+    private async Task SaveFile()
+    {
+        _isProcessing = true;
+
+        await Task.Delay(250);
+
+        var result = await addHeroImageHandler.Handle(_uploadedFile, _title);
+        _isSuccessful = result.isSuccessful;_responseMessage = result.responseMessage;
+
+        _isProcessing = false;
+    }
+
+    private async Task Cancel()
+    {
+        await HandleClose.InvokeAsync(_isSuccessful);
+    }
+}

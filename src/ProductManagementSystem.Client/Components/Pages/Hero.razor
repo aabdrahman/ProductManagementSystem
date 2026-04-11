@@ -1,5 +1,5 @@
 ﻿
-@inject IWebHostEnvironment webHostEnvironment
+
 
 @if (!_isLoading)
 {
@@ -67,7 +67,9 @@
 
         var filePath = Path.Combine(files, "Images");
 
-        var images = Directory.GetFiles(filePath, "*.jpg");
+        string[] allowedExtensions = { ".png", ".jpg", ".jpeg" };
+
+        var images = Directory.EnumerateFiles(filePath).Where(x => allowedExtensions.Contains(Path.GetExtension(x))).ToArray();
 
         // Console.WriteLine($"Found {images.Length} images in {filePath}. Files - {string.Join(" , ", images)}");
 

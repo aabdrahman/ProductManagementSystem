@@ -1,0 +1,167 @@
+﻿@page "/hero-content"
+
+@inject RemoveImageHandler removeImageHandler
+
+<PageTitle>Hero Content Management Page</PageTitle>
+
+@if (_isLoading)
+{
+    <Spinner Description="Fetching Content Images" />
+}
+
+@if (_isProcessingRemoval)
+{
+    <Spinner Description="Processing Image Removal" />
+}
+
+<section class="site-content-page">
+
+    <div class="site-content-form-header">
+        <h1>Images on hero section</h1>
+        <p>
+            Manage Images displayed on hero section for users
+        </p>
+    </div>
+
+    <div class="actions-bar">
+        <button class="btn apply"
+                disabled="@(!_removedImages.Any())"
+                @onclick="ApplyChanges">
+            Apply Changes (@_removedImages.Count)
+        </button>
+    </div>
+
+    <div class="content-management-wrapper">
+
+        <div class="add-image-card" @onclick="AddNewImage">
+            <div class="add-content">
+                <span class="plus">+</span>
+                <p>Add Image</p>
+            </div>
+        </div>
+
+        @if(_images is not null)
+        {
+            foreach (var item in _images)
+            {
+                <HeroImageItem @key="item.ToLower()" ImageItem="@(new ImageDetailItem(Path.GetFileName(item), item))" HandleDelete="RemoveImage" HandleUndoDelete="UndoRemoveImage" />
+            }
+        }
+
+
+    </div>
+
+    <Popup @ref="popup" Title="Add Hero Image" ShowCloseButton="@false" ShowFooter="@false">
+
+        <Body>
+
+            @if (_showPopup)
+            {
+                <AddHeroImage HandleClose="OnHandleClose" />
+            }
+
+        </Body>
+
+    </Popup>
+
+</section>
+
+
+@code {
+
+    private string[] _images;
+    private int _currentSlide = 0;
+    private bool _isLoading = true;
+    private int _loadTime = 5000;
+    private List<string> _removedImages = [];
+    private bool _showPopup = false;
+
+    private bool _isProcessingRemoval = false;
+
+    private Popup popup;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+
+        var files = webHostEnvironment.WebRootPath;
+
+        var filePath = Path.Combine(files, "Images");
+
+        string[] allowedExtensions = { ".png", ".jpg", ".jpeg" };
+
+        var images = Directory.EnumerateFiles(filePath).Where(x => allowedExtensions.Contains(Path.GetExtension(x))).ToArray();
+
+        _images = images.Select(img => Path.Combine("Images", Path.GetFileName(img))).ToArray();
+
+        await base.OnInitializedAsync();
+
+        _isLoading = false;
+    }
+
+    private void RemoveImage(string fileName)
+    {
+        _removedImages.Add(fileName);
+    }
+
+    private void UndoRemoveImage(string fileName)
+    {
+        _removedImages.Remove(fileName);
+    }
+
+    private void AddNewImage()
+    {
+        _showPopup = true;
+        popup.OpenModal();
+    }
+
+    private async Task ApplyChanges()
+    {
+
+        _isProcessingRemoval = true;
+        _images = [];
+
+        var result = await removeImageHandler.Handle(_removedImages);
+
+        var files = webHostEnvironment.WebRootPath;
+
+        var filePath = Path.Combine(files, "Images");
+
+        string[] allowedExtensions = { ".png", ".jpg", ".jpeg" };
+
+        var images = Directory.EnumerateFiles(filePath).Where(x => allowedExtensions.Contains(Path.GetExtension(x))).ToArray();
+
+        _images = images.Select(img => Path.Combine("Images", Path.GetFileName(img))).ToArray();
+
+        _isProcessingRemoval = false; _removedImages = [];
+
+        await Task.Delay(100);
+
+        StateHasChanged();
+    }
+
+    private async Task OnHandleClose(bool refreshDecision)
+    {
+        _showPopup = false;
+
+        if (refreshDecision)
+        {
+            var files = webHostEnvironment.WebRootPath;
+
+            var filePath = Path.Combine(files, "Images");
+
+            _images = [];
+
+            string[] allowedExtensions = { ".png", ".jpg", ".jpeg" };
+
+            var images = Directory.EnumerateFiles(filePath).Where(x => allowedExtensions.Contains(Path.GetExtension(x))).ToArray();
+
+
+            _images = images.Select(img => Path.Combine("Images", Path.GetFileName(img))).ToArray();
+
+            StateHasChanged();
+        }
+
+        popup.CloseModal();
+    }
+}

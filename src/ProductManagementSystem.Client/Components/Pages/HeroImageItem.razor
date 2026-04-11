@@ -1,0 +1,52 @@
+﻿
+
+@if(_imageDetailItem is not null)
+{
+    <div class="hero-image-item ">
+        <h4>@_imageDetailItem.fileName</h4>
+        <figure>
+            <img src="@_imageDetailItem.filePath" class="@(_isDeleted ? "image-removed" : "")" />
+            @if (_isDeleted)
+            {
+                <button class="btn restore" @onclick="RestoreImage">Restore</button>
+            }
+            else
+            {
+                <button class="btn delete" @onclick="MarkAsDeleted">Remove</button>
+            }
+
+            <figcaption>@_imageDetailItem.fileName</figcaption>
+        </figure>
+    </div>
+}
+
+
+@code {
+    private ImageDetailItem _imageDetailItem;
+    private bool _isDeleted = false;
+
+    [Parameter, EditorRequired]
+    public ImageDetailItem ImageItem { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<string> HandleDelete { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<string> HandleUndoDelete { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _imageDetailItem = ImageItem;
+    }
+
+    private async Task MarkAsDeleted()
+    {
+        _isDeleted = true;
+        await HandleDelete.InvokeAsync(_imageDetailItem.fileName);
+    }
+    private async Task RestoreImage()
+    {
+        _isDeleted = false;
+        await HandleUndoDelete.InvokeAsync(_imageDetailItem.fileName);
+    }
+}

@@ -1,0 +1,138 @@
+﻿
+
+/* ============================= */
+/* PAGE LAYOUT */
+/* ============================= */
+
+.site-content-page {
+    padding: 2rem;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+
+/* ============================= */
+/* HEADER */
+/* ============================= */
+
+.site-content-form-header {
+    margin-bottom: 2rem;
+}
+
+.site-content-form-header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.site-content-form-header p {
+    font-size: 0.95rem;
+    color: var(--FONT-COLOR-SECONDARY);
+    font-family: var(--FONT-STYLE-BODY);
+    font-weight: 600;
+}
+
+
+/* ============================= */
+/* GRID WRAPPER (PARENT) */
+/* ============================= */
+
+.content-management-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ============================= */
+/* ADD IMAGE CARD */
+/* ============================= */
+
+.add-image-card {
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    height: 100%;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fafafa;
+}
+
+.add-image-card:hover {
+    border-color: #000;
+    background: #f5f5f5;
+    transform: translateY(-4px);
+}
+
+.add-content {
+    text-align: center;
+    color: #777;
+}
+
+.add-content .plus {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.add-content p {
+    font-size: 0.9rem;
+}
+
+.add-content .plus {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem;
+}
+
+/* ============================= */
+/* ACTION BAR */
+/* ============================= */
+
+.actions-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+
+/* ============================= */
+/* APPLY BUTTON */
+/* ============================= */
+
+.btn.apply {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    background: black;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn.apply:hover {
+    background: #333;
+}
+
+.btn.apply:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .site-content-page {
+        padding: 1rem;
+    }
+
+    .site-content-form-header h1 {
+        font-size: 1.4rem;
+    }
+}
