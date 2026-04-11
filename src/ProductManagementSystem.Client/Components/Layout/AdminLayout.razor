@@ -156,6 +156,14 @@
         _avatar = _userName[0].ToString();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        StateHasChanged();
+    }
+
     void ToggleSidebar()
     {
         isSidebarCollapsed = !isSidebarCollapsed;
