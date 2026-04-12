@@ -29,7 +29,7 @@ else if(!_isLoading)
 
                     <InputSelect @bind-Value="_updateOrderStatusModel.UpdatedStatus">
                         <option value=""></option>
-                        @foreach (var status in Enum.GetValues<OrderStatus>().Where(x => !x.ToString().Equals("Cancelled", StringComparison.CurrentCultureIgnoreCase)))
+                        @foreach (var status in Enum.GetValues<OrderStatus>().Where(x => !x.ToString().Equals("Cancelled", StringComparison.OrdinalIgnoreCase) && !x.ToString().Equals("Confirmed", StringComparison.OrdinalIgnoreCase)))
                         {
                             if (((int)status) > _currentStatus)
                             {

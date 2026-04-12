@@ -1,21 +1,28 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects.Response;
+﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
+using ProductManagementSystem.Client.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class DeleteProductHandler
+public class DeleteProductHandler : HttpClientProvider
 {
-    private readonly HttpClient _httpClient;
+    //private readonly HttpClient _httpClient;
 
-    public DeleteProductHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //public DeleteProductHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //{
+    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
+    //}
+
+    public DeleteProductHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
     {
-        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
 
     public async Task<(bool isSuccessful, string responseMessage)> Handle(int Id)
     {
         try
         {
+            var _httpClient = await GetSecuredHttpClient();
             var httpResponse = await _httpClient.DeleteAsync($"api/product/{Id}?isSoftDelete=false");
 
             string responseContent = await httpResponse.Content.ReadAsStringAsync();

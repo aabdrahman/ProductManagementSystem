@@ -1,22 +1,29 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects.Product;
+﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
+using ProductManagementSystem.Client.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.Product;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class RestockProductHandler
+public class RestockProductHandler : HttpClientProvider
 {
-    private readonly HttpClient _httpClient;
+    //private readonly HttpClient _httpClient;
 
-    public RestockProductHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //public RestockProductHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //{
+    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
+    //}
+
+    public RestockProductHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
     {
-        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
 
     public async Task<(bool isSuccessful, string responseMessage)> Handle(UpdateProductStockDto updateProductStock)
     {
         try
         {
+            HttpClient _httpClient = await GetSecuredHttpClient();
             HttpResponseMessage httpResponse = await _httpClient.PatchAsJsonAsync("api/Product/update-stock", updateProductStock);
 
             string responseContent = await httpResponse.Content.ReadAsStringAsync();

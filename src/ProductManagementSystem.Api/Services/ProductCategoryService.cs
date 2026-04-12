@@ -54,11 +54,11 @@ public sealed class ProductCategoryService : IProductCategoryService
 
             var cacheItemResult = await _redisService.SetItemAsync<ProductCategoryDto>(productCategoryToReturn, RedisCacheHelperClass.GetProductCategoryItemKey(productCategoryToReturn.Id), 18400);
 
-            //var cacheItem = new CacheItem(value: JsonSerializer.Serialize(productCategoryToReturn), type: typeof(ProductCategoryDto).ToString(), key: RedisCacheHelperClass.GetProductCategoryItemKey(productCategoryToReturn.Id), expiresAfter: 18400);
+            var removeCacheResult = await _redisService.RemoveItemAsync(RedisCacheHelperClass.ProductCategoryKey);
 
-            //await _channel.Writer.WriteAsync(new CacheItemProcessor<CacheItem>(cacheItem));
 
-            Log.ForContext(_className, "ProductCategoryService").ForContext(_methodName, "CreateAsync").Information("Product Category Successfully Created - {0}. Cache Item Result - {1}.", productCategoryToReturn, cacheItemResult);
+            Log.ForContext(_className, "ProductCategoryService").ForContext(_methodName, "CreateAsync").Information("Product Category Successfully Created - {0}. Cache Item Result - {1}. Remove Cached Items result - {2}", 
+                                                                        productCategoryToReturn, cacheItemResult, removeCacheResult);
 
             return GenericResponse<ProductCategoryDto>.Success(productCategoryToReturn, "Product Category Created.", System.Net.HttpStatusCode.OK);
 

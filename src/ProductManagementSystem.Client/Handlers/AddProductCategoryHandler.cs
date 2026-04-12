@@ -1,22 +1,29 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects.ProductCategory;
+﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
+using ProductManagementSystem.Client.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.ProductCategory;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class AddProductCategoryHandler
+public class AddProductCategoryHandler : HttpClientProvider
 {
-    private readonly HttpClient _httpClient;
-
-    public AddProductCategoryHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public AddProductCategoryHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
     {
-        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
+
+    //private readonly HttpClient _httpClient;
+
+    //public AddProductCategoryHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //{
+    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
+    //}
 
     public async Task<(bool isSuccessful, string responseMessage)> Handle(string productCategoryToCreate)
     {
         try
         {
+            var _httpClient = await GetSecuredHttpClient();
             var httpResponse = await _httpClient.PostAsJsonAsync("api/productcategory", productCategoryToCreate);
 
             string responseContent = await httpResponse.Content.ReadAsStringAsync();

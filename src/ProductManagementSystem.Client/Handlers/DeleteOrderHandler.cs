@@ -1,22 +1,28 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects.Response;
+﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
+using ProductManagementSystem.Client.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class DeleteOrderHandler
+public class DeleteOrderHandler : HttpClientProvider
 {
-    private readonly HttpClient _httpClient;
+    //private readonly HttpClient _httpClient;
 
-    public DeleteOrderHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //public DeleteOrderHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //{
+    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
+    //}
+
+    public DeleteOrderHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
     {
-        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
-
 
     public async Task<(bool isSuccessful, string responseMessage)> Handle(int Id)
     {
         try
         {
+            HttpClient _httpClient = await GetSecuredHttpClient();
             var httpResponse = await _httpClient.DeleteAsync($"api/order/{Id}");
 
             string responseContent = await httpResponse.Content.ReadAsStringAsync();

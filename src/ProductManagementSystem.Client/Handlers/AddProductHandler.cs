@@ -1,22 +1,29 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects.Product;
+﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
+using ProductManagementSystem.Client.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.Product;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class AddProductHandler
+public class AddProductHandler : HttpClientProvider
 {
-    private readonly HttpClient _httpClient;
-
-    public AddProductHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public AddProductHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
     {
-        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
+
+    //private readonly HttpClient _httpClient;
+
+    //public AddProductHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //{
+    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
+    //}
 
     public async Task<(bool isSuccessful, string responseMessage)> Handle(CreateProductDto createProduct)
     {
         try
         {
+            HttpClient _httpClient = await GetSecuredHttpClient();
             var httpResponse = await _httpClient.PostAsJsonAsync("api/product", createProduct);
 
             string responseContent = await httpResponse.Content.ReadAsStringAsync();

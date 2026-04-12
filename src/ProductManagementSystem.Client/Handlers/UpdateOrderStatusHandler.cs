@@ -1,21 +1,28 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects.Order;
+﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
+using ProductManagementSystem.Client.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.Order;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class UpdateOrderStatusHandler
+public class UpdateOrderStatusHandler : HttpClientProvider
 {
-    private readonly HttpClient _httpClient;
-    public UpdateOrderStatusHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //private readonly HttpClient _httpClient;
+    //public UpdateOrderStatusHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //{
+    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
+    //}
+
+    public UpdateOrderStatusHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
     {
-        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
 
     public async Task<(bool isSuccessful, string responseMessage)> Handle(UpdateOrderStatusDto updateOrderStatus)
     {
         try
         {
+            var _httpClient = await GetSecuredHttpClient();
             var httpResponse = await _httpClient.PutAsJsonAsync("api/order/update-status", updateOrderStatus);
 
             string responseContent = await httpResponse.Content.ReadAsStringAsync();

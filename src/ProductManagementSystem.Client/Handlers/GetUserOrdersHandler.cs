@@ -1,21 +1,28 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects.Order;
+﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
+using ProductManagementSystem.Client.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.Order;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class GetUserOrdersHandler
+public class GetUserOrdersHandler : HttpClientProvider
 {
-    private readonly HttpClient _httpClient;
-    public GetUserOrdersHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public GetUserOrdersHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
     {
-        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
+
+    //private readonly HttpClient _httpClient;
+    //public GetUserOrdersHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //{
+    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
+    //}
 
     public async Task<(IEnumerable<OrderDto> userOrders, string responseMessage)> Handle(int UserId)
     {
         try
         {
+            var _httpClient = await GetSecuredHttpClient();
             var httpResponse = await _httpClient.GetAsync($"api/Order/user-orders?UserId={UserId}");
 
             string httpResponseContent = await httpResponse.Content.ReadAsStringAsync();

@@ -1,22 +1,29 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects.Order;
+﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
+using ProductManagementSystem.Client.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.Order;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class AddOrderHandler
+public class AddOrderHandler : HttpClientProvider
 {
-    private readonly HttpClient _httpClient;
+    //private readonly HttpClient _httpClient;
 
-    public AddOrderHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //public AddOrderHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //{
+    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
+    //}
+
+    public AddOrderHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
     {
-        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet"));
     }
 
     public async Task<(bool isSuccessul, string responseMessage)> Handle(CreateOrderDto createOrder)
     {
         try
         {
+            var _httpClient = await GetSecuredHttpClient();
             var httpResponse = await _httpClient.PostAsJsonAsync("api/order", createOrder);
 
             string responseContent = await httpResponse.Content.ReadAsStringAsync();
