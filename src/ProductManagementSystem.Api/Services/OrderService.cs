@@ -5,12 +5,14 @@ using ProductManagementSystem.Api.Controllers.AuthRequirements;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api.Entities.Models;
+using ProductManagementSystem.Api.Entities.StaticValues;
 using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.MailOperation;
 using ProductManagementSystem.Shared.DataTransferObjects.Order;
 using ProductManagementSystem.Shared.DataTransferObjects.OrderLineItem;
+using ProductManagementSystem.Shared.DataTransferObjects.RequestParameters;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
 using System.Data.Common;
@@ -326,6 +328,63 @@ public class OrderService : IOrderService
             Log.ForContext(_methodName, "GetAllAsync").ForContext(_className, "OrderService").Error(ex, "Error occurred fetching orders.");
             return GenericResponse<IEnumerable<OrderDto>>.Failure(null, "Error occurred fetching orders.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
+    }
+
+    public async Task<GenericResponse<PaginatedList<OrderDto>>> GetAllOrdersAsync(OrderRequestParameters orderRequestParameters)
+    {
+        try
+        {
+            Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetAllOrdersAsync)).Information("Fetching Orders with parameters - {0}", orderRequestParameters);
+
+            var startDatetime = orderRequestParameters.StartDate.ToDateTime(new TimeOnly(0, 0, 0, 0));
+            var endDatetime = orderRequestParameters.EndDate.ToDateTime(new TimeOnly(23, 59, 59, 999));
+
+            var queryableItem = _repositoryContext.Orders.Where(x => x.CreatedAt >= startDatetime && x.CreatedAt <= endDatetime)
+                                                .Skip(orderRequestParameters.PageNumber - 1)
+                                                .Take(orderRequestParameters.PageSize);
+
+            if (!string.IsNullOrEmpty(orderRequestParameters.OrderStatus))
+            {
+                if(Enum.TryParse<Entities.StaticValues.OrderStatus>(orderRequestParameters.OrderStatus, ignoreCase: true, out var enumResult))
+                {
+                    queryableItem = queryableItem.Where(x => x.OrderStatus == enumResult);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(orderRequestParameters.TrackingNumber))
+            {
+                queryableItem = queryableItem.Where(x => EF.Functions.Like(x.OrderTrackingId, orderRequestParameters.TrackingNumber));
+            }
+
+            if (orderRequestParameters.ProductId.HasValue)
+            {
+                queryableItem = queryableItem.Where(x => x.OrderLineItems.Any(x => x.ProductId == orderRequestParameters.ProductId.Value));
+            }
+
+            int totalCount = await queryableItem.CountAsync();
+
+            List<OrderDto> items = await queryableItem.Select(x => new OrderDto()
+                                                {
+                                                    Id = x.Id,
+                                                    OrderStatus = x.OrderStatus.ToString(),
+                                                    CreatedDate = x.CreatedAt.ToLocalTime(),
+                                                    CreatedBy = x.CreatedBy,
+                                                    LineItemsCount = x.OrderLineItems.Count,
+                                                    OrderNumber = x.OrderTrackingId
+                                                }).ToListAsync();
+
+            Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetAllOrdersAsync)).Information("Result returns total Count: {0} - {1}", totalCount, items);
+
+            var pagedItem = PaginatedList<OrderDto>.ToPagedList(items, orderRequestParameters.PageSize, orderRequestParameters.PageNumber, totalCount);
+
+            return GenericResponse<PaginatedList<OrderDto>>.Success(pagedItem, "Orders Fetced Successfully.", System.Net.HttpStatusCode.OK);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetAllOrdersAsync)).Error(ex, "An error occurred fetching paginated ordrs.");
+            return GenericResponse<PaginatedList<OrderDto>>.Failure(null, "An error occurred fetching orders.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+        }
+        throw new NotImplementedException();
     }
 
     public async Task<GenericResponse<OrderDto>> GetByIdAsync(int Id)
@@ -677,42 +736,6 @@ public class OrderService : IOrderService
             return GenericResponse<OrderDetailsDto>.Failure(null, "An error occurred fetching order details.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
         }
     }
-
-    // public async Task<GenericResponse<IEnumerable<OrderDto>>> GetUserOrdersAsync(int UserId, string UserEmailAddress = null)
-    // {
-    //     try
-    //     {
-    //         Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetUserOrdersAsync)).Information("Get User Order. User ID - {0}, User Email Address - {1}", UserId, UserEmailAddress);
-
-    //         var spoolQuery = _repositoryContext.Orders.Where(x => x.UserId.HasValue && x.UserId.Value == UserId);
-
-    //         if(!string.IsNullOrEmpty(UserEmailAddress))
-    //         {
-    //             spoolQuery = spoolQuery.Where(x => x.CreatedBy ==  UserEmailAddress);
-    //         }
-
-    //         var userOrders = await spoolQuery.Select(x => new OrderDto()
-    //         {
-    //             Id = x.Id,
-    //             OrderStatus = x.OrderStatus.ToString(),
-    //             CreatedBy = x.CreatedBy,
-    //             CreatedDate = x.CreatedAt,
-    //             LineItemsCount = x.OrderLineItems.Count,
-    //             OrderNumber = x.OrderTrackingId
-    //         }).ToListAsync();
-
-    //         Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetUserOrdersAsync)).Information("Fetched User Orders - {0}", userOrders);
-
-    //         return userOrders.Any() ?
-    //                     GenericResponse<IEnumerable<OrderDto>>.Success(userOrders, "User Orders Fetched Successfully.", System.Net.HttpStatusCode.OK) :
-    //                     GenericResponse<IEnumerable<OrderDto>>.Failure(userOrders, "User does not have any order", System.Net.HttpStatusCode.NotFound);
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetUserOrdersAsync)).Error(ex, "An Error Occurred Fetching User Orders.");
-    //         return GenericResponse<IEnumerable<OrderDto>>.Failure(null, "An Error Occurred Fetching User Orders.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
-    //     }
-    // }
 
     public async Task<GenericResponse<IEnumerable<OrderDto>>> GetUserOrdersAsync(int UserId)
     {

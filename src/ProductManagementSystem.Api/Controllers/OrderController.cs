@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Order;
+using ProductManagementSystem.Shared.DataTransferObjects.RequestParameters;
 using Serilog;
 using System.Net;
 
@@ -35,6 +36,28 @@ public class OrderController : ControllerBase
         catch (Exception ex)
         {
             Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetAll").Error(ex, "Error Invoking Endpoint");
+            return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+        }
+    }
+
+    [HttpGet("get-orders")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetParameterizedOrders([FromQuery] OrderRequestParameters orderRequestParameters = default)
+    {
+        try
+        {
+            var result = await _orderService.GetAllOrdersAsync(orderRequestParameters);
+
+            if (result.IsSuccessStatus)
+            {
+                Response.Headers.Add("X-Pagination",System.Text.Json.JsonSerializer.Serialize(result.Data.metaData));
+            }
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, "OrderController").ForContext(_methodName, "GetParameterizedOrders").Error(ex, "Error Invoking Endpoint");
             return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
         }
     }

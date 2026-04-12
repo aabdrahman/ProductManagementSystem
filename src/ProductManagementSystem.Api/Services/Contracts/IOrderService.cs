@@ -1,4 +1,5 @@
 ﻿using ProductManagementSystem.Shared.DataTransferObjects.Order;
+using ProductManagementSystem.Shared.DataTransferObjects.RequestParameters;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 
 namespace ProductManagementSystem.Api.Services.Contracts;
@@ -16,4 +17,5 @@ public interface IOrderService
     Task<GenericResponse<OrderDto>> UpdateAsync(UpdateOrderDto updateOrder);
     Task<GenericResponse<OrderDetailsDto>> GetOrderDetailsAsync(int OrderId);
     Task<GenericResponse<IEnumerable<OrderDto>>> GetUserOrdersAsync(int UserId);
+    Task<GenericResponse<PaginatedList<OrderDto>>> GetAllOrdersAsync(OrderRequestParameters orderRequestParameters);
 }
