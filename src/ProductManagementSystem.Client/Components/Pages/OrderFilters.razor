@@ -1,0 +1,84 @@
+﻿<div class="order-filters">
+
+    <!-- DATE RANGE -->
+    <div class="filter-group">
+        <label>Start Date</label>
+        <InputDate @bind-Value="_request.StartDate" />
+    </div>
+
+    <div class="filter-group">
+        <label>End Date</label>
+        <InputDate @bind-Value="_request.EndDate" />
+    </div>
+
+    <!-- PRODUCT -->
+    <div class="filter-group">
+        <label>Product</label>
+        <select @bind="_request.ProductId">
+            <option value="">All</option>
+            @foreach (var product in Products)
+            {
+                <option value="@product.Id">@product.Name</option>
+            }
+        </select>
+    </div>
+
+    <!-- STATUS -->
+    <div class="filter-group">
+        <label>Status</label>
+        <select @bind="_request.OrderStatus">
+            <option value="" selected>All</option>
+            @foreach(var status in _orderStatus)
+            {
+                <option value="@status">@status.ToString()</option>
+            }
+           
+        </select>
+    </div>
+
+    <!-- TRACKING -->
+    <div class="filter-group wide">
+        <label>Tracking Number</label>
+        <input placeholder="Search tracking..."
+               @bind="_request.TrackingNumber" />
+    </div>
+
+    <!-- PAGE SIZE -->
+    <div class="filter-group">
+        <label>Page Size</label>
+        <select @bind="_request.PageSize">
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="filter-actions">
+        <button class="btn apply" @onclick="ApplyFilters">Apply</button>
+        <button class="btn reset" @onclick="ResetFilters">Reset</button>
+    </div>
+
+</div>
+
+@code {
+    [Parameter] public OrderRequestParameters _request { get; set; }
+    [Parameter] public EventCallback OnFilterChanged { get; set; }
+
+    [Parameter] public List<ProductDto> Products { get; set; } = new();
+
+    private string[] _orderStatus = Enum.GetValues<OrderStatus>().Select(x => x.ToString()).ToArray();
+
+    private async Task ApplyFilters()
+    {
+        _request.PageNumber = 1; // reset paging
+        await OnFilterChanged.InvokeAsync();
+    }
+
+    private async Task ResetFilters()
+    {
+        _request = new OrderRequestParameters();
+        await OnFilterChanged.InvokeAsync();
+    }
+}

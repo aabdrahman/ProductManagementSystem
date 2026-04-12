@@ -1,0 +1,44 @@
+﻿@if (MetaData is not null && MetaData.totalPages > 1)
+{
+    <div class="pagination">
+
+        <button @onclick="PreviousPage" disabled="@(!MetaData.HasPrevious)">
+            Previous
+        </button>
+
+        @for (int i = 1; i <= MetaData.totalPages; i++)
+        {
+            <button class="@(i == MetaData.currentPage ? "active" : "")"
+                    @onclick="() => GoToPage(i)">
+                @i
+            </button>
+        }
+
+        <button @onclick="NextPage" disabled="@(!MetaData.HasNext)">
+            Next
+        </button>
+
+    </div>
+}
+
+@code {
+    [Parameter] public MetaData MetaData { get; set; }
+    [Parameter] public EventCallback<int> OnPageChanged { get; set; }
+
+    private async Task PreviousPage()
+    {
+        if (MetaData.HasPrevious)
+            await OnPageChanged.InvokeAsync(MetaData.currentPage - 1);
+    }
+
+    private async Task NextPage()
+    {
+        if (MetaData.HasNext)
+            await OnPageChanged.InvokeAsync(MetaData.currentPage + 1);
+    }
+
+    private async Task GoToPage(int page)
+    {
+        await OnPageChanged.InvokeAsync(page);
+    }
+}

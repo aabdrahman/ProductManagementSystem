@@ -1,0 +1,73 @@
+﻿
+/* ============================= */
+/* FILTER CONTAINER */
+/* ============================= */
+
+.order-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+
+/* ============================= */
+/* GROUP */
+/* ============================= */
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.filter-group.wide {
+    grid-column: span 2;
+}
+
+.filter-group label {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+
+/* ============================= */
+/* ACTIONS */
+/* ============================= */
+
+.filter-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+
+/* ============================= */
+/* BUTTONS */
+/* ============================= */
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn.apply {
+    background: black;
+    color: white;
+}
+
+.btn.reset {
+    background: #eee;
+}
