@@ -1,6 +1,10 @@
-﻿@page "/hero-content"
+﻿@page "/admin/manage-hero-content"
+
+@layout AdminLayout
 
 @inject RemoveImageHandler removeImageHandler
+
+@attribute [Authorize(Roles = "ADMIN,SYSTEM")]
 
 <PageTitle>Hero Content Management Page</PageTitle>
 

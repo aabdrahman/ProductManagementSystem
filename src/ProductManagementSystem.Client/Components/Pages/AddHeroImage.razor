@@ -24,6 +24,12 @@
         }
 
         <InputFile OnChange="HandleFileSelected" size="1048576" accept=",.jpeg,.jpg,.png" />
+        @if (!string.IsNullOrEmpty(_errorMessgae))
+        {
+            <span class="validation-message">
+                @_errorMessgae
+            </span>
+        }
 
         @if (!string.IsNullOrEmpty(_previewUrl))
         {
@@ -57,6 +63,7 @@
     private bool _isSuccessful = false;
     private bool _isProcessing;
     private string _responseMessage;
+    private string _errorMessgae;
 
     private bool _processingImage = false;
 
@@ -66,8 +73,30 @@
     private async Task HandleFileSelected(InputFileChangeEventArgs args)
     {
         _processingImage = true;
+        _errorMessgae = null; _responseMessage = null;
 
         _uploadedFile = args.File;
+
+        const long maxSize = 2 * 1024 * 1024; // 1MB
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/jpg" };
+
+        if (_uploadedFile.Size > maxSize)
+        {
+            _errorMessgae = "Max file size exceeded. Max size: 2MB}";
+            _uploadedFile = default;
+            _processingImage = false;
+            return;
+        }
+
+        if (!allowedTypes.Contains(_uploadedFile.ContentType))
+        {
+            _errorMessgae = "Invalid File type uploaded.";
+            _uploadedFile = default;
+            _processingImage = false;
+            return;
+        }
+
+
         var buffer = new byte[_uploadedFile.Size];
         _title = _uploadedFile.Name;
 

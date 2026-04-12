@@ -51,57 +51,90 @@ public class AuthStateProvider : AuthenticationStateProvider
         }
 
         DateTimeOffset expiryTimestamp = DateTimeOffset.FromUnixTimeSeconds(expiryTime);
+        double timeToExpiry = (DateTimeOffset.UtcNow - expiryTimestamp).TotalSeconds;
 
-        if(DateTimeOffset.UtcNow > expiryTimestamp || (DateTimeOffset.UtcNow - expiryTimestamp).TotalSeconds <= 5)
+        if(timeToExpiry <= 10 && timeToExpiry >= 0)
         {
-            //Begin Refresh Token implementation
-            if(DateTime.UtcNow > storedToken.TokenExpirationTime || (DateTimeOffset.UtcNow - expiryTimestamp).TotalSeconds <= 5)
+            try
             {
-                var refreshTokenResult = await _refreshTokenHandler.Handle(storedToken);
+                var refreshTokenResponse = await _refreshTokenHandler.Handle(storedToken);
 
-                if (refreshTokenResult)
-                {
-                    storedToken = await _storageUtility.GetItemFromStorageAsync<TokenDto>("session-token");
-
-                    if (storedToken is null)
-                    {
-                        NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
-                        return _anonymous;
-                    }
-
-                    claimsPrincipal = JwtParser.ParseClaimsFromJwt(storedToken.Token);
-
-                    if (DateTime.UtcNow >= storedToken.TokenExpirationTime)
-                    {
-                        var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
-                        NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
-                        return _anonymous;
-                    }
-
-                    expTokenTime = claimsPrincipal.FirstOrDefault(x => x.Type.Contains("exp", StringComparison.CurrentCultureIgnoreCase))?.Value ?? "";
-
-                    if (!long.TryParse(expTokenTime, out expiryTime))
-                    {
-                        var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
-                        NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
-                        return _anonymous;
-                    }
-                }
-                else
+                if (!refreshTokenResponse)
                 {
                     var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
                     NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
                     return _anonymous;
                 }
+
+                storedToken = await _storageUtility.GetItemFromStorageAsync<TokenDto>("session-token");
+
+                if (storedToken is null)
+                {
+                    NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
+                    return _anonymous;
+                }
+
+                claimsPrincipal = JwtParser.ParseClaimsFromJwt(storedToken.Token);
             }
-            else
+            catch (Exception ex)
             {
                 var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
                 NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
                 return _anonymous;
             }
-
+            
         }
+
+        //if (DateTimeOffset.UtcNow > expiryTimestamp || timeToExpiry <= 10)
+        //{
+        //    //Begin Refresh Token implementation
+        //    if(timeToExpiry <= 10)
+        //    {
+        //        var refreshTokenResult = await _refreshTokenHandler.Handle(storedToken);
+
+        //        if (refreshTokenResult)
+        //        {
+        //            storedToken = await _storageUtility.GetItemFromStorageAsync<TokenDto>("session-token");
+
+        //            if (storedToken is null)
+        //            {
+        //                NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
+        //                return _anonymous;
+        //            }
+
+        //            claimsPrincipal = JwtParser.ParseClaimsFromJwt(storedToken.Token);
+
+        //            if (DateTime.UtcNow >= storedToken.TokenExpirationTime)
+        //            {
+        //                var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
+        //                NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
+        //                return _anonymous;
+        //            }
+
+        //            expTokenTime = claimsPrincipal.FirstOrDefault(x => x.Type.Contains("exp", StringComparison.CurrentCultureIgnoreCase))?.Value ?? "";
+
+        //            if (!long.TryParse(expTokenTime, out expiryTime))
+        //            {
+        //                var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
+        //                NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
+        //                return _anonymous;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
+        //            NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
+        //            return _anonymous;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
+        //        NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
+        //        return _anonymous;
+        //    }
+
+        //}
 
         _tokenContainer.SetToken(storedToken.Token);
 
