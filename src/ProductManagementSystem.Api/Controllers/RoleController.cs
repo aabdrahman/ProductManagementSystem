@@ -59,6 +59,7 @@ public class RoleController : ControllerBase
 
     [Authorize]
     [HttpPost]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Create([FromBody] string roleName)
     {
         try

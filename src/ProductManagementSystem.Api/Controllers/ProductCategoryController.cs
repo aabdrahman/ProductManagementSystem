@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProductManagementSystem.Api.Controllers.ServiceFilters;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.ProductCategory;
 using Serilog;
@@ -39,6 +40,7 @@ public class ProductCategoryController : ControllerBase
     }
 
     [HttpGet("{Id:int}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> GetById(int Id)
     {
         try
@@ -55,6 +57,7 @@ public class ProductCategoryController : ControllerBase
     }
 
     [HttpDelete("{Id:int}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> DeleteById(int Id)
     {
         try
@@ -71,6 +74,7 @@ public class ProductCategoryController : ControllerBase
     }
 
     [HttpPost]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Create([FromBody] string ProductName)
     {
         try
@@ -87,6 +91,7 @@ public class ProductCategoryController : ControllerBase
     }
 
     [HttpPut]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Update([FromBody] UpdateProductCategoryDto updatedProductCategory)
     {
         try

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProductManagementSystem.Api.Controllers.ServiceFilters;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Product;
 using Serilog;
@@ -38,6 +39,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("{Id:int}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> GetById(int Id)
     {
         try
@@ -54,6 +56,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("category/{categoryId:int}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> GetByCategory(int categoryId)
     {
         try
@@ -70,6 +73,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("get-product-update-details/{Id:int}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> GetProductUpdateDetails(int Id)
     {
         try
@@ -86,6 +90,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("collection")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> GetProductCollection([FromQuery] IEnumerable<int> Ids)
     {
         try
@@ -102,6 +107,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpDelete("{Id:int}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Delete(int Id, bool isSoftDelete = true)
     {
         try
@@ -118,6 +124,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Create([FromBody] CreateProductDto productToCreate)
     {
         try
@@ -133,6 +140,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPut]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Update([FromBody] UpdateProductDto productToUpdate)
     {
         try
@@ -149,6 +157,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPatch("update-stock")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> UpdateStock([FromBody] UpdateProductStockDto productToUpdateStock)
     {
         try

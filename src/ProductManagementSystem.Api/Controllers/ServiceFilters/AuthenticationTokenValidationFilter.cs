@@ -6,7 +6,6 @@ using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Client.Utilities;
 using ProductManagementSystem.Shared.DataTransferObjects.Authentication;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
-using StackExchange.Redis;
 using System.Security.Claims;
 
 namespace ProductManagementSystem.Api.Controllers.ServiceFilters;
@@ -33,7 +32,7 @@ public class AuthenticationTokenValidationFilter(IRedisService redisService, ICo
         var userId = context.HttpContext.User.FindFirst(x => x.Type.EndsWith("nameidentifier"))?.Value ?? "";
         var userEmail = context.HttpContext.User.FindFirst(x => x.Type.EndsWith("emailaddress"))?.Value ?? "";
 
-        int userLockedOutAttempts = await redisService.GetItemAsync<int>(userId.ToUpper());
+        int userLockedOutAttempts = await redisService.GetItemAsync<int>(RedisCacheHelperClass.GetUserProfileFailedLoginAttemptCacheKey(userId.ToUpper()));
 
         if(userLockedOutAttempts >= configuration.GetValue<int>("JwtSettings:SessionLockoutAFterAttempt"))
         {

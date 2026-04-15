@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ProductManagementSystem.Api.Controllers.ServiceFilters;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.ContentDetails;
 using Serilog;
@@ -40,6 +41,7 @@ public class WhyChooseUsController : ControllerBase
     }
 
     [HttpPost]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Create([FromBody] CreateWhyChooseUsDto createWhyChooseUs)
     {
         try
@@ -56,6 +58,7 @@ public class WhyChooseUsController : ControllerBase
     }
 
     [HttpDelete("{Id:guid}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Delete(Guid Id, bool isSoftDelete = true)
     {
         try
@@ -72,6 +75,7 @@ public class WhyChooseUsController : ControllerBase
     }
 
     [HttpPut]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Update([FromBody] UpdateWhyChooseUsDto updateWhyChooseUsDto)
     {
         try

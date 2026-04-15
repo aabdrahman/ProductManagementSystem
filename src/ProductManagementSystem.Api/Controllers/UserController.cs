@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProductManagementSystem.Api.Controllers.ServiceFilters;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.User;
 using Serilog;
@@ -8,6 +10,7 @@ namespace ProductManagementSystem.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -21,6 +24,8 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "ADMIN,SYSTEM")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> GetAll()
     {
         try
@@ -37,6 +42,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{Id:int}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> GetById(int Id)
     {
         try
@@ -53,6 +59,7 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete("{Id:int}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Delete(int Id, bool isSoftDelete = true)
     {
         try
@@ -69,6 +76,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] CreateUserDto createUser)
     {
         try
@@ -85,6 +93,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> Update([FromBody] UpdateUserDto updateUser)
     {
         try
@@ -101,6 +110,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPatch("confirm-user-profile")]
+    [AllowAnonymous]
     public async Task<IActionResult> ConfirmUserProfile([FromBody] UpdateUserConfimationStatusDto updateUserConfimationStatus)
     {
         try
