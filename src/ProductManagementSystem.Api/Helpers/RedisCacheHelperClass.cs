@@ -18,6 +18,7 @@ public static class RedisCacheHelperClass
     public static string OrderBaseKey = "order";
     public static string AboutUsContentKey = "about-us-content";
     public static string WhyChooseUsContentKey = "why-choose-us-content";
+    public static string LockedOutProductsKey = "product-locked-out";
 
     public static string GetCacheKey(string prefix, params object[] parameters)
     {
@@ -57,5 +58,10 @@ public static class RedisCacheHelperClass
     public static string GetOrderDetailKey(int Id)
     {
         return GetCacheKey("order-detail", Id);
+    }
+
+    public static string GetLockedOutProductCacheKey(int Id)
+    {
+        return GetCacheKey(LockedOutProductsKey, Id);
     }
 }

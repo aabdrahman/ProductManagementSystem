@@ -31,10 +31,14 @@ public class OrderService : IOrderService
     private readonly IRedisService _redisService;
     private readonly IAuthorizationService _authorizationService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly StackExchange.Redis.IDatabase _redisDatabase;
+
+    private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
     public OrderService(RepositoryContext repositoryContext, IEmailVerificationLinkFactory emailVerificationLinkFactory,
                         IEmailService emailService, IOptionsMonitor<UserOrderVerificationConfig> optionsMonitor,
-                        IRedisService redisService, IAuthorizationService authorizationService, IHttpContextAccessor httpContextAccessor)
+                        IRedisService redisService, IAuthorizationService authorizationService, 
+                        IHttpContextAccessor httpContextAccessor, StackExchange.Redis.IConnectionMultiplexer connectionMultiplexer)
     {
         _repositoryContext = repositoryContext;
         _emailVerificationLinkFactory = emailVerificationLinkFactory;
@@ -43,6 +47,7 @@ public class OrderService : IOrderService
         _redisService = redisService;
         _authorizationService = authorizationService;
         _httpContextAccessor = httpContextAccessor;
+        _redisDatabase = connectionMultiplexer.GetDatabase();
     }
 
     private string _methodName = "MethodName";
@@ -71,6 +76,20 @@ public class OrderService : IOrderService
             //Validate the product to order exists and the quantity ordered is available in stock before creating the order
 
             List<int> productIds = createOrder.OrderLineItems.Select(x => x.ProductId).ToList();
+            //Begin to obtain lock on the product ids
+            int retryCount = 0; bool isLockObtained = false;
+
+            while(!isLockObtained && retryCount < 3)
+            {
+                isLockObtained = await TryAcquireLockOnProducts(productIds);
+                await Task.Delay(100);
+            }
+
+            if(retryCount >= 3 && !isLockObtained)
+            {
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("Product Id lock could not be obtained after {0} retrued.", retryCount);
+                return GenericResponse<OrderDto>.Failure(null, "Operation could not be performed. Kindly retry.", System.Net.HttpStatusCode.Conflict);
+            }
 
             List<Product> productsToOrder = await _repositoryContext.Products.Where(x => productIds.Contains(x.Id)).ToListAsync();
 
@@ -79,7 +98,8 @@ public class OrderService : IOrderService
                 var existingProductIds = productsToOrder.Select(x => x.Id);
                 var nonExistingProductIds = productIds.Except(existingProductIds);
 
-                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("The following product Ids do not exist: {nonExistingProductIds}", JsonSerializer.Serialize(nonExistingProductIds));
+                var removeLockedProduct = await RemoveProductLockFromCache(productIds);
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("The following product Ids do not exist: {nonExistingProductIds}. Remove locked products returns - {removeLocked}", JsonSerializer.Serialize(nonExistingProductIds), removeLockedProduct);
                 return GenericResponse<OrderDto>.Failure(null, $"The following product Ids do not exist: {JsonSerializer.Serialize(nonExistingProductIds)}", System.Net.HttpStatusCode.NotFound);
             }
 
@@ -87,8 +107,9 @@ public class OrderService : IOrderService
 
             if(joinedOrderItems.Any(x => !x.StockAvailable))
             {
+                var removeLockedProduct = await RemoveProductLockFromCache(productIds);
                 var outOfStockProducts = joinedOrderItems.Where(x => !x.StockAvailable).Select(x => new { x.Product.Id, x.Product.NormalizedName, x.Product.CurrentCount, x.OrderLineItem.QuantityOrdered });
-                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("The following products are out of stock: {outOfStockProducts}", JsonSerializer.Serialize(outOfStockProducts));
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("The following products are out of stock: {outOfStockProducts}. Remove locked products returns - {response}", JsonSerializer.Serialize(outOfStockProducts), removeLockedProduct);
                 return GenericResponse<OrderDto>.Failure(null, $"The following products are out of stock: {JsonSerializer.Serialize(outOfStockProducts.Select(x => x.NormalizedName).ToList())}", System.Net.HttpStatusCode.BadRequest);
             }
 
@@ -159,7 +180,21 @@ public class OrderService : IOrderService
             await _repositoryContext.Orders.AddAsync(orderToInsert);
             //_repositoryContext.Products.Update(productToOrder);
 
-            await _repositoryContext.SaveChangesAsync();
+            try
+            {
+                await _repositoryContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Error(ex, "An error ocurred updating database.");
+                return GenericResponse<OrderDto>.Failure(null, "An error occurred inserting record into database.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+            }
+            finally
+            {
+                var removeLockedProduct = await RemoveProductLockFromCache(productIds);
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("Remove locked out products returns - {0}", removeLockedProduct);
+            }
+
 
             try
             {
@@ -222,7 +257,7 @@ public class OrderService : IOrderService
             Log.ForContext(_methodName, "DeleteAsync").ForContext(_className, "OrderService").Information("Deleting Created Order - {Id}. Parameter: {isSoftDelete}", Id, isSoftDelete);
 
             //Fetch the order to delete along with the ordered product details to enable modification of the product count for the ordered product when the order is deleted
-            Order? order = await _repositoryContext.Orders.IgnoreQueryFilters().Include(x => x.OrderLineItems).ThenInclude(x => x.OrderedProduct).SingleOrDefaultAsync(x => x.Id == Id);
+            Order? order = await _repositoryContext.Orders.IgnoreQueryFilters().Include(x => x.OrderLineItems).SingleOrDefaultAsync(x => x.Id == Id);
 
             if(order is null)
             {
@@ -240,11 +275,40 @@ public class OrderService : IOrderService
                 return GenericResponse<string>.Failure("Operation Failed.", "Access denied.", System.Net.HttpStatusCode.Forbidden);
             }
 
-            //Loop through the order line items and increase the count of each product in the order line item by the quantity ordered for that product in the order line item
-            foreach (var orderItem in order.OrderLineItems)
+            List<int> productIds = order.OrderLineItems.Select(x => x.ProductId).ToList();
+            //Begin to obtain lock on the product ids
+            int retryCount = 0; bool isLockObtained = false;
+
+            while (!isLockObtained && retryCount < 3)
             {
-                int quantityOrdered = orderItem.QuantityOrdered;
-                orderItem.OrderedProduct.CurrentCount += quantityOrdered;
+                isLockObtained = await TryAcquireLockOnProducts(productIds);
+                await Task.Delay(100);
+            }
+
+            if (retryCount >= 3 && !isLockObtained)
+            {
+                Log.ForContext(_methodName, "CreateAsync").ForContext(_className, "OrderService").Information("Product Id lock could not be obtained after {0} retrued.", retryCount);
+                return GenericResponse<string>.Failure("Operation could not be completed.", "Operation could not be performed. Kindly retry.", System.Net.HttpStatusCode.Conflict);
+            }
+
+            List<Product> productsToOrder = await _repositoryContext.Products.Where(x => productIds.Contains(x.Id)).ToListAsync();
+
+            //Loop through the order line items and increase the count of each product in the order line item by the quantity ordered for that product in the order line item
+
+            var orderItems = order.OrderLineItems.Where(x => x.IsActive).ToList();
+
+            var joinedProducts = orderItems.Join(productsToOrder, x => x.ProductId, y => y.Id, (oli, p) => new { p, oli });
+
+            //foreach (var orderItem in order.OrderLineItems.Where(x => x.IsActive).ToList())
+            //{
+            //    int quantityOrdered = orderItem.QuantityOrdered;
+            //    orderItem.OrderedProduct.CurrentCount += quantityOrdered;
+            //}
+
+            foreach (var item in joinedProducts)
+            {
+                int orderedQuantity = item.oli.QuantityOrdered;
+                item.p.CurrentCount += orderedQuantity;
             }
 
             if (isSoftDelete)
@@ -266,7 +330,20 @@ public class OrderService : IOrderService
                 _repositoryContext.Orders.Remove(order);
             }
 
-            await _repositoryContext.SaveChangesAsync();
+            try
+            {
+                await _repositoryContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.ForContext(_methodName, "DeleteAsync").ForContext(_className, "OrderService").Error(ex, "Database error occurred performing operation");
+                return GenericResponse<string>.Failure("Operation Failed.", "Database error occurred.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+            }
+            finally
+            {
+                var result = await RemoveProductLockFromCache(productIds);
+                Log.ForContext(_methodName, "DeleteAsync").ForContext(_className, "OrderService").Information("Remove from lockout returns - {0}", result);
+            }
 
             return GenericResponse<string>.Success("Operation Successful", $"{(isSoftDelete ? "Order successfully deactivated" : "Order successfully removed")}", System.Net.HttpStatusCode.OK);
         }
@@ -786,5 +863,65 @@ public class OrderService : IOrderService
         }
 
         return Convert.ToHexString(randBytes);
+    }
+
+    private async Task<(bool isSuccessful, long removeCount)> RemoveProductLockFromCache(List<int> productIds)
+    {
+        StackExchange.Redis.RedisKey[] productKeys = productIds.Select(x => new StackExchange.Redis.RedisKey(RedisCacheHelperClass.GetLockedOutProductCacheKey(x))).ToArray();
+        var result = await _redisDatabase.KeyDeleteAsync(productKeys);
+
+        return (productIds.Count == result, result);
+    }
+
+    private async Task<bool> TryAcquireLockOnProducts(List<int> productIds)
+    {
+        //Begin locking and obtaining lock operation
+        Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(TryAcquireLockOnProducts)).Information("Getting locked status for - {0}", productIds);
+
+        //Check if semaphore lock is available within a 500ms timeout
+        bool isAavailable = await _semaphoreSlim.WaitAsync(500);
+
+        //Semaphore not available after timeout - return false to consumer
+        if (!isAavailable)
+        {
+            return false;
+        }
+
+
+        //Semaphore available - Begin main operation
+        try
+        {
+            //Get all the keys from the list of products
+            //var keys = productIds.Select(x => RedisCacheHelperClass.GetLockedOutProductCacheKey(x)).ToArray();
+
+            //StackExchange.Redis.RedisKey[] redisKeys = keys.Select(x => new StackExchange.Redis.RedisKey(x)).ToArray();
+
+            //Obtain any possible lock keys
+            //var availableKeysCount = await _redisDatabase.KeyExistsAsync(redisKeys);
+
+            //One or more keys in the product is currently locked
+            //if(availableKeysCount > 0)
+            //{
+            //    return false;
+            //}
+
+            //No product key is currently locked - Begin set such keys
+
+            KeyValuePair<StackExchange.Redis.RedisKey, StackExchange.Redis.RedisValue>[] keysToAdd = productIds.Select(x => new KeyValuePair<StackExchange.Redis.RedisKey, StackExchange.Redis.RedisValue>(new StackExchange.Redis.RedisKey(RedisCacheHelperClass.GetLockedOutProductCacheKey(x)), x)).ToArray();
+
+            //Set Multiple and set timeout to be after 10seconds
+            var setKeys = await _redisDatabase.StringSetAsync(keysToAdd, when: StackExchange.Redis.When.NotExists, expiry: TimeSpan.FromSeconds(10));
+
+            return setKeys;
+        }
+        catch (Exception ex)
+        {
+            Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(TryAcquireLockOnProducts)).Error(ex, "An error occurred while obtaining lock on products.");
+            return false;
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
 }
