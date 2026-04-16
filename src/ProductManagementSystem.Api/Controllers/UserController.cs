@@ -42,6 +42,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{Id:int}")]
+    [Authorize(Roles = "ADMIN,SYSTEM,USER")]
     [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> GetById(int Id)
     {

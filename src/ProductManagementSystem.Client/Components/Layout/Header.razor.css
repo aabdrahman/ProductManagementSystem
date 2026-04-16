@@ -6,7 +6,7 @@
 .site-header {
     background: var(--BG-COLOR-NAV);
     color: var(--FONT-COLOR-PRIMARY);
-    padding: 1rem 8%;
+    padding: 1rem 4%;
     position: sticky;
     top: 0;
     z-index: 100;

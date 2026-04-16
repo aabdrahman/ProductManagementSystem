@@ -1,22 +1,29 @@
-﻿using ProductManagementSystem.Shared.DataTransferObjects.Product;
+﻿using ProductManagementSystem.Client.Handlers.ClientHelper;
+using ProductManagementSystem.Client.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.Product;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using System.Text.Json;
 
 namespace ProductManagementSystem.Client.Handlers;
 
-public class GetMultipleProductsHandler
+public class GetMultipleProductsHandler : HttpClientProvider
 {
-    private readonly HttpClient _httpClient;
-
-    public GetMultipleProductsHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public GetMultipleProductsHandler(IHttpClientFactory httpClientFactory, ILocalStorageUtility localStorageUtility, IConfiguration configuration) : base(httpClientFactory, localStorageUtility, configuration)
     {
-        _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet."));
     }
+
+    //private readonly HttpClient _httpClient;
+
+    //public GetMultipleProductsHandler(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    //{
+    //    _httpClient = httpClientFactory.CreateClient(configuration.GetValue<string>("ApiClient:Key") ?? throw new ArgumentNullException("The api key name is not provided yet."));
+    //}
 
     public async Task<(IEnumerable<ProductDto> products, string message)> Handle(IEnumerable<int> Ids)
     {
         try
         {
+            HttpClient _httpClient = await GetSecuredHttpClient();
             string queryString = "";
 
             foreach (var id in Ids)

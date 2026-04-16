@@ -10,7 +10,7 @@ namespace ProductManagementSystem.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles = "ADMIN,SYSTEM")]
+[Authorize(Roles = "ADMIN,SYSTEM,USER")]
 public class ProductController : ControllerBase
 {
     private string _methodName = "MethodName";
@@ -39,7 +39,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("{Id:int}")]
-    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int Id)
     {
         try

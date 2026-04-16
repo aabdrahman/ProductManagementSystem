@@ -106,26 +106,30 @@ public class EmailService : IEmailService
                     int totalProcessedRecords = 0;
                     int successCount = 0; int failureCount = 0;
 
+
                     while (_queuedEmails.Count > 0)
                     {
+                        EmailSenderDto emailToProcess;
                         try
                         {
-                            if (_queuedEmails.TryDequeue(out var fetchedEmail))
+                            if (_queuedEmails.TryDequeue(out emailToProcess))
                             {
-                                IEnumerable<Address> recipientsAddress = fetchedEmail.Recipients.Select(x => new FluentEmail.Core.Models.Address(x)).ToList();
+                                IEnumerable<Address> recipientsAddress = emailToProcess.Recipients.Select(x => new FluentEmail.Core.Models.Address(x)).ToList();
 
                                 SendResponse result = await _fluentEmailFactory.Create()
-                                                    .Subject(fetchedEmail.Subject)
+                                                    .Subject(emailToProcess.Subject)
                                                     .To(mailAddresses: recipientsAddress)
-                                                    .Body(fetchedEmail.Content, isHtml: fetchedEmail.isHtml)
+                                                    .Body(emailToProcess.Content, isHtml: emailToProcess.isHtml)
                                                     .SendAsync();
 
                                 if (result.Successful)
                                 {
+
                                     successCount++;
                                 }
                                 else
                                 {
+                                    _tempQueuedEmails.Enqueue(emailToProcess);
                                     failureCount++;
                                 }
                             }
@@ -188,6 +192,7 @@ public class EmailService : IEmailService
                                     }
                                     else
                                     {
+                                        _tempQueuedEmails.Enqueue(fetchedEmail);
                                         failureCount++;
                                     }
 

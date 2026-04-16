@@ -280,7 +280,7 @@ public class AuthenticationService : IAuthenticationService
         {
             Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "RefreshTokenAsync").Information("Refresh Token request - {0}", tokenDto.Token);
 
-            var tokenPrincipals = GetPrincipalFromToken(tokenDto.Token);
+            var tokenPrincipals = GetPrincipalFromToken(tokenDto.Token, false);
 
             if(tokenPrincipals is null)
             {
