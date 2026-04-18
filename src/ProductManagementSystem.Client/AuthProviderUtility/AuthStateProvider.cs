@@ -25,7 +25,7 @@ public class AuthStateProvider : AuthenticationStateProvider
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-
+        int rndNum = Random.Shared.Next(1, 100);
         begin:
         TokenDto? storedToken = await _storageUtility.GetItemFromStorageAsync<TokenDto>("session-token");
 
@@ -53,17 +53,18 @@ public class AuthStateProvider : AuthenticationStateProvider
             return _anonymous;
         }
 
-        DateTimeOffset expiryTimestamp = (DateTimeOffset.FromUnixTimeSeconds(expiryTime)).AddSeconds(5);
-        double timeToExpiry = (DateTimeOffset.UtcNow - expiryTimestamp).TotalSeconds;
+        DateTimeOffset expiryTimestamp = DateTimeOffset.FromUnixTimeSeconds(expiryTime);
+        int timeToExpiry = (int)(expiryTimestamp - DateTimeOffset.UtcNow).TotalSeconds;
 
         if(timeToExpiry <= 10 && timeToExpiry >= 0)
         {
             try
             {
                 var refreshTokenResponse = await _refreshTokenHandler.Handle(storedToken);
-
+               
                 if (!refreshTokenResponse)
                 {
+                    
                     var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
                     NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
                     return _anonymous;
@@ -71,16 +72,20 @@ public class AuthStateProvider : AuthenticationStateProvider
 
                 storedToken = await _storageUtility.GetItemFromStorageAsync<TokenDto>("session-token");
 
+                
                 if (storedToken is null)
                 {
+                    
                     NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
                     return _anonymous;
                 }
 
                 claimsPrincipal = JwtParser.ParseClaimsFromJwt(storedToken.Token);
+
             }
             catch (Exception ex)
             {
+                
                 var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
                 NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
                 return _anonymous;
@@ -143,7 +148,7 @@ public class AuthStateProvider : AuthenticationStateProvider
 
         //}
 
-        _tokenContainer.SetToken(storedToken.Token);
+        //_tokenContainer.SetToken(storedToken.Token);
 
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claimsPrincipal, "jwtAuthType", nameType: ClaimTypes.Name, roleType: ClaimTypes.Role)));
 

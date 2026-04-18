@@ -25,7 +25,9 @@ public class RefreshTokenHandler
 
             GenericResponse<TokenDto> responseBody = JsonSerializer.Deserialize<GenericResponse<TokenDto>>(responseContent, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true }) ??
                                                             throw new ArgumentNullException("Response could not be deserialized.");
-            if (responseBody.IsSuccessStatus)
+
+
+            if (!responseBody.IsSuccessStatus)
             {
                 return false;
             }

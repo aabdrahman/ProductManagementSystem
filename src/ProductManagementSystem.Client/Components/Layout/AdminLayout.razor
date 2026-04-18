@@ -1,111 +1,116 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
+@using ProductManagementSystem.Client.AuthProviderUtility
+@using ProductManagementSystem.Client.Components.Pages
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
 @inject AuthenticationStateProvider authenticationStateProvider
 
 
-<div class="admin-wrapper">
+<AuthorizeView Roles="ADMIN,SYSTEM">
 
-    <!-- SIDEBAR -->
-    <aside class="admin-sidebar @(isSidebarCollapsed ? "collapsed" : "")">
+    <Authorized>
+        <div class="admin-wrapper">
 
-        <div class="sidebar-header">
-            <h3>ManageX</h3>
+            <!-- SIDEBAR -->
+            <aside class="admin-sidebar @(isSidebarCollapsed ? "collapsed" : "")">
 
-            <button class="collapse-btn" @onclick="ToggleSidebar">
-                @(isSidebarCollapsed ? "X" : "☰")
-            </button>
-        </div>
+                <div class="sidebar-header">
+                    <h3>Manage X</h3>
 
-        <nav class="sidebar-nav">
-
-            <a href="/admin" class="nav-item">
-                <span class="nav-icon">
-                    🛋️
-                </span>
-                <span class="nav-text">Home</span>
-            </a>
-
-            <a href="/admin/orders" class="nav-item">
-                <span class="nav-icon">📦</span>
-                <span class="nav-text">Orders</span>
-            </a>
-
-            <a href="/admin/products" class="nav-item">
-                <span class="nav-icon">🛒</span>
-                <span class="nav-text">Products</span>
-            </a>
-
-            <a href="/admin/manage-content" class="nav-item">
-                <span class="nav-icon">🏷️</span>
-                <span class="nav-text">Manage Content</span>
-            </a>
-
-            <a href="/admin/manage-hero-content" class="nav-item">
-                <span class="nav-icon">📊</span>
-                <span class="nav-text">Manage Hero Content</span>
-            </a>
-
-            <a href="/admin/analytics" class="nav-item">
-                <span class="nav-icon">📊</span>
-                <span class="nav-text">Analytics</span>
-            </a>
-
-        </nav>
-
-    </aside>
-
-
-    <!-- MAIN -->
-    <div class="admin-main">
-
-        <!-- HEADER -->
-        <header class="admin-header">
-
-            <div class="header-left">
-                <button class="nav-btn" @onclick="GoToHome">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" class="bi bi-house" viewBox="0 0 16 16">
-                        <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z" />
-                    </svg>
-                </button>
-                <h2>@PageTitle</h2>
-            </div>
-
-            <div class="header-right">
-
-                <div class="user-menu">
-
-                    <button @onclick="ShowProfile" class="admin-user-wrapper">
-                        <div class="admin-user">
-                            <div class="avatar">
-                                @_avatar
-                            </div>
-
-                            <div class="user-info">
-                                <span class="user-name">@_userName</span>
-                                <span class="user-role">@_userRole</span>
-                            </div>
-                        </div>
+                    <button class="collapse-btn" @onclick="ToggleSidebar">
+                        @(isSidebarCollapsed ? "X" : "☰")
                     </button>
+                </div>
 
-                    @if (_showUserProfile)
-                    {
-                        <div class="user-dropdown">
+                <nav class="sidebar-nav">
 
-                            <a href="@(string.Concat("/profile"))">Profile</a>
+                    <a href="/admin" class="nav-item">
+                        <span class="nav-icon">
+                            🛋️
+                        </span>
+                        <span class="nav-text">Home</span>
+                    </a>
 
-                            @* <button class="logout-btn" @onclick="HandleLogout">
+                    <a href="/admin/orders" class="nav-item">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">Orders</span>
+                    </a>
+
+                    <a href="/admin/products" class="nav-item">
+                        <span class="nav-icon">🛒</span>
+                        <span class="nav-text">Products</span>
+                    </a>
+
+                    <a href="/admin/manage-content" class="nav-item">
+                        <span class="nav-icon">🏷️</span>
+                        <span class="nav-text">Manage Content</span>
+                    </a>
+
+                    <a href="/admin/manage-hero-content" class="nav-item">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Manage Hero Content</span>
+                    </a>
+
+                    <a href="/admin/analytics" class="nav-item">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Analytics</span>
+                    </a>
+
+                </nav>
+
+            </aside>
+
+
+            <!-- MAIN -->
+            <div class="admin-main">
+
+                <!-- HEADER -->
+                <header class="admin-header">
+
+                    <div class="header-left">
+                        <button class="nav-btn" @onclick="GoToHome">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="green" class="bi bi-house" viewBox="0 0 16 16">
+                                <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z" />
+                            </svg>
+                        </button>
+                        <h2>@PageTitle</h2>
+                    </div>
+
+                    <div class="header-right">
+
+                        <div class="user-menu">
+
+                            <button @onclick="ShowProfile" class="admin-user-wrapper">
+                                <div class="admin-user">
+                                    <div class="avatar">
+                                        @_avatar
+                                    </div>
+
+                                    <div class="user-info">
+                                        <span class="user-name">@(context.User.Identity.Name)</span>
+                                        <span class="user-role">@(context.User.FindFirst(x => x.Type == ClaimTypes.Role)?.Value)</span>
+                                    </div>
+                                </div>
+                            </button>
+
+                            @if (_showUserProfile)
+                            {
+                                <div class="user-dropdown">
+
+                                    <a href="@(string.Concat("/profile"))">Profile</a>
+
+                                    @* <button class="logout-btn" @onclick="HandleLogout">
                                 Logout
                             </button> *@
 
+                                </div>
+                            }
+
                         </div>
-                    }
-
-                </div>
 
 
-                @* <button @onclick="ShowProfile" class="admin-user-wrapper">
+                        @* <button @onclick="ShowProfile" class="admin-user-wrapper">
                     <div class="admin-user">
                         <div class="avatar">
                             @_avatar
@@ -118,22 +123,31 @@
                     </div>
                 </button> *@
 
-                <button @onclick="HandleLogout" class="logout-btn-admin">
-                    Logout
-                </button>
+                        <button @onclick="HandleLogout" class="logout-btn-admin">
+                            Logout
+                        </button>
+
+                    </div>
+
+                </header>
+
+                <!-- BODY -->
+                <main class="admin-content">
+                    @Body
+                </main>
 
             </div>
 
-        </header>
+        </div>
+    </Authorized>
 
-        <!-- BODY -->
-        <main class="admin-content">
-            @Body
-        </main>
+    <NotAuthorized>
+        <UnAuthorized />
+    </NotAuthorized>
 
-    </div>
+</AuthorizeView>
 
-</div>
+
 
 @code {
 
@@ -146,12 +160,13 @@
     private string _userRole;
     private string _avatar;
     private string _loggedInUserId;
+    private bool _isAuthenticating = false;
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(500);
 
-        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var authState = await ((AuthStateProvider)authenticationStateProvider).GetAuthenticationStateAsync();
         var user = authState.User;
 
         _userName = user.Identity?.Name ?? "Administrator User";
@@ -163,10 +178,17 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var authState = await authStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        if (!_isAuthenticating)
+        {
+            _isAuthenticating = true;
+            var authState = await ((AuthStateProvider)authStateProvider).GetAuthenticationStateAsync();
+            var user = authState.User;
 
-        StateHasChanged();
+            _isAuthenticating = false;
+
+            StateHasChanged();
+        }
+
     }
 
     void ToggleSidebar()

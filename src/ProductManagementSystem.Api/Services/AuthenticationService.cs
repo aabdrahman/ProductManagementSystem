@@ -234,7 +234,7 @@ public class AuthenticationService : IAuthenticationService
             if(existingTokenDetails is not null && existingTokenDetails.TokenExpirationTime.Value.AddSeconds(10) > DateTime.UtcNow)
             {
                 Log.ForContext(_className, "AuthenticationService").ForContext(_methodName, "LoginAsync").Information("User already has an active session. Active token details - {0}", existingTokenDetails);
-                return GenericResponse<TokenDto>.Success(existingTokenDetails, "User already has an active session.", HttpStatusCode.OK);
+                return GenericResponse<TokenDto>.Success(existingTokenDetails with { TokenExpirationTime = userToAuthenticate.RefreshTokenExpiryTime }, "User already has an active session.", HttpStatusCode.OK);
             }
 
             loggedInUser = userToAuthenticate;

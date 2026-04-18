@@ -1,4 +1,5 @@
-﻿
+﻿@attribute [Authorize(Roles = "ADMIN,SYSTEM")]
+
 @inject DeleteWhyChooseUsContentHandler deleteWhyChooseUsContentHandler
 
 @if(_whyChooseUsContentToDelete is not null)

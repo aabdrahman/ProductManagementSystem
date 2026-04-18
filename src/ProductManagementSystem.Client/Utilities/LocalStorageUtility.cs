@@ -47,6 +47,7 @@ public class LocalStorageUtility : ILocalStorageUtility
         }
         catch (Exception ex)
         {
+            
             return false;
         }
     }

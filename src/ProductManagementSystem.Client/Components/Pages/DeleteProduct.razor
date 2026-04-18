@@ -2,6 +2,7 @@
 
 @inject DeleteProductHandler deleteProductHandler
 
+@attribute [Authorize(Roles = "ADMIN,SYSTEM")]
 
 <section class="product-form-page danger-zone">
     <div class="form-header">

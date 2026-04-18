@@ -23,7 +23,6 @@
             <a href="#about-us">About Us</a>
             <a href="#reviews">Reviews</a>
             <a href="/contact-us">Contact</a>
-            @* <a href="/admin">Admin</a> *@
 
             <AuthorizeView Roles="ADMIN,SYSTEM">
                 <a href="/admin">Admin</a>
@@ -39,7 +38,53 @@
 
         <div class="header-actions">
 
-            @if (_isLoggedIn)
+            <AuthorizeView>
+
+                <Authorized>
+                    <div class="user-menu" @onclick="ToggleMenu">
+
+                        <div class="user-trigger">
+                            <span class="user-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                                </svg>
+                            </span>
+                            <span>@((context.User.Identity.Name).Split(" ")[0])</span>
+                            <span class="arrow">▾</span>
+                        </div>
+
+                        @if (_showUserMenu)
+                        {
+                            <div class="user-dropdown">
+
+                                <a href="@(string.Concat("/user-details"))">Profile</a>
+
+                                <a href="/user/orders">My Orders</a>
+
+                                <button class="logout-btn" @onclick="Logout">
+                                    Logout
+                                </button>
+
+                            </div>
+                        }
+
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <a @onclick="Login" class="login-btn">
+                        <span class="login-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+                                <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+                            </svg>
+                        </span>
+                        <span class="login-text">Login</span>
+                    </a>
+                </NotAuthorized>
+
+            </AuthorizeView>
+
+            @* @if (_isLoggedIn)
             {
                 <div class="user-menu" @onclick="ToggleMenu">
 
@@ -82,7 +127,7 @@
                     </span>
                     <span class="login-text">Login</span>
                 </a>
-            }
+            } *@
 
 
             <a href="/checkout" class="checkout-btn">
@@ -148,20 +193,20 @@
         var savedOrders = await localStorageUtility
             .GetItemFromStorageAsync<IEnumerable<CreateOrderDto>>("orders");
 
-        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        var authState = await ((AuthStateProvider)authStateProvider).GetAuthenticationStateAsync();
         var user = authState.User;
 
-        _isLoggedIn = user.Claims.Any();
+        // _isLoggedIn = user.Claims.Any();
 
-        if (_isLoggedIn)
-        {
-            string nameOfUser = user?.Identity?.Name ?? "";
-            _username = nameOfUser.Split(" ")[0];
+        // if (_isLoggedIn)
+        // {
+        //     string nameOfUser = user?.Identity?.Name ?? "";
+        //     _username = nameOfUser.Split(" ")[0];
 
-            string userId = user?.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value ?? "0";
+        //     string userId = user?.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value ?? "0";
 
-            _loggedInUserId = int.Parse(userId);
-        }
+        //     _loggedInUserId = int.Parse(userId);
+        // }
 
         _cartCount = savedOrders?.Count() ?? 0;
 
