@@ -60,7 +60,9 @@
     background: #fee2e2;
     color: #991b1b;
 }
-
+.order-status.processing {
+    background: #dbeafe;
+}
 
 /* ORDER INFO */
 

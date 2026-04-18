@@ -124,6 +124,10 @@ builder.Services.AddSingleton<IOtpOperation, OtpOperation>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<IEmailVerificationLinkFactory, EmailVerificationLinkFactory>();
 builder.Services.AddSingleton<IAuthorizationHandler, DeleteOrderDetailsRequirementHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, UpdateOrderDetailsRequirementHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, GetUserDetailsRequirement>();
+builder.Services.AddSingleton<IAuthorizationHandler, UpdateUserDetailsRequirement>();
+builder.Services.AddSingleton<IAuthorizationHandler, DeleteUserDetailsRequirement>();
 
 builder.Services.Configure<JwtSettingConfig>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<OtpSettingsConfig>(builder.Configuration.GetSection("OtpSettings"));

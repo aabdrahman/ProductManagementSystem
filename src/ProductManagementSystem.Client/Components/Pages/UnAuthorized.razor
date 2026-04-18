@@ -4,6 +4,8 @@
 
 @rendermode InteractiveServer
 
+@inject LogoutHandler logoutHandler
+
 <Popup @ref="popup" Title="@_title" ShowCloseButton="@false">
 
     <Body>
@@ -41,7 +43,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(500);
+        await Task.Delay(250);
+        // await logoutHandler.Handle();
         _title = "Unauthorized Access";
 
         popup.OpenModal();
@@ -49,7 +52,8 @@
 
     protected async override void OnAfterRender(bool firstRender)
     {
-        await Task.Delay(500);
+        //await Task.Delay(500);
+        await logoutHandler.Handle();
         _title = "Unauthorized Access";
 
         popup.OpenModal();
@@ -62,7 +66,7 @@
 
     void GoToLogin()
     {
-        navigationManager.NavigateTo("/login");
+        navigationManager.NavigateTo("/logout");
         popup.CloseModal();
     }
 }

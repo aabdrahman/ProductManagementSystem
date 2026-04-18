@@ -33,7 +33,7 @@ else
     {
         _isLoading = true;
 
-        await Task.Delay(500);
+        await Task.Delay(250);
 
         var isLogoutResult = await logoutHandler.Handle();
         _responseMessage = isLogoutResult.responseMessage;
@@ -41,12 +41,12 @@ else
 
         if (isLogoutResult.isSuccessful)
         {
-            await Task.Delay(3000);
+            await Task.Delay(300);
             navigationManager.NavigateTo("/login");
         }
         else
         {
-            await Task.Delay(3000);
+            await Task.Delay(300);
             navigationManager.NavigateTo("/login");
         }
     }

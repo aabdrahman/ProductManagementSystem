@@ -13,6 +13,7 @@ public class AuthStateProvider : AuthenticationStateProvider
     private readonly RefreshTokenHandler _refreshTokenHandler;
     private AuthenticationState _anonymous;
     private readonly TokenContainer _tokenContainer;
+    private static bool _isRefreshing = false;
 
     public AuthStateProvider(ILocalStorageUtility storageUtility, TokenContainer tokenContainer, RefreshTokenHandler refreshTokenHandler)
     {
@@ -24,6 +25,8 @@ public class AuthStateProvider : AuthenticationStateProvider
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
+
+        begin:
         TokenDto? storedToken = await _storageUtility.GetItemFromStorageAsync<TokenDto>("session-token");
 
         if(storedToken is null)
@@ -50,7 +53,7 @@ public class AuthStateProvider : AuthenticationStateProvider
             return _anonymous;
         }
 
-        DateTimeOffset expiryTimestamp = DateTimeOffset.FromUnixTimeSeconds(expiryTime);
+        DateTimeOffset expiryTimestamp = (DateTimeOffset.FromUnixTimeSeconds(expiryTime)).AddSeconds(5);
         double timeToExpiry = (DateTimeOffset.UtcNow - expiryTimestamp).TotalSeconds;
 
         if(timeToExpiry <= 10 && timeToExpiry >= 0)
@@ -81,6 +84,10 @@ public class AuthStateProvider : AuthenticationStateProvider
                 var removeTokenResult = await _storageUtility.RemoveItemFromStorageAsync("session-token");
                 NotifyAuthenticationStateChanged(Task.FromResult(_anonymous));
                 return _anonymous;
+            }
+            finally
+            {
+                _isRefreshing = false;
             }
             
         }

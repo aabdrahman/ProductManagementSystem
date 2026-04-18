@@ -5,7 +5,6 @@ using ProductManagementSystem.Api.Controllers.AuthRequirements;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api.Entities.Models;
-using ProductManagementSystem.Api.Entities.StaticValues;
 using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Api.Utilities.Contracts;
@@ -575,7 +574,7 @@ public class OrderService : IOrderService
                 return GenericResponse<OrderDto>.Failure(null, $"Order with Id: {updateOrder.Id} does not exist.", System.Net.HttpStatusCode.NotFound);
             }
 
-            var isValidRequirement = await _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, orderToUpdate, Operations.Update);
+            AuthorizationResult isValidRequirement = await _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, orderToUpdate, Operations.Update);
 
             if (!isValidRequirement.Succeeded)
             {
@@ -693,11 +692,11 @@ public class OrderService : IOrderService
                 return GenericResponse<string>.Failure(null, $"Order with specified Id: {updateOrderStatus.Id} does not exist", System.Net.HttpStatusCode.NotFound);
             }
 
-            var isValidRequirement = await _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, orderToUpdate, Operations.Update);
+            AuthorizationResult isValidRequirement = await _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, orderToUpdate, Operations.Update);
 
             if (!isValidRequirement.Succeeded)
             {
-                Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Warning("User - {0} is not auhtorized to perform operation on the resource. Allowed User - {1}",
+                Log.ForContext(_methodName, "UpdateAsync").ForContext(_className, "OrderService").Warning("User - {0} is not authorized to perform operation on the resource. Allowed User - {1}",
                                                                     _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), orderToUpdate.UserId);
                 return GenericResponse<string>.Failure("Operation Failed.", "Operation denied.", System.Net.HttpStatusCode.Forbidden);
             }
@@ -726,6 +725,8 @@ public class OrderService : IOrderService
             //_repositoryContext.Orders.Update(orderToUpdate);
 
             await _repositoryContext.SaveChangesAsync();
+
+            var removeFromCcahe = await _redisService.RemoveMultiple(RedisCacheHelperClass.OrdersKey, RedisCacheHelperClass.GetOrderCacheKey(orderToUpdate.Id), RedisCacheHelperClass.GetOrderDetailKey(orderToUpdate.Id));
 
             Log.ForContext(_methodName, "UpdateOrderStatusAsync").ForContext(_className, "OrderService").Information("Order Status Successfully updated - {updatedSttaus}", orderToUpdate.OrderStatus.ToString());
 
@@ -821,7 +822,15 @@ public class OrderService : IOrderService
         {
             Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetUserOrdersAsync)).Information("Get User Orders - {0}", UserId);
 
-            List<OrderDto> userOrders = await _repositoryContext.Orders.Where(x => x.UserId == UserId).Select(x => new OrderDto()
+            var loggedInUserId = _httpContextAccessor.HttpContext.User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if(!int.TryParse(loggedInUserId, out int userId) || UserId != userId)
+            {
+                Log.ForContext(_className, nameof(OrderService)).ForContext(_methodName, nameof(GetUserOrdersAsync)).Information("Logged in user does not match the user id.");
+                return GenericResponse<IEnumerable<OrderDto>>.Failure(null, "An error occurred performing operation.", System.Net.HttpStatusCode.Conflict);
+            }
+
+            List<OrderDto> userOrders = await _repositoryContext.Orders.Where(x => x.UserId == userId).Select(x => new OrderDto()
             {
                 Id = x.Id,
                 OrderStatus = x.OrderStatus.ToString(),

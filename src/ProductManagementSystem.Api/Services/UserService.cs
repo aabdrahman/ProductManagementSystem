@@ -11,6 +11,9 @@ using System.Net;
 using ProductManagementSystem.Api.Entities.StaticValues;
 using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Shared.DataTransferObjects.MailOperation;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using ProductManagementSystem.Api.Controllers.AuthRequirements;
 
 namespace ProductManagementSystem.Api.Services;
 
@@ -20,16 +23,22 @@ public class UserService : IUserService
     private readonly IPasswordHasher _passwordHasher;
     private readonly IEmailService _emailService;
     private readonly IOtpOperation _otpOperation;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
-    public UserService(RepositoryContext repositoryContext, IPasswordHasher passwordHasher, IEmailService emailService, IOtpOperation otpOperation)
+    public UserService(RepositoryContext repositoryContext, IPasswordHasher passwordHasher, 
+                        IEmailService emailService, IOtpOperation otpOperation, 
+                        IHttpContextAccessor httpContextAccessor , IAuthorizationService authorizationService)
     {
         _repositoryContext = repositoryContext;
         _passwordHasher = passwordHasher;
         _emailService = emailService;
         _otpOperation = otpOperation;
+        _httpContextAccessor = httpContextAccessor;
+        _authorizationService = authorizationService;
     }
 
     public async Task<GenericResponse<string>> ConfirmUserAsync(UpdateUserConfimationStatusDto updateUserConfimationStatus)
@@ -175,6 +184,14 @@ public class UserService : IUserService
                 return GenericResponse<string>.Failure("Operation Failed.", "User could not be deactivated as one or more orders are still processing or pending.", HttpStatusCode.Conflict);
             }
 
+            AuthorizationResult isValidUser = await _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, userToDelete, Operations.Delete);
+
+            if (!isValidUser.Succeeded)
+            {
+                Log.ForContext(_className, "UserService").ForContext(_methodName, "DeleteAsync").Information("User is not authorized to delete the user record.");
+                return GenericResponse<string>.Failure("Operation Failed.", "Operation could not be completed.", HttpStatusCode.Conflict);
+            }
+
             if (isSoftDelete)
             {
                 userToDelete.IsActive = false;
@@ -243,6 +260,14 @@ public class UserService : IUserService
         {
             Log.ForContext(_className, "UserService").ForContext(_methodName, "GetUserByIdAsync").Information("Fetching User with Id - {0}", Id);
 
+            var loggedInUserId = _httpContextAccessor.HttpContext.User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if(!int.TryParse(loggedInUserId, out int userId) || userId != Id)
+            {
+                Log.ForContext(_className, "UserService").ForContext(_methodName, "GetUserByIdAsync").Information("User Id could not be fetched from the context.");
+                return GenericResponse<UserDto>.Failure(null, "User could not be fetched.", HttpStatusCode.Unauthorized);
+            }
+
             UserDto? user = await _repositoryContext.Users.Select(x => new UserDto()
             {
                 Id = x.Id,
@@ -293,7 +318,16 @@ public class UserService : IUserService
                 return GenericResponse<UserDto>.Failure(null, $"User with Id: {updateUser.Id} does not exist.", HttpStatusCode.NotFound);
             }
 
-            if(!userToUpdate.UserEmailAddress.Equals(updateUser.UserEmailAddress, StringComparison.CurrentCultureIgnoreCase))
+
+            AuthorizationResult isValidUser = await _authorizationService.AuthorizeAsync(_httpContextAccessor.HttpContext.User, updateUser, Operations.Update);
+
+            if (!isValidUser.Succeeded)
+            {
+                Log.ForContext(_className, "UserService").ForContext(_methodName, "UpdateAsync").Information("Logged in user cannot perform operation on the selected user.");
+                return GenericResponse<UserDto>.Failure(null, "An error occurred performing action.", HttpStatusCode.Conflict);
+            }
+
+            if (!userToUpdate.UserEmailAddress.Equals(updateUser.UserEmailAddress, StringComparison.CurrentCultureIgnoreCase))
             {
                 var isNewEmailExists = await _repositoryContext.Users.AnyAsync(x => x.UserEmailAddress == updateUser.UserEmailAddress.ToUpper());
 

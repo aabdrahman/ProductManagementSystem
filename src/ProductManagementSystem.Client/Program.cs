@@ -28,7 +28,7 @@ builder.Services.AddAuthentication(opts =>
         ValidateIssuer = true,
         ValidateIssuerSigningKey = true,
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero,
+        ClockSkew = TimeSpan.FromSeconds(5),
 
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("PmsSECRET") ?? "Test")),
         ValidIssuer = "TaskManagementAPI",
