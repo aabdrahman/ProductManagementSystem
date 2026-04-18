@@ -14,4 +14,10 @@
     <ProjectReference Include="..\ProductManagementSystem.Shared\ProductManagementSystem.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Pages\Admin\" />
+    <Folder Include="Components\Pages\Authentication\" />
+    <Folder Include="Components\Pages\Home\" />
+  </ItemGroup>
+
 </Project>

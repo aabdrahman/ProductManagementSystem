@@ -25,6 +25,12 @@
 		<PackageReference Include="FluentEmail.Smtp" Version="3.0.2" />
 		<PackageReference Include="FluentEmail.Razor" Version="3.0.2" />
 		<PackageReference Include="StackExchange.Redis" Version="3.0.2-preview" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.6" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Core" Version="9.0.0" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
+		<PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
+		<PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
