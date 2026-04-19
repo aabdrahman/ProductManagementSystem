@@ -1,6 +1,10 @@
+using HealthChecks.UI.Client;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -8,6 +12,7 @@ using ProductManagementSystem.Api;
 using ProductManagementSystem.Api.BackgroundWorker;
 using ProductManagementSystem.Api.Controllers.AuthRequirements;
 using ProductManagementSystem.Api.Controllers.ServiceFilters;
+using ProductManagementSystem.Api.CustomHealthChecks;
 using ProductManagementSystem.Api.Data;
 using ProductManagementSystem.Api.Endpoints;
 using ProductManagementSystem.Api.Entities.ChannelBrokers;
@@ -34,6 +39,26 @@ Log.Logger = new LoggerConfiguration()
                     .WriteTo.File(logPath, Serilog.Events.LogEventLevel.Information, outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.ffff zzz}||{Level:u3}] || [{ClassName}].[{MethodName}] - {Message:lj}{NewLine}{Exception}{NewLine}", 
                                     fileSizeLimitBytes: 10_000_000, rollingInterval: RollingInterval.Day, buffered: false)
                     .CreateLogger();
+
+builder.Services.AddCors(opts =>
+{
+
+    opts.AddDefaultPolicy(setup =>
+    {
+        setup.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+
+    opts.AddPolicy("FrontEndPolicy", setup =>
+    {
+        var config = builder.Configuration.GetSection("CorsPolicy");
+        setup.AllowAnyHeader()
+            .WithExposedHeaders(config["ExposedHeaders"].Split(",", StringSplitOptions.TrimEntries))
+            .WithMethods(config["AllowedMethods"].Split(",", StringSplitOptions.TrimEntries))
+            .WithOrigins(config["AllowedOrigins"].Split(",", StringSplitOptions.TrimEntries));
+    });
+});
 
 builder.Services.AddSwaggerGen(opts =>
 {
@@ -90,7 +115,7 @@ builder.Services.AddDbContext<RepositoryContext>(opts =>
 {
     opts.UseSqlServer(builder.Configuration.GetConnectionString("SqlDbConnection"))
             .EnableSensitiveDataLogging()
-            .LogTo(Log.Information, new[] { DbLoggerCategory.Database.Command.Name, DbLoggerCategory.Model.Name }, LogLevel.Information, Microsoft.EntityFrameworkCore.Diagnostics.DbContextLoggerOptions.SingleLine);
+            .LogTo(Log.Information, new[] { DbLoggerCategory.Database.Command.Name, DbLoggerCategory.Model.Name }, LogLevel.Information, DbContextLoggerOptions.SingleLine);
 });
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(opts =>
@@ -99,6 +124,25 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(opts =>
 
     return connection;
 });
+
+builder.Services.AddHealthChecks().AddCheck<RedisHealthCheck>(name: "Custom Redis Health", failureStatus: HealthStatus.Unhealthy)
+    .AddSqlServer(connectionString: builder.Configuration.GetConnectionString("SqlDbConnection"), 
+                    name: "SQL Database Health", 
+                    failureStatus: HealthStatus.Unhealthy)
+    .AddRedis(redisConnectionString: builder.Configuration.GetConnectionString("RedisConnection"), 
+              name: "Redis Health", 
+              failureStatus: HealthStatus.Unhealthy)
+    .AddSmtpHealthCheck(opts =>
+    {
+        opts.Port = builder.Configuration.GetValue<int>("EmailSettings:Port");
+        opts.Host = builder.Configuration.GetValue<string>("EmailSettings:Host");
+    }, name: "SMTP Health Check", failureStatus: HealthStatus.Degraded);
+
+builder.Services.AddHealthChecksUI(opts =>
+{
+    opts.AddHealthCheckEndpoint("System Health Check", "/_healths");
+    opts.SetEvaluationTimeInSeconds(20);
+}).AddInMemoryStorage();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -186,6 +230,8 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+app.UseCors("FrontEndPolicy");
+
 app.UseSwagger();
 app.UseSwaggerUI(opts =>
 {
@@ -207,6 +253,18 @@ app.UseExceptionHandler(opts =>
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseHealthChecks("/_healths", new HealthCheckOptions()
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+
+});
+
+app.UseHealthChecksUI(opts =>
+{
+    opts.UIPath = "/_healths-ui";
+    opts.ApiPath = "/_healths-api";
+});
 
 app.UseHttpsRedirection();
 
