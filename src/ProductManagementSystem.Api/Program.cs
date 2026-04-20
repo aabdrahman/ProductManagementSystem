@@ -125,22 +125,26 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(opts =>
     return connection;
 });
 
-builder.Services.AddHealthChecks().AddCheck<RedisHealthCheck>(name: "Custom Redis Health", failureStatus: HealthStatus.Unhealthy)
-    .AddSqlServer(connectionString: builder.Configuration.GetConnectionString("SqlDbConnection"), 
-                    name: "SQL Database Health", 
+builder.Services.AddHealthChecks()
+    .AddCheck<D_DriveStorageHealthCheck>(name: "D Drive Disk space Health", failureStatus: HealthStatus.Degraded)
+    .AddCheck<C_DriveStorageHealthCheck>(name: "C Drive Disk space Health", failureStatus: HealthStatus.Unhealthy)
+    .AddCheck<RedisHealthCheck>(name: "Custom Redis Health", failureStatus: HealthStatus.Unhealthy)
+    .AddSqlServer(connectionString: builder.Configuration.GetConnectionString("SqlDbConnection"),
+                    name: "SQL Database Health",
                     failureStatus: HealthStatus.Unhealthy)
-    .AddRedis(redisConnectionString: builder.Configuration.GetConnectionString("RedisConnection"), 
-              name: "Redis Health", 
+    .AddRedis(redisConnectionString: builder.Configuration.GetConnectionString("RedisConnection"),
+              name: "Redis Health",
               failureStatus: HealthStatus.Unhealthy)
-    .AddSmtpHealthCheck(opts =>
-    {
-        opts.Port = builder.Configuration.GetValue<int>("EmailSettings:Port");
-        opts.Host = builder.Configuration.GetValue<string>("EmailSettings:Host");
-    }, name: "SMTP Health Check", failureStatus: HealthStatus.Degraded);
+    //.AddSmtpHealthCheck(opts =>
+    //{
+    //    opts.Port = builder.Configuration.GetValue<int>("EmailSettings:Port");
+    //    opts.Host = builder.Configuration.GetValue<string>("EmailSettings:Host");
+    //}, name: "SMTP Health Check", failureStatus: HealthStatus.Degraded);
+    ;
 
 builder.Services.AddHealthChecksUI(opts =>
 {
-    opts.AddHealthCheckEndpoint("System Health Check", "/_healths");
+    opts.AddHealthCheckEndpoint("System Health Check", "/admin/_healths");
     opts.SetEvaluationTimeInSeconds(20);
 }).AddInMemoryStorage();
 
@@ -254,7 +258,7 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.UseHealthChecks("/_healths", new HealthCheckOptions()
+app.UseHealthChecks("/admin/_healths", new HealthCheckOptions()
 {
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 
@@ -262,8 +266,8 @@ app.UseHealthChecks("/_healths", new HealthCheckOptions()
 
 app.UseHealthChecksUI(opts =>
 {
-    opts.UIPath = "/_healths-ui";
-    opts.ApiPath = "/_healths-api";
+    opts.UIPath = "/admin/_healths-ui"; 
+    //opts.ApiPath = "/admin/_healths-api";
 });
 
 app.UseHttpsRedirection();
