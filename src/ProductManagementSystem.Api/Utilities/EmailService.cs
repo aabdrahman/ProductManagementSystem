@@ -33,6 +33,18 @@ public class EmailService : IEmailService
         _sendPriorityMailChannel = sendPriorityMailChannel;
     }
 
+    public Task<(int tempQueuedCount, int queuedCount)> GetPriorityMails()
+    {
+        try
+        {
+            return Task.FromResult((_tempQueuedEmails.Count, _queuedEmails.Count));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult((0, 0));
+        }
+    }
+
     public async Task<ProcessedMailResultDto> ProcessPriorityMails()
     {
         try

@@ -126,7 +126,9 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(opts =>
 });
 
 builder.Services.AddHealthChecks()
-    .AddCheck<D_DriveStorageHealthCheck>(name: "D Drive Disk space Health", failureStatus: HealthStatus.Degraded)
+    .AddCheck<FileStoragePathHealthCheck>(name: "File Storage Path Health", failureStatus: HealthStatus.Degraded)
+    .AddCheck<MailProcessorHealthCheck>(name: "Mail Processor Health", failureStatus: HealthStatus.Degraded)
+    .AddCheck<D_DriveStorageHealthCheck>(name: " Drive Disk space Health", failureStatus: HealthStatus.Degraded)
     .AddCheck<C_DriveStorageHealthCheck>(name: "C Drive Disk space Health", failureStatus: HealthStatus.Unhealthy)
     .AddCheck<RedisHealthCheck>(name: "Custom Redis Health", failureStatus: HealthStatus.Unhealthy)
     .AddSqlServer(connectionString: builder.Configuration.GetConnectionString("SqlDbConnection"),
@@ -234,6 +236,8 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+app.UseRouting();
+
 app.UseCors("FrontEndPolicy");
 
 app.UseSwagger();
@@ -258,19 +262,25 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+
+app.UseHttpsRedirection();
+
+
+
 app.UseHealthChecks("/admin/_healths", new HealthCheckOptions()
 {
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+    Predicate = p => true
 
 });
 
 app.UseHealthChecksUI(opts =>
 {
-    opts.UIPath = "/admin/_healths-ui"; 
-    //opts.ApiPath = "/admin/_healths-api";
+    opts.UIPath = "/_healths-ui";
+    opts.ApiPath = "/admin/_healths-api";
 });
 
-app.UseHttpsRedirection();
+
 
 await app.MigrateDatabase();
 

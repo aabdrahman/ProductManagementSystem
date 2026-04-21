@@ -8,4 +8,5 @@ public interface IEmailService
     Task<bool> RevokeEmailAsync(EmailSenderDto emailToRevoke);
     Task<ProcessedMailResultDto> ProcessQueuedEmails(bool processAll = false);
     Task<ProcessedMailResultDto> ProcessPriorityMails();
+    Task<(int tempQueuedCount, int queuedCount)> GetPriorityMails();
 }
