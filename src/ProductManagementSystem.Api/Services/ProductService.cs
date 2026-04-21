@@ -20,11 +20,14 @@ public sealed class ProductService : IProductService
     private readonly RepositoryContext _repositoryContext;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IRedisService _redisService;
-    public ProductService(RepositoryContext repositoryContext, IHttpContextAccessor httpContextAccessor, IRedisService redisService)
+    private readonly StackExchange.Redis.IDatabase _redisDatabase;
+    private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+    public ProductService(RepositoryContext repositoryContext, IHttpContextAccessor httpContextAccessor, IRedisService redisService, StackExchange.Redis.IConnectionMultiplexer connectionMultiplexer)
     {
         _repositoryContext = repositoryContext;
         _httpContextAccessor = httpContextAccessor;
         _redisService = redisService;
+        _redisDatabase = connectionMultiplexer.GetDatabase();
     }
     public async Task<GenericResponse<ProductDto>> CreateAsync(CreateProductDto productToCreate)
     {
@@ -381,13 +384,72 @@ public sealed class ProductService : IProductService
                 return GenericResponse<string>.Failure("Operation Failed", "No product with specified id exists", System.Net.HttpStatusCode.NotFound);
             }
 
-            productToUpdateStock.CurrentCount += productStock.StockToAdd;
+            //Locking operation section to ensure that only one stock update operation can be performed on a product at a given time. This is to prevent race conditions and ensure data consistency when multiple requests are trying to update the stock of the same product concurrently.
+            var lockProcess = await _semaphoreSlim.WaitAsync(500);
 
-            await _repositoryContext.SaveChangesAsync();
+            if(!lockProcess)
+            {
+                Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Could not acquire lock for updating stock for product with Id - {0}", productStock.Id);
+                return GenericResponse<string>.Failure("Operation Failed", "The product stock is currently being updated by another process. Please try again shortly.", System.Net.HttpStatusCode.Conflict);
+            }
 
-            var removeFromCcahe = await _redisService.RemoveMultiple(RedisCacheHelperClass.ProductsKey, RedisCacheHelperClass.GetProductCacheKey(productStock.Id));
+            int retryCount = 0; bool _isLockMaintained = false;
 
-            Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Product with Id: {0} Stock Updated Successfully. Current Count - {1}. Remove From cache returns - {2}", productToUpdateStock.Id, productToUpdateStock.CurrentCount, removeFromCcahe);
+            while (retryCount < 3 && !_isLockMaintained)
+            {
+
+                var lockKey = RedisCacheHelperClass.GetLockedOutProductCacheKey(productStock.Id);
+                bool isLockAcquired = await _redisDatabase.StringSetAsync(RedisCacheHelperClass.GetLockedOutProductCacheKey(productToUpdateStock.Id), productToUpdateStock.Id, TimeSpan.FromSeconds(10), when: StackExchange.Redis.When.NotExists);
+                if (isLockAcquired)
+                {
+                    _isLockMaintained = true;
+                    break;
+                }
+                retryCount++;
+                await Task.Delay(1000);
+            }
+
+            _semaphoreSlim.Release();
+
+            //locking operation section ends here
+
+            if (retryCount >= 3 && !_isLockMaintained)
+            {
+                Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Could not acquire lock for updating stock for product with Id - {0} after 3 retries.", productStock.Id);
+                return GenericResponse<string>.Failure("Operation Failed", "The product stock is currently being updated by another process. Please try again shortly.", System.Net.HttpStatusCode.Conflict);
+            }
+
+            //Get the stock count value directly from database to ensure that we have the most up-to-date value, especially in scenarios where there might be multiple concurrent updates to the product stock. This helps to prevent issues such as lost updates and ensures that the stock count is accurately maintained.
+
+            int? productStockBeforeUpdate = await _repositoryContext.Products.Where(x => x.Id == productToUpdateStock.Id).Select(x => x.CurrentCount).FirstOrDefaultAsync();
+
+            if(!productStockBeforeUpdate.HasValue)
+            {
+
+                Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Product with Id - {0} does not exist.", productStock.Id);
+                return GenericResponse<string>.Failure("Operation Failed", "No product with specified id exists", System.Net.HttpStatusCode.NotFound);
+            }
+
+            productToUpdateStock.CurrentCount = productStockBeforeUpdate.Value + productStock.StockToAdd;
+            bool removeLock = false;
+            try
+            {
+                await _repositoryContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Error(ex, "A Database Error Occurred Updating Product Stock.");
+                return GenericResponse<string>.Failure(null, "Error Occurred Updating Stock.", System.Net.HttpStatusCode.InternalServerError, new { Message = ex.Message });
+            }
+            finally
+            {
+                //This section is always run as it ensures that the lock is released even if there is an exception during the database update operation. This is crucial to prevent deadlocks and ensure that other processes can continue to update the stock of the product without being indefinitely blocked by a lock that was not released due to an error.
+                removeLock = await _redisDatabase.KeyDeleteAsync(RedisCacheHelperClass.GetLockedOutProductCacheKey(productToUpdateStock.Id));
+            }
+
+            var removeFromCache = await _redisService.RemoveMultiple(RedisCacheHelperClass.ProductsKey, RedisCacheHelperClass.GetProductCacheKey(productStock.Id));
+
+            Log.ForContext(_className, "ProductService").ForContext(_methodName, "UpdateStockAsync").Information($"Product with Id: {0} Stock Updated Successfully. Current Count - {1}. Remove From cache returns - {2}. Remove Lock returns - {3}", productToUpdateStock.Id, productToUpdateStock.CurrentCount, removeFromCache, removeLock);
 
             return GenericResponse<string>.Success("Operation Successful", $"Product Stock successfully updated. Current Count: {productToUpdateStock.CurrentCount}", System.Net.HttpStatusCode.OK);
 

@@ -896,7 +896,6 @@ public class OrderService : IOrderService
             return false;
         }
 
-
         //Semaphore available - Begin main operation
         try
         {
