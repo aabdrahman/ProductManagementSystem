@@ -137,12 +137,15 @@ builder.Services.AddHealthChecks()
     .AddRedis(redisConnectionString: builder.Configuration.GetConnectionString("RedisConnection"),
               name: "Redis Health",
               failureStatus: HealthStatus.Unhealthy)
-    //.AddSmtpHealthCheck(opts =>
-    //{
-    //    opts.Port = builder.Configuration.GetValue<int>("EmailSettings:Port");
-    //    opts.Host = builder.Configuration.GetValue<string>("EmailSettings:Host");
-    //}, name: "SMTP Health Check", failureStatus: HealthStatus.Degraded);
-    ;
+    .AddSmtpHealthCheck(opts =>
+    {
+        opts.Port = builder.Configuration.GetValue<int>("EmailSettings:Port");
+        opts.Host = builder.Configuration.GetValue<string>("EmailSettings:Host");
+        opts.ConnectionType = HealthChecks.Network.Core.SmtpConnectionType.PLAIN;
+        opts.AllowInvalidRemoteCertificates = true;
+        
+    }, name: "SMTP Health Check", failureStatus: HealthStatus.Degraded);
+;
 
 builder.Services.AddHealthChecksUI(opts =>
 {
