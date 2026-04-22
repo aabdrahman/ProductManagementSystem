@@ -1,0 +1,23 @@
+﻿
+.custom-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 4%;
+    min-height: 100vh;
+}
+
+/* Small devices */
+@media (max-width: 768px) {
+    .custom-body {
+        padding: 1rem 0.75rem;
+    }
+}
+
+/* Very small devices */
+@media (max-width: 480px) {
+    .custom-body {
+        padding: 0.5rem 0.25rem;
+    }
+}

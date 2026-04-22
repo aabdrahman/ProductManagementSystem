@@ -188,6 +188,36 @@ form{
     border-color: #dc3545;
 }
 
+.form-group select {
+    appearance: none;
+    background-color: #ffffff;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    padding: 10px 40px 10px 15px;
+    cursor: pointer;
+/*    font-size: 1px;*/
+}
+
+option {
+    font-family: var(--FONT-STYLE-BODY);
+    font-size: 0.5rem;
+    color: red;
+}
+
+/*select::picker-icon {
+    color: #999999;
+    transition: 0.4s rotate;
+}*/
+
+option:hover,
+option:focus {
+    background-color: green;
+}
+
+option:checked{
+    background-color: red;
+}
+
 .form-group input:valid,
 .form-group textarea:valid {
     border-color: #28a745;
@@ -195,7 +225,7 @@ form{
 
 
 input::placeholder,
-textarea::placeholder {
+textarea::placeholder, select::placeholder {
     font-family: var(--FONT-STYLE-BODY);
     font-style: italic;
 }
@@ -351,12 +381,14 @@ textarea::placeholder {
 }
 
 .auth-card {
-    width: 660px;
+    width: min(660px, 100%);
     max-width: 1200px;
     background: white;
     border-radius: 12px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-    padding: 2rem 4%;
+/*    padding: 2rem 4%;*/
+    padding: clamp(1rem, 4vw, 2rem);
+
 }
 
 .auth-card h2 {
@@ -552,4 +584,42 @@ textarea::placeholder {
 .btn.danger:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+}
+
+
+@media (max-width: 768px) {
+    .auth-page {
+        padding: 1.25rem 0.75rem;
+    }
+
+    .form-group input{
+        font-size: 0.85rem;
+    }
+
+    .btn, .auth-btn {
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s ease;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .auth-page {
+        padding: .75rem 0.5rem;
+    }
+
+    .form-group input {
+        font-size: 0.85rem;
+    }
+
+    .btn, .auth-btn {
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s ease;
+    }
 }

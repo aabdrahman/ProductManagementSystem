@@ -1,12 +1,24 @@
 ﻿
 .user-card {
+    width: min(500px, 100%);
     max-width: 500px;
     margin: auto;
     background: white;
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
 }
+
+/*.user-card {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}*/
 
 /* HEADER */
 
@@ -158,4 +170,32 @@
 .status-pill.inactive {
     background: #ffeef0;
     color: #cb2431;
+}
+
+@media (max-width: 768px) {
+    .user-card {
+        max-width: 90%;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-card {
+        max-width: 100%;
+        padding: .65rem;
+        border-radius: 10px;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+
+    .user-header {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .user-header .avatar {
+        width: 25px;
+        height: 25px;
+        font-size: 0.6rem;
+    }
 }

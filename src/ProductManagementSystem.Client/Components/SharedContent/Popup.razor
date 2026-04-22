@@ -1,30 +1,4 @@
-﻿@* @if (_showModal)
-{
-    <div class="modal-backdrop" @onclick="CloseModal">
-
-    </div>
-
-    <div class="modal" role="dialog" aria-modal="true">
-        <div class="modal-header">
-            <h3>@_modalTitle</h3>
-            <button class="modal-close" hidden="@_showCloseButton" @onclick="CloseModal">✕</button>
-        </div>
-
-        <div class="modal-body">
-            @ChildContent
-        </div>
-
-        @if (_showFooter)
-        {
-            <div class="modal-footer">
-                <button class="btn ghost" @onclick="CloseModal">Cancel</button>
-                <button class="btn danger" @onclick="ConfirmAction">Confirm</button>
-            </div>
-        }
-
-    </div>
-} *@
-
+﻿
 @if (_showModal)
 {
     <div class="modal-overlay"></div>
@@ -35,7 +9,7 @@
                 <h3>@_modalTitle</h3>
                 @if (ShowCloseButton)
                 {
-                    <button class="app-modal-close" @onclick="CloseModal">✕</button>
+                    <button class="app-modal-close" @onclick="CloseModal">✖</button>
                 }
             </div>
 

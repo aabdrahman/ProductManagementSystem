@@ -12,24 +12,33 @@
 <header class="site-header">
     <div class="header-container">
 
+        <!-- Mobile Menu Icon -->
+        <div class="menu-toggle" @onclick="ToggleItemMenu" id="menu-toggle">
+            @(_showItemMenu ? "✖" : "☰")
+        </div>
+
         <!-- Logo / Site Name -->
         <div class="logo">
             <a href="#">MANAGE X</a>
         </div>
 
         <!-- Navigation Links -->
-        <nav class="nav-links">
-            <a href="#products">Products</a>
-            <a href="#about-us">About Us</a>
-            <a href="#reviews">Reviews</a>
-            <a href="/contact-us">Contact</a>
+        <nav class="nav-links @(_showItemMenu ? "active" : "")">
+            <a href="#products" @onclick="CloseItemMenu">Products</a>
+            <a href="#about-us" @onclick="CloseItemMenu">About Us</a>
+            <a href="#reviews" @onclick="CloseItemMenu">Reviews</a>
+            <a href="/contact-us" @onclick="CloseItemMenu">Contact</a>
 
             <AuthorizeView Roles="ADMIN,SYSTEM">
-                <a href="/admin">Admin</a>
+                <a href="/admin" @onclick="CloseItemMenu">Admin</a>
             </AuthorizeView>
 
-
         </nav>
+
+        @if (_showItemMenu)
+        {
+            <div class="overlay" @onclick="CloseItemMenu"></div>
+        }
 
         <!-- CTA Button -->
         <div class="header-cta">
@@ -70,6 +79,9 @@
                         }
 
                     </div>
+
+
+
                 </Authorized>
                 <NotAuthorized>
                     <a @onclick="Login" class="login-btn">
@@ -82,67 +94,62 @@
                     </a>
                 </NotAuthorized>
 
+
             </AuthorizeView>
 
-            @* @if (_isLoggedIn)
-            {
-                <div class="user-menu" @onclick="ToggleMenu">
-
-                    <div class="user-trigger">
-                        <span class="user-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
-                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-                                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+            <AuthorizeView>
+                <NotAuthorized>
+                    <a href="/checkout" class="checkout-btn">
+                        <span class="cart-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cart-fill" viewBox="0 0 16 16">
+                                <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L1.01 3H.5a.5.5 0 0 1-.5-.5zM4.415 11h8.17l1.2-6H3.215l1.2 6zM6 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7-2a2 2 0 1 0 .001-3.999A2 2 0 0 0 13 .001z" />
                             </svg>
                         </span>
-                        <span>@_username</span>
-                        <span class="arrow">▾</span>
-                    </div>
+                        @if (_cartCount > 0)
+                        {
+                            <span class="checkout-badge">@_cartCount</span>
+                        }
+                    </a>
 
-                    @if (_showUserMenu)
-                    {
-                        <div class="user-dropdown">
+                    @* <a href="/checkout" class="checkout-btn">
+                        🛒 Checkout
+                        @if (_cartCount > 0)
+                        {
+                            <span class="checkout-badge">@_cartCount</span>
+                        }
+                    </a> *@
 
-                            <a href="@(string.Concat("/user-details"))">Profile</a>
+                </NotAuthorized>
+                    
+                <Authorized>
+                    <a href="/checkout" class="checkout-btn">
+                        <span class="cart-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cart-fill" viewBox="0 0 16 16">
+                                <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L1.01 3H.5a.5.5 0 0 1-.5-.5zM4.415 11h8.17l1.2-6H3.215l1.2 6zM6 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7-2a2 2 0 1 0 .001-3.999A2 2 0 0 0 13 .001z" />
+                            </svg>
+                        </span>
+                        @if (_cartCount > 0)
+                        {
+                            <span class="checkout-badge">@_cartCount</span>
+                        }
+                    </a>
 
-                            <a href="/user/orders">My Orders</a>
+                    @* <a href="/checkout" class="checkout-btn">
+                        🛒 Checkout
+                        @if (_cartCount > 0)
+                        {
+                            <span class="checkout-badge">@_cartCount</span>
+                        }
+                    </a> *@
+                </Authorized>
+            </AuthorizeView>
 
-                            <button class="logout-btn" @onclick="Logout">
-                                Logout
-                            </button>
-
-                        </div>
-                    }
-
-                </div>
-            }
-            else if (!_isLoggedIn)
-            {
-
-                <a @onclick="Login" class="login-btn">
-                    <span class="login-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
-                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
-                        </svg>
-                    </span>
-                    <span class="login-text">Login</span>
-                </a>
-            } *@
-
-
-            <a href="/checkout" class="checkout-btn">
-                🛒 Checkout
-                @if (_cartCount > 0)
-                {
-                    <span class="checkout-badge">@_cartCount</span>
-                }
-            </a>
         </div>
 
-        <!-- Mobile Menu Icon -->
+        @* <!-- Mobile Menu Icon -->
         <div class="menu-toggle" id="menu-toggle">
             ☰
-        </div>
+        </div> *@
 
     </div>
 </header>
@@ -158,10 +165,21 @@
     private string _username = "Abdrahman";
 
     private bool _showUserMenu = false;
+    private bool _showItemMenu = false;
 
     void ToggleMenu()
     {
         _showUserMenu = !_showUserMenu;
+    }
+
+    void ToggleItemMenu()
+    {
+        _showItemMenu = !_showItemMenu;
+    }
+
+    void CloseItemMenu()
+    {
+        _showItemMenu = false;
     }
 
     void Logout()
