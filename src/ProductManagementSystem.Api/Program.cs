@@ -1,10 +1,10 @@
 using HealthChecks.UI.Client;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -22,10 +22,14 @@ using ProductManagementSystem.Api.Services;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Api.Utilities;
 using ProductManagementSystem.Api.Utilities.Contracts;
+using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
 using StackExchange.Redis;
+using System.Collections.Concurrent;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Channels;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -228,6 +232,72 @@ builder.Services.AddControllers(opts =>
     //opts.Filters.Add<AuthenticationTokenValidationFilter>();
 });
 
+builder.Services.AddRateLimiter(opts =>
+{
+    opts.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    //opts.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+
+    //    RateLimitPartition.GetFixedWindowLimiter("globalRateLimiter", partition =>  new FixedWindowRateLimiterOptions
+    //    {
+    //        PermitLimit = 3,
+    //        AutoReplenishment = true,
+    //        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+    //        QueueLimit = 0,
+    //        Window = TimeSpan.FromSeconds(6)
+    //    })
+
+    //);
+
+    opts.AddPolicy("per-user-limit", context =>
+    {
+        var userId = context.User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value ?? "0";
+
+        if(int.TryParse(userId, out var id) && id > 0)
+        {
+            return RateLimitPartition.GetTokenBucketLimiter(userId, _ => new TokenBucketRateLimiterOptions
+            {
+                TokenLimit = 5,
+                TokensPerPeriod = 2,
+                ReplenishmentPeriod = TimeSpan.FromMinutes(2)
+            });
+        }
+
+        return RateLimitPartition.GetFixedWindowLimiter(userId, _ => new FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromSeconds(5),
+            PermitLimit = 100,
+            AutoReplenishment = true,
+            QueueLimit = 10,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+        });
+    });
+
+    //opts.AddPolicy("OptionalPolicy", context => RateLimitPartition.GetFixedWindowLimiter("globalRateLimiter", partition => new FixedWindowRateLimiterOptions
+    //{
+    //    PermitLimit = 3,
+    //    AutoReplenishment = true,
+    //    Window = TimeSpan.FromSeconds(60)
+    //}));
+
+    opts.OnRejected = async (context, token) =>
+    {
+        var response = GenericResponse<object>.Failure(null, $"Too many requests.", System.Net.HttpStatusCode.TooManyRequests);
+
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var metadata))
+        {
+            response.ResponseMessage = $"Too many requests. Please retry again after {metadata.TotalSeconds} seconds";
+            await context.HttpContext.Response.WriteAsJsonAsync(response, token);
+        }   
+        else
+        {
+            await context.HttpContext.Response.WriteAsJsonAsync(response, token);
+        }
+            
+    };
+    
+});
+
 builder.Services.AddHostedService<EmailProcessingBackgroundService>();
 builder.Services.AddHostedService<RemoveExpiredOtpBackgroundService>();
 builder.Services.AddHostedService<RemoveExpiredVerificationTokenBackgroundService>();
@@ -240,6 +310,8 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseRouting();
+
+app.UseRateLimiter();
 
 app.UseCors("FrontEndPolicy");
 

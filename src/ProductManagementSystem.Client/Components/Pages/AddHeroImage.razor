@@ -113,7 +113,7 @@
     {
         _isProcessing = true;
 
-        await Task.Delay(250);
+        //await Task.Delay(250);
 
         var result = await addHeroImageHandler.Handle(_uploadedFile, _title);
         _isSuccessful = result.isSuccessful;_responseMessage = result.responseMessage;

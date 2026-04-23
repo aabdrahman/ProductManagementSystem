@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using ProductManagementSystem.Api.Controllers.ServiceFilters;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.ContentDetails;
@@ -10,6 +11,7 @@ namespace ProductManagementSystem.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize(Roles = "ADMIN,SYSTEM")]
+[EnableRateLimiting("per-user-limit")]
 public class AboutUsController : ControllerBase
 {
     private readonly IAboutUsService _aboutUsService;

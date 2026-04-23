@@ -95,6 +95,7 @@ builder.Services.AddScoped<TokenContainer>();
 //builder.Services.AddScoped<HttpClientProvider>();
 
 builder.Services.AddTransient<OriginHandler>();
+builder.Services.AddTransient<RateLimitingHandler>();
 builder.Services.AddTransient<AuthProviderHandler>();
 builder.Services.AddScoped<RequestContext>();
 
@@ -106,7 +107,7 @@ builder.Services.AddHttpClient(builder.Configuration.GetValue<string>("ApiClient
     opts.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<double>("ApiClient:TimeoutAfterSeconds"));
     opts.DefaultRequestVersion = HttpVersion.Version11;
 
-}).AddHttpMessageHandler<OriginHandler>();
+}).AddHttpMessageHandler<OriginHandler>().AddHttpMessageHandler<RateLimitingHandler>();
 
 builder.Services.AddHttpClient(builder.Configuration.GetValue<string>("ApiClient:Secure-Key") ?? throw new ArgumentNullException("The api key name is not provided yet"), opts =>
 {
@@ -114,7 +115,7 @@ builder.Services.AddHttpClient(builder.Configuration.GetValue<string>("ApiClient
     opts.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<double>("ApiClient:TimeoutAfterSeconds"));
     opts.DefaultRequestVersion = HttpVersion.Version11;
 
-}).AddHttpMessageHandler<AuthProviderHandler>();
+}).AddHttpMessageHandler<AuthProviderHandler>().AddHttpMessageHandler<RateLimitingHandler>();
 
 var app = builder.Build();
 

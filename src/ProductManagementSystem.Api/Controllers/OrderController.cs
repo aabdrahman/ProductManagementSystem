@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using ProductManagementSystem.Api.Controllers.ServiceFilters;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Order;
@@ -13,6 +14,7 @@ namespace ProductManagementSystem.Api.Controllers;
 [ApiController]
 [Authorize(Roles = "ADMIN,SYSTEM,USER")]
 [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
+[EnableRateLimiting("per-user-limit")]
 public class OrderController : ControllerBase
 {
     private readonly IOrderService _orderService;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using ProductManagementSystem.Api.Services.Contracts;
 using Serilog;
 using System.Net;
@@ -7,6 +8,7 @@ namespace ProductManagementSystem.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[EnableRateLimiting("per-user-limit")]
 public class UserOrderVerificationController : ControllerBase
 {
     private readonly IUserOrderVerificationService _userOrderVerificationService;

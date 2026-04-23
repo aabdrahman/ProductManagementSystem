@@ -14,7 +14,7 @@ public class FileStoragePathHealthCheck : IHealthCheck
     {
         try
         {
-            Console.WriteLine($"Content Root Path: {_webHostEnvironment.ContentRootPath}");
+            //Console.WriteLine($"Content Root Path: {_webHostEnvironment.ContentRootPath}");
             var fileStoragePath = Path.Combine(_webHostEnvironment.ContentRootPath, "StaticFiles");
 
             if(!Directory.Exists(fileStoragePath))
