@@ -1,37 +1,62 @@
-﻿
-
+﻿/* =========================
+   PRODUCTS GRID
+========================= */
+/*.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: clamp(1rem, 3vw, 2rem);
+}
+*/
+/* =========================
+   PRODUCT CARD
+========================= */
 .product-card {
     background: var(--BG-COLOR-TERTIARY);
-    padding: 2rem;
+    padding: clamp(1rem, 3vw, 2rem);
     border-radius: 16px;
     border: 1px solid #e5e7eb;
     box-shadow: 0 8px 25px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-.product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+/* Hover only on devices that support it */
+@media (hover: hover) {
+    .product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
 }
 
+/* =========================
+   CATEGORY
+========================= */
 .product-category {
-    font-size: 0.95rem;
+    font-size: clamp(0.75rem, 2vw, 0.95rem);
     font-weight: 900;
     color: var(--FONT-COLOR-SECONDARY);
     text-transform: uppercase;
     letter-spacing: 0.75px;
     display: block;
-    margin-bottom: 0.75rem;
-    font-family: var(--FONT-STYLE-BODY-TITLE) ;
+    margin-bottom: 0.5rem;
+    font-family: var(--FONT-STYLE-BODY-TITLE);
 }
 
+/* =========================
+   TITLE
+========================= */
 .product-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    margin-bottom: 0.75rem;
 }
 
+/* =========================
+   DESCRIPTION
+========================= */
 .product-desc {
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1.05rem);
     color: var(--FONT-COLOR-BODY);
     margin-bottom: 1rem;
     line-height: 1.5;
@@ -39,8 +64,10 @@
     font-weight: 500;
 }
 
+/* =========================
+   STOCK
+========================= */
 .stock {
-    display: block;
     font-size: 0.85rem;
     margin-bottom: 1rem;
     font-weight: 600;
@@ -49,49 +76,59 @@
 .in {
     display: block;
     color: var(--FONT-COLOR-SECONDARY);
-
-    font-family: var(--FONT-STYLE-BODY) ;
+    font-family: var(--FONT-STYLE-BODY);
 }
 
 .out {
-
     color: #db0d30;
 }
 
-/* Low Stock Badge */
 .low {
-    color: #bd910f; /* Amber/orange for alert */
+    color: #bd910f;
 }
 
-/* Optional: Add a subtle background for emphasis */
+/* Low stock visual emphasis */
 .product-card.low {
-    border: 2px solid #fbbf24; /* amber border */
+    border: 2px solid #fbbf24;
     box-shadow: 0 10px 25px rgba(251, 191, 36, 0.2);
 }
 
+/* =========================
+   FOOTER
+========================= */
 .product-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    flex-wrap: wrap;
 }
 
+/* =========================
+   PRICE
+========================= */
 .product-price {
     font-weight: 900;
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
     color: var(--FONT-COLOR-SECONDARY);
     font-family: var(--FONT-STYLE-BODY);
 }
 
+/* =========================
+   BUTTON
+========================= */
 .order-btn {
-    padding: 0.5rem 1.2rem;
+    padding: 0.45rem 1rem;
     border: none;
     background: #2563eb;
-    color: VAR(--FONT-COLOR-BASIC);
+    color: var(--FONT-COLOR-BASIC); /* FIXED */
     border-radius: 8px;
     cursor: pointer;
     transition: 0.3s ease;
     font-family: var(--FONT-STYLE-BODY);
     font-weight: 800;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
 }
 
 .order-btn:hover {
@@ -101,4 +138,19 @@
 .order-btn:disabled {
     background: #9ca3af;
     cursor: not-allowed;
+}
+
+/* =========================
+   MOBILE OPTIMIZATION
+========================= */
+@media (max-width: 480px) {
+    .product-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .order-btn {
+        width: 100%;
+        text-align: center;
+    }
 }

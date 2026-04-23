@@ -7,7 +7,7 @@
 }*/
 
 .reviews {
-    padding: 6rem 8%;
+    padding: clamp(2rem, 6vw, 6rem) clamp(1rem, 6vw, 8%);
     margin-top: 1.2rem;
     background: var(--BG-COLOR-SECONDARY);
 }
@@ -18,18 +18,18 @@
 }
 
 .reviews-header h2 {
-    font-size: 2.5rem;
+    font-size: clamp(1.25rem, 3.5vw, 2.25rem);
     font-weight: 700;
     margin-bottom: 1rem;
-    color: #111827;
 }
 
 .reviews-header p {
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
     color: var(--FONT-COLOR-SECONDARY);
     font-family: var(--FONT-STYLE-BODY);
     font-weight: 400;
     line-height: 1.8;
+/*    max-width: 60ch;*/
 }
 
 /* Reviews Grid */

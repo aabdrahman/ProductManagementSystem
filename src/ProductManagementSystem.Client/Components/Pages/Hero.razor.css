@@ -12,7 +12,7 @@
     width: 100%;
     margin-bottom: 1.2rem;
     background-color: var(--BG-COLOR-SECONDARY);
-    padding: 2rem 4%;
+    padding: clamp(1.75rem, 5vw, 5rem) clamp(0.75rem, 5vw, 4%);
     gap: 2.5rem;
 }
 
@@ -43,21 +43,19 @@ h1 {
     font-size: clamp(2rem, 5vw, 2.75rem); /* Fluid typography */
     line-height: .85;
     margin-bottom: 1.5rem;
-/*    font-family: "Archivo Black", sans-serif;*/
     font-weight: 400;
     font-style: normal;
 }
 
 p {
-    font-size: 1.1rem;
     color: var(--FONT-COLOR-BODY);
     line-height: 1.6;
     margin-bottom: 2rem;
-    font-weight: 600;
-    font-family: var(--FONT-STYLE-BODY);
     font-family: "Righteous", sans-serif;
+
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--FONT-COLOR-SECONDARY);
     font-weight: 400;
-    font-style: normal;
 }
 
 /* Buttons */
@@ -66,9 +64,9 @@ p {
     gap: 15px;
 }
 
-    .cta-group a {
-        background-color: var(--BG-COLOR-BTN-SUCCESS);
-    }
+.cta-group a {
+    background-color: var(--BG-COLOR-BTN-SUCCESS);
+}
 
 .btn {
     padding: 15px 30px;
@@ -111,31 +109,11 @@ p {
     object-fit: cover; /* Ensures the image fills the space without distortion */
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-    .hero {
-        flex-direction: column-reverse; /* Image on top, text below for mobile */
-    }
-
-    .hero-image {
-        height: 50vh;
-    }
-
-    .hero-content {
-        padding: 60px 20px;
-        text-align: center;
-    }
-
-    .cta-group {
-        justify-content: center;
-    }
-}
-
 
 .hero-carousel {
     position: relative;
     width: 100%;
-    height: 80vh;
+    height: 75vh;
     overflow: hidden;
 }
 
@@ -226,4 +204,38 @@ p {
 .slide .btn:hover {
     background: var(--BG-COLOR-BTN-SUCCESS-HOVER);
     color: white;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .hero {
+        flex-direction: column; /* Image on top, text below for mobile */
+    }
+
+    .hero-image {
+        height: 50vh;
+    }
+
+    .hero-content {
+        text-align: center;
+    }
+
+    .cta-group {
+        justify-content: center;
+    }
+
+    .slide-content {
+        position: absolute;
+        top: 55%;
+        transform: translateY(-50%);
+        color: white;
+    }
+
+    .nav-btn {
+        font-size: 1rem;
+    }
+
+    .hero-carousel {
+        height: 50vh;
+    }
 }

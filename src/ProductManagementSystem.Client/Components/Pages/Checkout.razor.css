@@ -265,4 +265,11 @@
     .checkout-layout {
         grid-template-columns: 1fr;
     }
+
+    .checkout-card-actions{
+        width: 100%;
+    }
+    .checkout-card-actions .remove-btn{
+        width: 100%;
+    }
 }

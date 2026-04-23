@@ -5,7 +5,7 @@
 ========================= */
 
 .why-choose-us {
-    padding: 6rem 8%;
+    padding: clamp(2rem, 6vw, 6rem) clamp(1rem, 6vw, 8%);
     background: var(--BG-COLOR-SECONDARY);
     margin-top: 1.2rem;
 }
@@ -16,22 +16,27 @@
 
 .why-choose-header {
     text-align: center;
-    max-width: 750px;
-    margin: 0 auto 4rem auto;
+/*    max-width: 750px;*/
+    margin: 0 auto clamp(1.5rem, 5vw, 4rem) auto;
+    padding: 0 1rem;
 }
 
 .why-choose-header h2 {
-    font-size: 2.5rem;
+
+    font-size: clamp(1.25rem, 3.5vw, 2.25rem);
     font-weight: 700;
+    color: VAR(--FONT-COLOR-SECONDARY);
     margin-bottom: 1rem;
 }
 
 .why-choose-header p {
-    font-size: 1.25rem;
-    color: var(--FONT-COLOR-BODY);
-    line-height: 1.8;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--FONT-COLOR-SECONDARY);
     font-family: var(--FONT-STYLE-BODY);
     font-weight: 400;
+    line-height: 1.7;
+/*    max-width: 60ch;*/
+    margin-top: 0.5rem;
 }
 
 .why-choose-items {
@@ -46,6 +51,7 @@
     transition: all 0.3s ease;
     cursor: pointer;
     background: var(--BG-COLOR-TERTIARY);
+    cursor: pointer;
 }
 
 .why-choose-item:hover {
@@ -77,12 +83,9 @@
 }
 
 @media (max-width: 600px) {
-    .why-choose-us {
-        padding: 4rem 6%;
-    }
 
-    .why-choose-header h2 {
-        font-size: 1.8rem;
+    .why-choose-us {
+        padding: clamp(2rem, 6vw, 6rem) clamp(1rem, 6vw, 8%);
     }
 
     .why-choose-items {

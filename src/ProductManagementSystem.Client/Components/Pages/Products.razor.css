@@ -3,28 +3,32 @@
 ========================= */
 
 .products {
-    padding: 6rem 8%;
-    margin-top: 1.2rem;
+    padding: clamp(2rem, 6vw, 6rem) clamp(1rem, 6vw, 8%);
+    margin: 1.2rem auto 0;
     background: var(--BG-COLOR-SECONDARY);
+/*    max-width: 1200px;*/
 }
 
 .products-header {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: clamp(1.5rem, 5vw, 4rem);
+    padding: 0 1rem;
 }
 
 .products-header h2 {
-    font-size: 2.5rem;
+    font-size: clamp(1.25rem, 3.5vw, 2.25rem);
     font-weight: 700;
     margin-bottom: 1rem;
 }
 
 .products-header p {
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
     color: var(--FONT-COLOR-SECONDARY);
     font-family: var(--FONT-STYLE-BODY);
     font-weight: 400;
-    line-height: 1.8;
+    line-height: 1.7;
+/*    max-width: 60ch;*/
+    margin-top: 0.5rem;
 }
 
 /* Grid */
@@ -95,20 +99,6 @@
     background: #1d4ed8;
 }
 
-/* Responsive */
-
-@media (max-width: 1000px) {
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 600px) {
-    .products-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
 /*FILTER SECTION*/
 
 .products-filter {
@@ -139,7 +129,7 @@
     padding: 0.6rem 0.9rem;
     border-radius: 8px;
     border: 1px solid #d1d5db;
-    font-size: 0.95rem;
+    font-size: 0.75rem;
 }
 
 .filter-input:focus {
@@ -172,14 +162,59 @@
     text-decoration: none;
 }
 
+/* Responsive */
+
+@media (max-width: 1000px) {
+
+    .products-grid {
+
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .products-header h2 {
+        font-size: clamp(1.25rem, 3.5vw, 2.25rem);
+        font-weight: 400;
+        margin-bottom: 0.5rem;
+    }
+}
 
 /* Mobile */
 @media (max-width: 768px) {
+
     .products-filter {
         grid-template-columns: 1fr;
     }
+
     .clear-filter-btn {
         grid-column: span 1;
         text-align: center;
+    }
+
+    .products-header h2 {
+        font-size: clamp(1.25rem, 3.5vw, 2.25rem);
+        font-weight: 400;
+        margin-bottom: 0.5rem;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .products-header h2 {
+        font-size: clamp(1.25rem, 3.5vw, 2.25rem);
+        font-weight: 400;
+        margin-bottom: 0.5rem;
     }
 }
