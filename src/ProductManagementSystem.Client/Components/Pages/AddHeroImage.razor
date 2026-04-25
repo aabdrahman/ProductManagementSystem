@@ -99,24 +99,62 @@
         }
 
 
-        var buffer = new byte[_uploadedFile.Size];
+        Console.WriteLine($"File selected: {_uploadedFile.Name}, Size: {_uploadedFile.Size} bytes, Type: {_uploadedFile.ContentType}");
         _title = _uploadedFile.Name;
 
-        await _uploadedFile.OpenReadStream(1024*1024*5).ReadAsync(buffer);
 
-        _previewUrl = $"data:{_uploadedFile.ContentType};base64,{Convert.ToBase64String(buffer)}";
+        try
+        {
+            // Create a MemoryStream to hold the final data
+            using var ms = new MemoryStream();
+            using var stream = args.File.OpenReadStream(maxSize);
 
-        _processingImage = false;
+            var buffer = new byte[1024 * 16];
+            int bytesRead;
+
+            while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                // Write the chunk into our MemoryStream
+                await ms.WriteAsync(buffer.AsMemory(0, bytesRead));
+            }
+
+            // Now you can use the data
+            byte[] finalBytes = ms.ToArray();
+            Console.WriteLine($"File loaded! Size: {finalBytes.Length} bytes");
+
+            // DO SOMETHING WITH finalBytes HERE
+
+            Console.WriteLine("File read into buffer successfully. Generating preview URL...");
+
+            _previewUrl = $"data:{_uploadedFile.ContentType};base64,{Convert.ToBase64String(finalBytes)}";
+
+            Console.WriteLine("Preview URL generated successfully.");
+        }
+        catch (Exception ex)
+        {
+            _errorMessgae = $"Error processing file: {ex.Message}";
+        }
+        finally
+        {
+            _processingImage = false;
+        }
+
+        //await _uploadedFile.OpenReadStream(_uploadedFile.Size).ReadAsync(buffer);
+
+        // _processingImage = false;
     }
 
     private async Task SaveFile()
     {
+        Console.WriteLine("Begin SaveFile operation...");
         _isProcessing = true;
 
-        //await Task.Delay(250);
+        await Task.Delay(250);
 
         var result = await addHeroImageHandler.Handle(_uploadedFile, _title);
         _isSuccessful = result.isSuccessful;_responseMessage = result.responseMessage;
+
+        Console.WriteLine("Saving file operation successful");
 
         _isProcessing = false;
     }
