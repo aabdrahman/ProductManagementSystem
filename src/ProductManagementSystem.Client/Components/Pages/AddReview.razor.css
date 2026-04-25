@@ -1,29 +1,34 @@
-﻿
-
-.add-review {
-    padding: 4rem 8%;
+﻿.add-review {
     background: var(--BG-COLOR-TERTIARY);
     max-width: 700px;
     margin: 0 auto;
     border-radius: 16px;
+    /* FIXED */
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 5vw, 2rem);
 }
 
+/* HEADER */
 .add-review-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: clamp(1.5rem, 4vw, 2rem);
 }
 
 .add-review-header h2 {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: #111827;
 }
 
 .add-review-header p {
-    font-size: 1.25rem;
+    font-size: clamp(1rem, 2vw, 1.15rem);
     color: var(--FONT-COLOR-BODY);
     line-height: 1.8;
     font-family: var(--FONT-STYLE-BODY);
-    font-weight: 400;
+}
+
+/* SMALL DEVICES */
+@media (max-width: 480px) {
+    .add-review {
+        border-radius: 12px;
+    }
 }
