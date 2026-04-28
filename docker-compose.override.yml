@@ -1,0 +1,35 @@
+services:
+  productmanagementsystem.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=9000
+      - ASPNETCORE_HTTPS_PORTS=9001
+      - ConnectionStrings__RedisConnection=redis_cache-staging:6379
+      - ConnectionStrings__SqlDbConnection=Server=sql_server_data-staging,1433;Database=ProductManagementSystem;User Id=sa;Password=Raymond007;TrustServerCertificate=True;
+      - CorsPolicy__AllowedOrigins=https://localhost:7000;https://localhost:7001;https://productmanagementsystem.client:7001;https://productmanagementsystem.client-1:7001
+      - JwtSettings__ValidAudience=https://localhost:7000;https://localhost:7001;https://productmanagementsystem.client:7001;https://productmanagementsystem.client-1:7001
+      - PmsSECRET=9DF155F3FFA0BE9B7B332EC03DEA95200C3D3CF078C57B536381956D56E5B899DA7B54B0511BC0A585806571321FB874
+      - SystemDefaultPassword=Raymond&007
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  productmanagementsystem.client:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=7000
+      - ASPNETCORE_HTTPS_PORTS=7001
+      - ApiClient__BaseUri=https://productmanagementsystem.api:9001/
+      - PmsSECRET=9DF155F3FFA0BE9B7B332EC03DEA95200C3D3CF078C57B536381956D56E5B899DA7B54B0511BC0A585806571321FB874
+    ports:
+      - "7000:7000"
+      - "7001:7001"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
