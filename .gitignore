@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /src/ProductManagementSystem.Client/wwwroot/Images/
 /.logs/productmanagementsystem
+/.env
