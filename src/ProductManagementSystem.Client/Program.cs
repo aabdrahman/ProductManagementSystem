@@ -129,7 +129,7 @@ if (!app.Environment.IsDevelopment())
 
 //app.UseStatusCodePagesWithRedirects("/StatusCode/{0}");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 

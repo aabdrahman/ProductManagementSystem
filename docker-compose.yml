@@ -9,7 +9,8 @@ services:
     environment:
       - ConnectionStrings__RedisConnection=redis_cache-staging:6379
       - ConnectionStrings__SqlDbConnection=Server=sql_server_data-staging,1433;Database=ProductManagementSystem;User Id=sa;Password=Raymond007;TrustServerCertificate=True;
-
+    volumes:
+      - .Logs/Productmanagementsystem:/app/Logs
   productmanagementsystem.client:
     image: ${DOCKER_REGISTRY-}productmanagementsystemclient
     build:
