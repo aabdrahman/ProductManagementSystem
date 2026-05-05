@@ -6,10 +6,11 @@ services:
       # - ASPNETCORE_HTTPS_PORTS=9001
       - ConnectionStrings__RedisConnection=redis_cache-staging:6379
       - ConnectionStrings__SqlDbConnection=Server=sql_server_data-staging,1433;Database=ProductManagementSystem;User Id=sa;Password=Raymond007;TrustServerCertificate=True;
-      - CorsPolicy__AllowedOrigins=http://localhost:7000;https://localhost:7001;https://productmanagementsystem.client:7001;http://productmanagementsystem.client:7000;https://negative-tables-second.ngrok-free.dev
-      - JwtSettings__ValidAudience=http://localhost:7000;https://localhost:7001;https://productmanagementsystem.client:7001;http://productmanagementsystem.client:7000;https://negative-tables-second.ngrok-free.dev
+      - CorsPolicy__AllowedOrigins=http://localhost:7000;https://localhost:7001;https://productmanagementsystem.client:7001;http://productmanagementsystem.client:7000;https://negative-tables-second.ngrok-free.dev;http://negative-tables-second.ngrok-free.dev
+      - JwtSettings__ValidAudience=http://localhost:7000;https://localhost:7001;https://productmanagementsystem.client:7001;http://productmanagementsystem.client:7000;https://negative-tables-second.ngrok-free.dev;http://negative-tables-second.ngrok-free.dev
       - PmsSECRET=9DF155F3FFA0BE9B7B332EC03DEA95200C3D3CF078C57B536381956D56E5B899DA7B54B0511BC0A585806571321FB874
       - SystemDefaultPassword=Raymond&007
+      - EmailSettings__Host=smtpDev
     ports:
       - "9000:9000"
       # - "9001:9001"
@@ -23,7 +24,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=7000
       # - ASPNETCORE_HTTPS_PORTS=7001
-      - ApiClient__BaseUri=${API_ENVIRONMENT}
+      - ApiClient__BaseUri=http://productmanagementsystem.api:9000
       - PmsSECRET=9DF155F3FFA0BE9B7B332EC03DEA95200C3D3CF078C57B536381956D56E5B899DA7B54B0511BC0A585806571321FB874
     ports:
       - "7000:7000"
