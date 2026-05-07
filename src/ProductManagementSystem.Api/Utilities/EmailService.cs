@@ -79,6 +79,7 @@ public class EmailService : IEmailService
                     else
                     {
                         failureCount++;
+                        _queuedEmails.Enqueue(priorityMail.EmailDetails);
                         Log.ForContext(_className, nameof(EmailService)).ForContext(_methodName, nameof(ProcessPriorityMails)).Information("High Priority Email processing failed - {0}. Send Mail Response - {1}", priorityMail.EmailDetails, sendMailResult.ErrorMessages);
                     }
                 }
