@@ -17,4 +17,7 @@ public class Product
 
     //Order
     public ICollection<OrderLineItem> OrderLineItems { get; set; } = [];
+
+    //Product images
+    public ICollection<ProductImage> ProductImages { get; set; } = [];
 }

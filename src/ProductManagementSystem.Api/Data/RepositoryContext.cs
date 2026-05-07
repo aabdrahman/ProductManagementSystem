@@ -22,6 +22,7 @@ public class RepositoryContext : DbContext
     public DbSet<UserOrderVerificationToken> UserOrderVerificationTokens { get; set; }
     public DbSet<AboutUsDetail> AboutUsDetails { get; set; }
     public DbSet<WhyChooseUsDetail> WhyChooseUsDetails { get; set; }
+    public DbSet<ProductImage> ProductImages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
