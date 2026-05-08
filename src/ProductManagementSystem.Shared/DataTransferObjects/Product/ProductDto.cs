@@ -15,4 +15,5 @@ public record class ProductDto
     public int CurrentCount { get; set; }
     public decimal CostPrice { get; set; }
     public decimal SellingPrice { get; set; }
+    public List<string> ProductImages { get; set; } = [];
 }

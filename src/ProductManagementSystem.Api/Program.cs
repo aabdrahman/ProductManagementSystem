@@ -25,7 +25,6 @@ using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
 using StackExchange.Redis;
-using System.Collections.Concurrent;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Channels;
@@ -172,10 +171,12 @@ builder.Services.AddScoped<IBackgroundOperationService, BackgroundOperationServi
 builder.Services.AddScoped<IUserOrderVerificationService, UserOrderVerificationService>();
 builder.Services.AddScoped<IAboutUsService, AboutUsService>();
 builder.Services.AddScoped<IWhyChooseUsService, WhyChooseUsService>();
+builder.Services.AddScoped<IProductImageService, ProductImageService>();
 
 builder.Services.AddScoped<IRedisService, RedisService>();
 builder.Services.AddScoped<AuthenticationTokenValidationFilter>();
 
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IOtpOperation, OtpOperation>();
 builder.Services.AddSingleton<IEmailService, EmailService>();

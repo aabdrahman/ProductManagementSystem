@@ -40,8 +40,4 @@
 	  <ProjectReference Include="..\ProductManagementSystem.Shared\ProductManagementSystem.Shared.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="StaticFiles\ProductImages\" />
-	</ItemGroup>
-
 </Project>
