@@ -365,3 +365,4 @@ FodyWeavers.xsd
 /.logs/productmanagementsystem
 /src/ProductManagementSystem.Api/StaticFiles/ProductImages/
 /.env
+/src/ProductManagementSystem.Api/StaticFiles/ProductImages/1
