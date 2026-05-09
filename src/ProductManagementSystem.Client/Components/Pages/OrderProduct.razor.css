@@ -26,3 +26,9 @@ p strong {
     font-weight: 600;
     color: #4f46e5;
 }
+
+.product-carousel-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

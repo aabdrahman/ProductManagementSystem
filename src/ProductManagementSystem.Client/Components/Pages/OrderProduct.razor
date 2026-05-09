@@ -20,7 +20,10 @@ else
                 @_productToOrder.CurrentCount
             </p>
 
-            <ProductImageCarousel Product="_productToOrder" />
+            <div class="product-carousel-container">
+                <ProductImageCarousel Product="_productToOrder" />
+            </div>
+            
 
             @if(_createOrderModel is not null)
             {

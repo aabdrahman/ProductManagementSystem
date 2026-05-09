@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
 
 @inject AddProductImageHandler addProductImageHandler
+@inject RemoveProductImageHandler removeProductImageHandler
 
 @if(_isUploading)
 {
@@ -25,18 +26,88 @@
 
     </label>
 
-    @if (_selectedFiles.Any())
+    @if (_existingImages.Any())
     {
-        <div class="upload-count">
-            @_selectedFiles.Count
-            @(_selectedFiles.Count == 1 ? "image" : "images")
-            selected
+        <div class="existing-images-section">
+
+            <h4>Existing Images</h4>
+
+            <div class="actions">
+                <button class="btn apply" disabled="@(!_deletedImages.Any())" @onclick="ApplyRemovedImages">
+                    Remove Images
+
+                    <span>
+                        (@_deletedImages.Count)
+                    </span>
+                    
+                </button>
+            </div>
+
+
+
+            <div class="preview-grid">
+
+                @for (int i = 0; i < _existingImages.Count; i++)
+                {
+                    var index = i;
+                    var isRemoved = _removedIndexes.Any(x => x == index);
+
+                    <div class="preview-card @(_removedIndexes.Any(x => x == index) ? "removed" : "")">
+
+                        <img src="@_existingImages[index]"
+                             alt="Existing Image" />
+
+                        @if (isRemoved)
+                        {
+                            <button type="button" class="undo-btn" hidden="@isRemoved" @onclick="(() => UndoRemoveExistingImage(index))">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z" />
+                                    <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466" />
+                                </svg>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    class="remove-btn"
+                                    @onclick="(() => RemoveExistingImage(index))">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                </svg>
+                            </button>
+                        }
+
+                        <button type="button"
+                                class="remove-btn"
+                                @onclick="(() => RemoveExistingImage(index))">
+                            ×
+                        </button>
+
+                    </div>
+                }
+
+            </div>
+
         </div>
     }
 
     <!-- Preview Images -->
     @if (_imagePreviews.Any())
     {
+        <div class="new-image-section">
+
+            <h4>New Uploaded Images</h4>
+
+            @if (_selectedFiles.Any())
+            {
+                <div class="upload-count">
+                    @_selectedFiles.Count
+                    @(_selectedFiles.Count == 1 ? "image" : "images")
+                    selected
+                </div>
+            }
+
+        </div>
         <div class="preview-grid">
 
             @for (int i = 0; i < _imagePreviews.Count; i++)
@@ -48,11 +119,15 @@
                     <img src="@_imagePreviews[index]"
                          alt="Preview Image" />
 
+
                     <button type="button"
                             class="remove-btn"
                             @onclick="(() => RemoveImage(index))">
-                        ×
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                        </svg>
                     </button>
+
 
                 </div>
             }
@@ -81,6 +156,9 @@
 @code {
 
     private List<IBrowserFile> _selectedFiles = new();
+    private List<string> _existingImages = [];
+    private List<string> _deletedImages = [];
+    private List<int> _removedIndexes = [];
 
     private List<string> _imagePreviews = new();
 
@@ -98,8 +176,15 @@
     [Parameter, EditorRequired]
     public ProductDto Product { get; set; }
 
+    protected override void OnParametersSet()
+    {
+        _existingImages = Product.ProductImages.ToList();
+    }
+
     private async Task HandleFilesSelected(InputFileChangeEventArgs e)
     {
+        _responseMessage = null;
+        _selectedFiles.Clear();
         var files = e.GetMultipleFiles();
 
         foreach (var file in files)
@@ -125,6 +210,7 @@
 
     private async Task RemoveImage(int index)
     {
+        _responseMessage = null;
         _selectedFiles.RemoveAt(index);
 
         _imagePreviews.RemoveAt(index);
@@ -139,11 +225,13 @@
 
     private async Task HandleUpload()
     {
+        _responseMessage = null;
         if (!_selectedFiles.Any())
         {
             _responseMessage = "Please select at least one image to upload.";
             return;
         }
+
         _isUploading = true;
         var response = await addProductImageHandler.Handle(Product.Id, _selectedFiles);
         _isSuccessful = response.isSuccessful;
@@ -161,5 +249,56 @@
 
             await CloseModal(true);
         }
+    }
+
+
+
+    private void RemoveExistingImage(int index)
+    {
+        var imageToRemove = _existingImages[index];
+
+        _deletedImages.Add(imageToRemove);
+        _removedIndexes.Add(index);
+
+        StateHasChanged();
+
+        //_existingImages.RemoveAt(index);
+    }
+
+    public void UndoRemoveExistingImage(int index)
+    {
+        var imageToUndo = _existingImages[index];
+        _deletedImages.Remove(imageToUndo);
+        _removedIndexes.Remove(index);
+        StateHasChanged();
+    }
+
+    private async Task ApplyRemovedImages()
+    {
+        _responseMessage = null;
+        _isUploading = true;
+
+        if (!_removedIndexes.Any())
+        {
+            _responseMessage = "No Items selected to remove.";
+            _isUploading = true;
+            return;
+        }
+
+        var removeResponse = await removeProductImageHandler.Handle(_deletedImages);
+
+        _isSuccessful = removeResponse.isSuccessful;
+        _responseMessage = removeResponse.responseMessage;
+
+        if (_isSuccessful)
+        {
+            _existingImages = _existingImages.Where(x => !_deletedImages.Contains(x)).ToList();
+            _removedIndexes.Clear();
+            _deletedImages.Clear();
+            StateHasChanged();
+        }
+
+
+        _isUploading = false;
     }
 }

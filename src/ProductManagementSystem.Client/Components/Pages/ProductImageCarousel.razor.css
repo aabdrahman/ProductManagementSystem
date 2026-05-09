@@ -1,71 +1,14 @@
 ﻿
-/*.product-carousel {
+.product-carousel {
     width: 100%;
-    max-width: 350px;
+    max-width: 250px;
     overflow: hidden;
     border-radius: 18px;
     position: relative;
     margin-bottom: 1rem;
-}
-
-.product-slides-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    anchor-name: --product-image-carousel;
-    scroll-marker-group: after;
-}
-
-    .product-slides-container::-webkit-scrollbar {
-        display: none;
-    }
-
-.product-card-slide {*/
-/*    display: flex;*/
-    /*align-items: center;
-    flex-shrink: 0;
-    scroll-snap-align: start;
-    user-select: none;
-    flex: 0 0 100%;
-    justify-content: center;
-    position: relative;
-    min-width: 100%;
-}
-
-.product-card-slide img {
-    width: 100%;*/
-/*    max-width: 250px;*/
-    /*object-fit: cover;
-    display: block;
-    pointer-events: none;
-    height: auto;*/
-    /*    aspect-ratio: 16/9;*/
-/*}
-
-ul::scroll-marker-group {
-    position: absolute;
-    position-anchor: --product-image-carousel;
-    top: calc(anchor(bottom) - 70px);
-    justify-self: anchor-center;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}*/
-
-
-.product-carousel {
-    width: 100%;
-    max-width: 350px;
-    overflow: hidden;
-    border-radius: 18px;
-    position: relative;
-    margin-bottom: 1rem;
 }
 
 /* ===== Slides Container ===== */
@@ -95,13 +38,13 @@ ul::scroll-marker-group {
     position: relative;
 }
 
-    /* ===== Image ===== */
-    .product-card-slide img {
-        width: 100%;
-        aspect-ratio: 1 / 1; /* clean square product image */
-        object-fit: cover;
-        display: block;
-    }
+/* ===== Image ===== */
+.product-card-slide img {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* clean square product image */
+    object-fit: cover;
+    display: block;
+}
 
 /* ===== Optional: Indicators (if you add later) ===== */
 .carousel-indicators {
@@ -139,10 +82,10 @@ ul::scroll-marker-group {
     z-index: 2;
 }
 
-    .carousel-btn.prev {
-        left: 10px;
-    }
+.carousel-btn.prev {
+    left: 10px;
+}
 
-    .carousel-btn.next {
-        right: 10px;
-    }
+.carousel-btn.next {
+    right: 10px;
+}
