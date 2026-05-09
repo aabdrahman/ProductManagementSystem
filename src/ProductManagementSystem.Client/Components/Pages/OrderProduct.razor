@@ -20,6 +20,8 @@ else
                 @_productToOrder.CurrentCount
             </p>
 
+            <ProductImageCarousel Product="_productToOrder" />
+
             @if(_createOrderModel is not null)
             {
                 <EditForm Model="_createOrderModel" OnValidSubmit="HandleSaveOrder">

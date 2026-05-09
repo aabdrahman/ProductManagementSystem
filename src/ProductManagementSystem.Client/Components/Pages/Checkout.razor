@@ -56,6 +56,8 @@
                             </p>
                         </div>
 
+                        <ProductImageCarousel Product="_products.Where(x => x.Id == item.ProductId).FirstOrDefault()" />
+
                         <div class="checkout-card-actions">
                             <button class="remove-btn" @onclick="() => RemoveItem(item)">
                                 Remove
