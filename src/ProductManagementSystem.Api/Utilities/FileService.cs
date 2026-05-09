@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.Extensions.Options;
 using ProductManagementSystem.Api.Data;
+using ProductManagementSystem.Api.Entities.ConfigurationModels;
 using ProductManagementSystem.Api.Entities.Models;
 using ProductManagementSystem.Api.Utilities.Contracts;
 using Serilog;
@@ -12,15 +14,17 @@ public class FileService : IFileService
 {
     private string _productImagePath;
     private readonly RepositoryContext _repositoryContext;
+    private readonly ImageSizingConfig _imageSizingConfig;
     private Serilog.ILogger logger;
 
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
-    public FileService(RepositoryContext repositoryContext)
+    public FileService(RepositoryContext repositoryContext, IOptionsMonitor<ImageSizingConfig> optionsMonitor)
     {
         _productImagePath = Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles", "ProductImages");
         _repositoryContext = repositoryContext;
+        _imageSizingConfig = optionsMonitor.CurrentValue;
 
         logger = Log.ForContext(_className, nameof(FileService));
     }
@@ -47,7 +51,7 @@ public class FileService : IFileService
         var resizeOption = new ResizeOptions()
         {
             Mode = ResizeMode.Pad,
-            Size = new Size(width: 250, height: 250)
+            Size = new Size(width: _imageSizingConfig.Width, height: _imageSizingConfig.Height)
         };
 
         List<string> savedImages = [];

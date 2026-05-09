@@ -194,6 +194,7 @@ builder.Services.Configure<EmailSettingsWorkerConfig>(builder.Configuration.GetS
 builder.Services.Configure<RemoveExpiredOtpBackgroundConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:RemoveExpiredOTP"));
 builder.Services.Configure<RemoveExpiredVerificationTokenBackgroundConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:RemoveExpiredVerificationToken"));
 builder.Services.Configure<UserOrderVerificationConfig>(builder.Configuration.GetSection("UserTokenVerification"));
+builder.Services.Configure<ImageSizingConfig>(builder.Configuration.GetSection("ImageSizing"));
 
 builder.Services.AddFluentEmail(builder.Configuration.GetSection("EmailSettings")["DefaultFrom"]).AddSmtpSender(host: builder.Configuration.GetSection("EmailSettings")["Host"], port: builder.Configuration.GetSection("EmailSettings").GetValue<int>("Port")).AddRazorRenderer();
 

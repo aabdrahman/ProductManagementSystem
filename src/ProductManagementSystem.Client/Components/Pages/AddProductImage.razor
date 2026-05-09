@@ -3,6 +3,8 @@
 @inject AddProductImageHandler addProductImageHandler
 @inject RemoveProductImageHandler removeProductImageHandler
 
+@attribute [Authorize(Roles = "ADMIN,SYSTEM")]
+
 @if(_isUploading)
 {
     <Spinner Description="Uploading Product Image" />

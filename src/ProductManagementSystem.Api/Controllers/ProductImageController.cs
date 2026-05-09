@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ProductManagementSystem.Api.Controllers.ServiceFilters;
 using ProductManagementSystem.Api.Services.Contracts;
 using Serilog;
 using System.Security.Cryptography;
@@ -7,6 +9,7 @@ namespace ProductManagementSystem.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = "SYSTEM,ADMIN")]
 public class ProductImageController : ControllerBase
 {
     private readonly IProductImageService _productImageService;
@@ -24,6 +27,7 @@ public class ProductImageController : ControllerBase
     }
 
     [HttpPost("{productId:int}")]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> ProcessImage([FromRoute] int productId)
     {
         var logProvider = logger.ForContext(_methodName, nameof(ProcessImage));
@@ -55,6 +59,7 @@ public class ProductImageController : ControllerBase
     }
 
     [HttpDelete]
+    [ServiceFilter(typeof(AuthenticationTokenValidationFilter))]
     public async Task<IActionResult> RemoveImage([FromQuery] int productId,  [FromQuery] string productImageName)
     {
         var logProvider = logger.ForContext(_methodName, nameof(RemoveImage));
@@ -72,6 +77,7 @@ public class ProductImageController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetFiles([FromQuery] int productId, [FromQuery] string productImageName)
     {

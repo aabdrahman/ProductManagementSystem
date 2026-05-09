@@ -23,6 +23,9 @@ public class RemoveProductImageHandler : HttpClientProvider
                 {
                     using (var client = new HttpClient())
                     {
+                        var secureClient = await base.GetSecuredHttpClient();
+
+                        client.DefaultRequestHeaders.Authorization = secureClient.DefaultRequestHeaders.Authorization;
                         var response = await client.DeleteAsync(item);
 
                         var responseContent = await response.Content.ReadAsStringAsync();

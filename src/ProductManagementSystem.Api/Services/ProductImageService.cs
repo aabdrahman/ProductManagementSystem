@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using ProductManagementSystem.Api.Data;
+using ProductManagementSystem.Api.Helpers;
 using ProductManagementSystem.Api.Services.Contracts;
 using ProductManagementSystem.Api.Utilities.Contracts;
 using Serilog;
@@ -11,16 +12,18 @@ public class ProductImageService : IProductImageService
 {
     private readonly IFileService _fileService;
     private readonly RepositoryContext _repositoryContext;
+    private readonly IRedisService _redisService;
 
     private string _methodName = "MethodName";
     private string _className = "ClassName";
 
     private readonly Serilog.ILogger logger;
-    public ProductImageService(IFileService fileService, RepositoryContext repositoryContext)
+    public ProductImageService(IFileService fileService, RepositoryContext repositoryContext, IRedisService redisService)
     {
         _fileService = fileService;
         logger = Log.ForContext(_className, nameof(ProductImageService));
         _repositoryContext = repositoryContext;
+        _redisService = redisService;
     }
     public async Task<bool> AddProductImage(int productId, List<IFormFile> productImages)
     {
@@ -38,8 +41,10 @@ public class ProductImageService : IProductImageService
             }
 
             var isProcessed = await _fileService.WriteToPath(productId, productImages);
+            
+            var removeFromCache = await _redisService.RemoveMultiple(RedisCacheHelperClass.ProductsKey, RedisCacheHelperClass.GetProductCacheKey(productId));
 
-            logProvider.Information("Product Image files processor returns - {0}", isProcessed);
+            logProvider.Information("Product Image files processor returns - {0}. Cache Removal returns: {1}", isProcessed, removeFromCache);
 
             if (!isProcessed)
             {
@@ -85,7 +90,9 @@ public class ProductImageService : IProductImageService
 
             await _repositoryContext.SaveChangesAsync();
 
-            logProvider.Information("Product image removal operation successful.");
+            var removeFromCache = await _redisService.RemoveMultiple(RedisCacheHelperClass.ProductsKey, RedisCacheHelperClass.GetProductCacheKey(productId));
+
+            logProvider.Information("Product image removal operation successful. Remove from cache returns: {0}", removeFromCache);
 
             return true;
         }

@@ -1,7 +1,7 @@
 ﻿
 .product-carousel {
     width: 100%;
-    max-width: 250px;
+/*    max-width: 250px;*/
     overflow: hidden;
     border-radius: 18px;
     position: relative;
@@ -41,7 +41,7 @@
 /* ===== Image ===== */
 .product-card-slide img {
     width: 100%;
-    aspect-ratio: 1 / 1; /* clean square product image */
+    aspect-ratio: 16 / 9; /* clean square product image */
     object-fit: cover;
     display: block;
 }
