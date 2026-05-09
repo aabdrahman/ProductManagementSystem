@@ -178,7 +178,8 @@ public sealed class ProductService : IProductService
                                                         CostPrice = x.CostPrice,
                                                         SellingPrice = x.SellingPrice,
                                                         Description = x.Description,
-                                                        CurrentCount = x.CurrentCount
+                                                        CurrentCount = x.CurrentCount,
+                                                        ProductImages = x.ProductImages.Select(x => x.Filename).ToList()
                                                     })
                                         .ToListAsync();
             if (products.Any())
@@ -275,7 +276,8 @@ public sealed class ProductService : IProductService
                                                         CostPrice = x.CostPrice,
                                                         SellingPrice = x.SellingPrice,
                                                         Description = x.Description,
-                                                        CurrentCount = x.CurrentCount
+                                                        CurrentCount = x.CurrentCount,
+                                                        ProductImages = x.ProductImages.Select(x => x.Filename).ToList()
                                                     })
                                         .SingleOrDefaultAsync(x => x.Id == Id);
 
@@ -524,7 +526,8 @@ public sealed class ProductService : IProductService
                                                         CostPrice = x.CostPrice,
                                                         SellingPrice = x.SellingPrice,
                                                         Description = x.Description,
-                                                        CurrentCount = x.CurrentCount
+                                                        CurrentCount = x.CurrentCount,
+                                                        ProductImages = x.ProductImages.Select(x => x.Filename).ToList()
                                                     })
                                                     .ToListAsync();
 

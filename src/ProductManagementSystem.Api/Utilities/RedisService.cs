@@ -38,7 +38,7 @@ public class RedisService : IRedisService
         {
             Log.ForContext("ClassName", nameof(RedisService)).ForContext("MethodName", nameof(RemoveItemAsync)).Information("Removing item from Redis cache with key: {Key}.", key);
 
-            var result = await _redisDatabase.StringDeleteAsync(key, When.Always);
+            var result = await _redisDatabase.StringDeleteAsync(key, When.Always, CommandFlags.FireAndForget);
 
             return result;
 
@@ -59,7 +59,7 @@ public class RedisService : IRedisService
 
             var keysItems = keys.Select(x => new RedisKey(x)).ToArray();
 
-            var result = await _redisDatabase.KeyDeleteAsync(keysItems);
+            var result = await _redisDatabase.KeyDeleteAsync(keysItems, CommandFlags.FireAndForget);
 
             Log.ForContext("ClassName", nameof(RedisService)).ForContext("MethodName", nameof(RemoveMultiple)).Information("Keys deletion returns - {0}", result);
 

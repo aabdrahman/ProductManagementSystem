@@ -1,0 +1,91 @@
+﻿
+.product-carousel {
+    width: 100%;
+/*    max-width: 250px;*/
+    overflow: hidden;
+    border-radius: 18px;
+    position: relative;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ===== Slides Container ===== */
+.product-slides-container {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+    /* Hide scrollbar (Chrome, Edge, Safari) */
+    .product-slides-container::-webkit-scrollbar {
+        display: none;
+    }
+
+/* ===== Slide ===== */
+.product-card-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    position: relative;
+}
+
+/* ===== Image ===== */
+.product-card-slide img {
+    width: 100%;
+    aspect-ratio: 16 / 9; /* clean square product image */
+    object-fit: cover;
+    display: block;
+}
+
+/* ===== Optional: Indicators (if you add later) ===== */
+.carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    position: absolute;
+    bottom: 10px;
+    width: 100%;
+}
+
+    .carousel-indicators span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.5);
+    }
+
+        .carousel-indicators span.active {
+            background: white;
+        }
+
+/* ===== Optional: Navigation Buttons ===== */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.carousel-btn.prev {
+    left: 10px;
+}
+
+.carousel-btn.next {
+    right: 10px;
+}

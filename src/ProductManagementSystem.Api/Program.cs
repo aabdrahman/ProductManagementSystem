@@ -25,7 +25,6 @@ using ProductManagementSystem.Api.Utilities.Contracts;
 using ProductManagementSystem.Shared.DataTransferObjects.Response;
 using Serilog;
 using StackExchange.Redis;
-using System.Collections.Concurrent;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Channels;
@@ -172,10 +171,12 @@ builder.Services.AddScoped<IBackgroundOperationService, BackgroundOperationServi
 builder.Services.AddScoped<IUserOrderVerificationService, UserOrderVerificationService>();
 builder.Services.AddScoped<IAboutUsService, AboutUsService>();
 builder.Services.AddScoped<IWhyChooseUsService, WhyChooseUsService>();
+builder.Services.AddScoped<IProductImageService, ProductImageService>();
 
 builder.Services.AddScoped<IRedisService, RedisService>();
 builder.Services.AddScoped<AuthenticationTokenValidationFilter>();
 
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IOtpOperation, OtpOperation>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
@@ -193,6 +194,7 @@ builder.Services.Configure<EmailSettingsWorkerConfig>(builder.Configuration.GetS
 builder.Services.Configure<RemoveExpiredOtpBackgroundConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:RemoveExpiredOTP"));
 builder.Services.Configure<RemoveExpiredVerificationTokenBackgroundConfig>(builder.Configuration.GetSection("BackgroundWorkerSettings:RemoveExpiredVerificationToken"));
 builder.Services.Configure<UserOrderVerificationConfig>(builder.Configuration.GetSection("UserTokenVerification"));
+builder.Services.Configure<ImageSizingConfig>(builder.Configuration.GetSection("ImageSizing"));
 
 builder.Services.AddFluentEmail(builder.Configuration.GetSection("EmailSettings")["DefaultFrom"]).AddSmtpSender(host: builder.Configuration.GetSection("EmailSettings")["Host"], port: builder.Configuration.GetSection("EmailSettings").GetValue<int>("Port")).AddRazorRenderer();
 
