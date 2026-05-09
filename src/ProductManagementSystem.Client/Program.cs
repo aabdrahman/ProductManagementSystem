@@ -89,6 +89,7 @@ builder.Services.AddScoped<AddAboutUsContentHandler>();
 builder.Services.AddScoped<AddHeroImageHandler>();
 builder.Services.AddScoped<RemoveImageHandler>();
 builder.Services.AddScoped<GetParameterizedOrdersHandler>();
+builder.Services.AddScoped<AddProductImageHandler>();
 
 builder.Services.AddScoped<ILocalStorageUtility, LocalStorageUtility>();
 builder.Services.AddScoped<TokenContainer>();

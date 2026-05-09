@@ -10,6 +10,11 @@
 
             @if (_product.ProductImages.Any())
             {
+
+                @* <div class="product-card-slide">
+                    <img alt="No Product Image" src="/Images/no-image.jpg" />
+                </div>
+
                 foreach (var url in _product.ProductImages)
                 {
                     <div class="product-card-slide">
@@ -17,7 +22,10 @@
                         <img alt="Product card image" src="@url" />
 
                     </div>
-                }
+                } *@
+
+                <ProductImageCarousel Product="_product" />
+
             }
             else
             {

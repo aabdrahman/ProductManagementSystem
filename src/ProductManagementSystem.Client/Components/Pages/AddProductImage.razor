@@ -1,0 +1,165 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+
+@inject AddProductImageHandler addProductImageHandler
+
+@if(_isUploading)
+{
+    <Spinner Description="Uploading Product Image" />
+}
+
+
+<div class="image-upload-wrapper">
+
+    <!-- Upload Area -->
+    <label class="upload-zone">
+
+        <InputFile OnChange="HandleFilesSelected"
+                   multiple
+                   accept="image/*" />
+
+        <div class="upload-content">
+            <span class="upload-icon">+</span>
+            <p>Upload Product Images</p>
+            <small>PNG, JPG, JPEG</small>
+        </div>
+
+    </label>
+
+    @if (_selectedFiles.Any())
+    {
+        <div class="upload-count">
+            @_selectedFiles.Count
+            @(_selectedFiles.Count == 1 ? "image" : "images")
+            selected
+        </div>
+    }
+
+    <!-- Preview Images -->
+    @if (_imagePreviews.Any())
+    {
+        <div class="preview-grid">
+
+            @for (int i = 0; i < _imagePreviews.Count; i++)
+            {
+                var index = i;
+
+                <div class="preview-card">
+
+                    <img src="@_imagePreviews[index]"
+                         alt="Preview Image" />
+
+                    <button type="button"
+                            class="remove-btn"
+                            @onclick="(() => RemoveImage(index))">
+                        ×
+                    </button>
+
+                </div>
+            }
+
+        </div>
+    }
+
+    @if(_responseMessage is not null)
+    {
+        <Status StatusMessage="@_responseMessage" SuccessStatus="@_isSuccessful" />
+    }
+    
+
+    <div class="form-actions">
+                            
+        <button class="btn submit" @onclick="HandleUpload"
+                disabled="@(_isSuccessful || _isUploading)">
+                @(!_isUploading ? "Upload Image" : "Uploading Image...")
+        </button>
+
+        <button class="btn cancel" disabled="@_isUploading" @onclick="(() => CloseModal(_isSuccessful))">Cancel</button>
+    </div>
+
+</div>
+
+@code {
+
+    private List<IBrowserFile> _selectedFiles = new();
+
+    private List<string> _imagePreviews = new();
+
+    private bool _isLoading = false;
+    private bool _isUploading = false;
+    private bool _isSuccessful = false;
+    private string _responseMessage;
+
+    [Parameter]
+    public EventCallback<List<IBrowserFile>> OnImagesChanged { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<bool> HandleClose { get; set; }
+
+    [Parameter, EditorRequired]
+    public ProductDto Product { get; set; }
+
+    private async Task HandleFilesSelected(InputFileChangeEventArgs e)
+    {
+        var files = e.GetMultipleFiles();
+
+        foreach (var file in files)
+        {
+            _selectedFiles.Add(file);
+
+            using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+
+            using var memoryStream = new MemoryStream();
+
+            await stream.CopyToAsync(memoryStream);
+
+            var imageBase64 = Convert.ToBase64String(memoryStream.ToArray());
+
+            var imageUrl =
+                $"data:{file.ContentType};base64,{imageBase64}";
+
+            _imagePreviews.Add(imageUrl);
+        }
+
+        await OnImagesChanged.InvokeAsync(_selectedFiles);
+    }
+
+    private async Task RemoveImage(int index)
+    {
+        _selectedFiles.RemoveAt(index);
+
+        _imagePreviews.RemoveAt(index);
+
+        await OnImagesChanged.InvokeAsync(_selectedFiles);
+    }
+
+    private async Task CloseModal(bool refreshDecision = false)
+    {
+        await HandleClose.InvokeAsync(refreshDecision);
+    }
+
+    private async Task HandleUpload()
+    {
+        if (!_selectedFiles.Any())
+        {
+            _responseMessage = "Please select at least one image to upload.";
+            return;
+        }
+        _isUploading = true;
+        var response = await addProductImageHandler.Handle(Product.Id, _selectedFiles);
+        _isSuccessful = response.isSuccessful;
+        _responseMessage = response.responseMessage;
+
+        _isUploading = false;
+
+        if (_isSuccessful)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(2000);
+                await CloseModal(true);
+            });
+
+            await CloseModal(true);
+        }
+    }
+}

@@ -23,7 +23,7 @@ public class ProductImageController : ControllerBase
         logger = Log.ForContext(_className, nameof(ProductImageController));
     }
 
-    [HttpPost]
+    [HttpPost("{productId:int}")]
     public async Task<IActionResult> ProcessImage([FromRoute] int productId)
     {
         var logProvider = logger.ForContext(_methodName, nameof(ProcessImage));

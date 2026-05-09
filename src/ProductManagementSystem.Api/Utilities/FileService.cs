@@ -39,7 +39,7 @@ public class FileService : IFileService
 
         string specificProductImagePath = Path.Combine(_productImagePath, productId.ToString());
 
-        if (!Path.Exists(specificProductImagePath))
+        if (!Directory.Exists(specificProductImagePath))
         {
             Directory.CreateDirectory(specificProductImagePath);
         }
@@ -47,15 +47,15 @@ public class FileService : IFileService
         var resizeOption = new ResizeOptions()
         {
             Mode = ResizeMode.Pad,
-            Size = new Size(width: 50, height: 50)
+            Size = new Size(width: 250, height: 250)
         };
 
         List<string> savedImages = [];
 
         foreach (var image in productImages)
         {
-            var fileName = image.Name;
-            var extension = Path.GetExtension(fileName);
+            var fileName = image.FileName;
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
 
             using var imageOperator = await Image.LoadAsync(image.OpenReadStream());
             imageOperator.Mutate(x => x.Resize(resizeOption));

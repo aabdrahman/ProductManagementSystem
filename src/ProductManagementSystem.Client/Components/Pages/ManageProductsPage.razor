@@ -39,7 +39,7 @@
         }
         else if(_products is not null && _products.Any())
         {
-            <ProductsView Products="_products" HandleRestock="HandleRestockProduct" HandleUpdate="HandleUpdateProduct" HandleDelete="HandleDeleteProduct" />
+            <ProductsView Products="_products" HandleRestock="HandleRestockProduct" HandleUpdate="HandleUpdateProduct" HandleDelete="HandleDeleteProduct" HandleProductImage="HandleAddProductImage" />
         }
 
     }
@@ -74,6 +74,11 @@
         {
             <DeleteProductCategory HandleClose="HandleDeleteProductCategoryClose" ProductCategoryToDelete="_selectedProductCategory" />
         }
+        else if(_operationToPerform == OperationType.AddProductImage)
+        {
+            <AddProductImage HandleClose="HandleAddProductImageClose" Product="@_selectedProduct" />
+        }
+        
     </Body>
 </Popup>
 
@@ -163,6 +168,14 @@
         HandleOpen($"Delete Product - {_selectedProduct.Name}", false);
     }
 
+    private void HandleAddProductImage(ProductDto selectedProduct)
+    {
+        _selectedProduct = selectedProduct;
+        _operationToPerform = OperationType.AddProductImage;
+
+        HandleOpen($"Add Product Image - {_selectedProduct.Name}", false);
+    }
+
     private async Task HandleDeleteProductClose(bool refreshDecision)
     {
         _title = null;
@@ -193,6 +206,22 @@
         popup.CloseModal();
     }
 
+
+    private async Task HandleAddProductImageClose(bool refreshDecision)
+    {
+        _title = null;
+        _selectedProduct = null;
+        _operationToPerform = default;
+
+        if (refreshDecision)
+        {
+            var response = await getProductsHandler.Handle();
+            _products = response.products;
+        }
+
+        popup.CloseModal();
+    }
+
 }
 
 
@@ -206,7 +235,8 @@
         UpdateProduct,
         DeleteProduct,
         AddNewProductCategory,
-        DeleteProductCategory
+        DeleteProductCategory,
+        AddProductImage
     }
 
     private void HandleOpen(string title, bool showCloseButton)

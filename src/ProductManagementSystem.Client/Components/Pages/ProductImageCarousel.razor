@@ -1,32 +1,36 @@
 ﻿
+@if(_product is not null)
+{
+    <div class="product-carousel">
 
-<div class="product-carousel">
 
+        <div class="product-slides-container">
 
-    <div class="product-slides-container">
+            @if (_product.ProductImages.Any())
+            {
 
-        @if (_product.ProductImages.Any())
-        {
-            foreach (var url in _product.ProductImages)
+                foreach (var url in _product.ProductImages)
+                {
+                    <div class="product-card-slide">
+
+                        <img alt="Product card image" src="@url" />
+
+                    </div>
+                }
+            }
+            else
             {
                 <div class="product-card-slide">
-
-                    <img alt="Product card image" src="@url" />
-
+                    <img alt="No Product Image" src="/Images/no-image.jpg" />
                 </div>
             }
-        }
-        else
-        {
-            <div class="product-card-slide">
-                <img alt="No Product Image" src="/Images/no-image.jpg" />
-            </div>
-        }
+
+        </div>
+
 
     </div>
+}
 
-
-</div>
 
 @code {
 

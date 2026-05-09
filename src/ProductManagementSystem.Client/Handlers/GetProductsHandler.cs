@@ -23,6 +23,21 @@ public class GetProductsHandler
 
             GenericResponse<IEnumerable<ProductDto>> responseBody = JsonSerializer.Deserialize<GenericResponse<IEnumerable<ProductDto>>>(responseContent, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true }) ?? throw new ArgumentException("Response could not be deserialized.");
 
+            if(responseBody.IsSuccessStatus && responseBody.Data.Any())
+            {
+                var sampleResp = responseBody.Data.ToList();
+
+                responseBody.Data = responseBody.Data.Select(x => x with { ProductImages = x.ProductImages.Select(y => string.Concat(_httpClient.BaseAddress, $"api/ProductImage?productId={x.Id}&productImageName={y}")).ToList() });
+
+                
+
+                //var responseDetails = responseBody.Data.Select(x => x.ProductImages.Select(y => string.Concat(_httpClient.BaseAddress, $"api/ProductImage?productId={x.Id}&productImageName={y}"))).ToList();
+
+                //Console.WriteLine("Products; {0}", JsonSerializer.Serialize(respDetails));
+
+                return (responseBody.Data, responseBody.ResponseMessage);
+            }
+
             return (responseBody.Data ?? [], responseBody.ResponseMessage);
 
         }
