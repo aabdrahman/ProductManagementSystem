@@ -1,0 +1,31 @@
+services:
+  productmanagementsystem.api:
+    image: ${DOCKER_REGISTRY-}productmanagementsystemapi
+    build:
+      context: .
+      dockerfile: src/ProductManagementSystem.Api/Dockerfile
+    networks:
+      - staging-data
+    environment:
+      - ConnectionStrings__RedisConnection=redis_cache-staging:6379
+      - ConnectionStrings__SqlDbConnection=Server=sql_server_data-staging,1433;Database=ProductManagementSystem;User Id=sa;Password=Raymond007;TrustServerCertificate=True;
+    volumes:
+      - .Logs/Productmanagementsystem:/app/Logs
+  productmanagementsystem.client:
+    image: ${DOCKER_REGISTRY-}productmanagementsystemclient
+    build:
+      context: .
+      dockerfile: src/ProductManagementSystem.Client/Dockerfile
+    depends_on:
+       productmanagementsystem.api:
+         condition: service_started
+    networks:
+      - staging-data
+      
+
+
+networks:
+  staging-data:
+    external: true
+  
+

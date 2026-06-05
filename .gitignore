@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /src/ProductManagementSystem.Client/wwwroot/Images/
 /.logs/productmanagementsystem
 /src/ProductManagementSystem.Api/StaticFiles/ProductImages/
+/.env
