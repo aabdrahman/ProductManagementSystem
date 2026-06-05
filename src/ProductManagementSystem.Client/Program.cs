@@ -22,6 +22,7 @@ builder.Services.AddAuthentication(opts =>
 
 }).AddJwtBearer("Bearer", opts =>
 {
+    var jwtConfig = builder.Configuration.GetSection("JwtSettings");
     var tokenParameter = new TokenValidationParameters()
     {
         ValidateAudience = true,
@@ -31,15 +32,16 @@ builder.Services.AddAuthentication(opts =>
         ClockSkew = TimeSpan.Zero,
 
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("PmsSECRET") ?? "Test")),
-        ValidIssuer = "TaskManagementAPI",
-        ValidAudiences = "https://localhost:7082;http://localhost:5246".Split(";", StringSplitOptions.TrimEntries)
+        ValidIssuer = jwtConfig["ValidIssuer"],
+        ValidAudiences = jwtConfig["ValidAudiences"]?.Split(";", StringSplitOptions.TrimEntries)
     };
 
     opts.TokenValidationParameters = tokenParameter;
 
 });
 
-builder.Services.AddAuthorizationCore();
+//builder.Services.AddAuthorizationCore();
+builder.Services.AddAuthorization();
 
 builder.Services.AddCascadingAuthenticationState();
 

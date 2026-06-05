@@ -153,7 +153,7 @@ builder.Services.AddHealthChecks()
 builder.Services.AddHealthChecksUI(opts =>
 {
     opts.AddHealthCheckEndpoint("System Health Check", "/admin/_healths");
-    opts.SetEvaluationTimeInSeconds(20);
+    opts.SetEvaluationTimeInSeconds(5400);
 }).AddInMemoryStorage();
 
 builder.Services.AddHttpContextAccessor();
